@@ -487,12 +487,12 @@ const cellStyle = ({row, column, rowIndex, columnIndex}) => {
   }
   if (row.power_state == '开机' && columnIndex === 4)
     return {color: "#189EFF", textAlign: "center"}
-  if (row.electrify_state == '关机' && columnIndex === 4) {
+  if (row.power_state == '关机' && columnIndex === 4) {
     return {color: "#FB6E6E", textAlign: "center"}
   }
   if (row.operation_mode == '制冷' && columnIndex === 5)
     return {color: "#189EFF", textAlign: "center"}
-  if (row.electrify_state == '制热' && columnIndex === 5) {
+  if (row.operation_mode == '制热' && columnIndex === 5) {
     return {color: "#FB6E6E", textAlign: "center"}
   }
   return {textAlign: "center"}

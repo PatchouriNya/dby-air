@@ -78,12 +78,12 @@ import useReturnIndex from '@/hooks/layout/headers/components/person/useReturnIn
 import {useAccountStore} from '@/store/account.js'
 import {storeToRefs} from 'pinia'
 import useClientEdit from '@/hooks/layout/headers/components/person/useClientEdit.js'
-
 // 修改密码
 const {showCpdVisible, cpwForm, showCpd, sureChange} = useChangePwd()
 
 // 登出
 const {logout} = useLogOut()
+
 
 // 返回主页
 const {returnIndex} = useReturnIndex()

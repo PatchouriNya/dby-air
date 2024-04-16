@@ -36,6 +36,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Client whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Client withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Client withoutTrashed()
+ * @property int $type 判断类型，0为目录，1为可点击
+ * @property string|null $info
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Client> $children
+ * @property-read int|null $children_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Client> $childsSelect
+ * @property-read int|null $childs_select_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client\Client_account_relationship> $withAccount
+ * @property-read int|null $with_account_count
+ * @property-read \App\Models\Client\Client_overview|null $withOverview
+ * @method static \Illuminate\Database\Eloquent\Builder|Client whereInfo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Client whereType($value)
  * @mixin \Eloquent
  */
 class Client extends Model

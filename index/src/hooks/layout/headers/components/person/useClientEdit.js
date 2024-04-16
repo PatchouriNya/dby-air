@@ -26,6 +26,7 @@ export default function () {
         clientEditForm.city = mainClient.value.city
         clientEditForm.district = mainClient.value.district
         clientEditForm.info = mainClient.value.info
+        clientEditForm.pid = mainClient.value.pid
         clientEditVisible.value = !clientEditVisible.value
     }
 

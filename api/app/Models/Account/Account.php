@@ -50,6 +50,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Account whereUpgradePermissionFlag($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Account withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Account withoutTrashed()
+ * @property-read Client_account_relationship|null $withClient
  * @mixin \Eloquent
  */
 class Account extends Model

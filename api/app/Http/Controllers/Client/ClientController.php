@@ -58,7 +58,7 @@ class ClientController extends Controller
     public function getMainClientByAccount($id)
     {
         $res = Client_account_relationship::where('account_id',$id)->first();
-        $data = Client::select(['id','city','province','district','clientname','info'])->findOrFail($res->client_id);
+        $data = Client::select(['id','city','province','district','clientname','info','pid'])->findOrFail($res->client_id);
         return api($data,200,'获取账号对应的客户成功');
     }
 

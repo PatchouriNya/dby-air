@@ -6,6 +6,41 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * App\Models\Menu\Menu
+ *
+ * @property int $id
+ * @property string $name 名称
+ * @property int $pid 父级id,默认为0代表顶级
+ * @property int $sort 层级,默认为1级
+ * @property string|null $icon 图标
+ * @property string|null $url 路由
+ * @property int $type 判断类型，1为目录，2为可点击
+ * @property string|null $permission 权限
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Menu> $children
+ * @property-read int|null $children_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereIcon($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu wherePermission($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu wherePid($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereSort($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu withoutTrashed()
+ * @mixin \Eloquent
+ */
 class Menu extends Model
 {
     use HasFactory;

@@ -20,9 +20,9 @@ class CreateLogsTable extends Migration
 
             $table->string('account',50)->comment('账号名');
 
-            $table->integer('client_id',false)->index('client_id')->comment('客户id');
+            $table->integer('client_id',false)->index('client_id')->nullable()->comment('客户id');
 
-            $table->string('client',255)->comment('客户名');
+            $table->string('client',255)->nullable()->comment('客户名');
 
             $table->tinyInteger('type',false)->comment('日志类型,1为登录日志,2为空调操控日志');
 

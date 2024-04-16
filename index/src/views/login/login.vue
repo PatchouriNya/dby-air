@@ -34,6 +34,8 @@ import {ElForm, ElFormItem, ElInput, ElButton, ElCheckbox, ElMessage} from 'elem
 import {useRouter} from 'vue-router'
 import axios from 'axios'
 import {useLoginstateStore} from '@/stores/loginstate.js'
+import {loginCreateApi} from '@/api/log.js'
+
 
 const loginstateStore = useLoginstateStore()
 
@@ -55,6 +57,11 @@ const loginRules = ref({
 const router = useRouter()
 const loginFormRef = ref(null)
 const url = getCurrentInstance().proxy.$API_URL + '/login'
+const loginLog = ref({
+  id: '',
+  type: 1,
+  content: '登录系统'
+})
 
 // 检查本地存储中是否有记住的用户名和密码，并设置初始值
 onMounted(() => {
@@ -86,6 +93,8 @@ async function login() {
 
       localStorage.setItem("token", response.data.data[0].id)
       loginstateStore.id = response.data.data[0].id
+      loginLog.value.id = response.data.data[0].id
+      loginCreateApi(loginLog.value)
       ElMessage.success('登录成功')
       // 跳转到 index 路由
       await router.push({path: '/'})

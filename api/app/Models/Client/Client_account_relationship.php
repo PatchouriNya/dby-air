@@ -25,6 +25,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Client_account_relationship whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Client_account_relationship whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Client_account_relationship whereUpdatedAt($value)
+ * @property-read Account|null $account
+ * @method static \Illuminate\Database\Eloquent\Builder|Client_account_relationship onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Client_account_relationship withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Client_account_relationship withoutTrashed()
  * @mixin \Eloquent
  */
 class Client_account_relationship extends Model

@@ -75,4 +75,9 @@ Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Air','middlewar
     Route::resource('air','AirController');
 });
 
-//Route::get('user',[LoginController::class,'user']);
+// 日志
+
+Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Log','middleware'=>['cors']],function (){
+    // 资源路由
+    Route::resource('log','LogController');
+});

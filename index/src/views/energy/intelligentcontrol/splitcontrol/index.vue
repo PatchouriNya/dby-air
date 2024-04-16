@@ -1,0 +1,765 @@
+<template>
+  <el-row>
+    <el-col :span="4">
+      <div style="width: 250px">
+        <el-tree
+            :data="treeData"
+            :props="defaultProps"
+            node-key="id"
+            :expand-on-click-node="true"
+            @current-change="clickNode"
+            :current-node-key="default_checked"
+            :default-expanded-keys="defaultExpandedKeys"
+            auto-expand-parent
+            highlight-current
+            style="background-color: #f5f5f5"
+        />
+      </div>
+    </el-col>
+    <el-col :span="20">
+      <div class="right-content">
+        <h2 style="margin-bottom: 20px;text-align: center">{{ selectData.clientname }}</h2>
+        <div v-if="!selectData.clientname">
+          <h2 style="margin-bottom: 20px;text-align: center" v-if="selectData.type === 0 || !selectData.clientname">
+            请选择一个客户</h2>
+        </div>
+        <div class="shaixuan">
+          <div class="searchName">
+            <span>办公室</span>
+            <el-input
+                v-model="filters.designation"
+                style="width: 240px"
+                placeholder="请输入办公室名称"
+                clearable
+            />
+            <div class="searchTemp" style="margin-left: 10px">
+              <span>室温</span>
+              <el-input
+                  v-model="filters.room_temperature"
+                  style="width: 240px"
+                  placeholder="请输入室温"
+                  clearable
+              />
+            </div>
+            <div class="searchOnline" style="margin-left: 10px">
+              <span>开机状态</span>
+              <el-select v-model="filters.power_state" placeholder="选择状态" style="width: 240px">
+                <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.lable"
+                    :value="item.value"
+                />
+              </el-select>
+            </div>
+            <div class="buttonSide" style="margin-left: 20px">
+              <el-button @click="reset">重置</el-button>
+              <el-button type="primary" @click="search">搜索</el-button>
+              <el-button type="primary" @click="showSelectColumn">选择列</el-button>
+            </div>
+          </div>
+
+        </div>
+        <el-table :data="tableData" style="width: 100%"
+                  :header-cell-style="{'text-align':'center'}"
+                  :cell-style="cellStyle"
+                  :empty-text="noDataMeg">
+          <el-table-column prop="show_id" label="序号" width="100px"/>
+          <el-table-column v-if="showColumn.designation" prop="designation" label="空调位置"/>
+          <el-table-column v-if="showColumn.air_brand" prop="air_brand" label="品牌" width="120px"/>
+          <el-table-column v-if="showColumn.electrify_state" prop="electrify_state" label="通电状态" width="120px"/>
+          <el-table-column v-if="showColumn.power_state" prop="power_state" label="开机状态" width="120px"/>
+          <el-table-column v-if="showColumn.operation_mode" prop="operation_mode" label="运行模式" width="120px"/>
+          <el-table-column v-if="showColumn.wind_speed" prop="wind_speed" label="风速" width="120px"/>
+          <el-table-column v-if="showColumn.wind_mode" prop="wind_mode" label="风向" width="120px"/>
+          <el-table-column v-if="showColumn.set_temperature" prop="set_temperature" label="设置温度℃" width="120px"/>
+          <el-table-column v-if="showColumn.room_temperature" prop="room_temperature" label="室温℃" width="120px"/>
+          <el-table-column v-if="showColumn.online_state" prop="online_state" label="接入状态" width="120px"/>
+          <el-table-column v-if="showColumn.voltage" prop="voltage" label="电压" width="120px"/>
+          <el-table-column v-if="showColumn.electric_current" prop="electric_current" label="电流" width="120px"/>
+          <el-table-column v-if="showColumn.power" prop="power" label="功率" width="120px"/>
+          <el-table-column v-if="showColumn.electric_quantity" prop="electric_quantity" label="电量读取" width="120px"/>
+          <el-table-column v-if="showColumn.responsible_person" prop="responsible_person" label="责任人" width="120px"/>
+          <el-table-column v-if="showColumn.standby_mode" prop="standby_mode" label="待机状态" width="120px"/>
+          <el-table-column fixed="right" label="操作" width="100">
+            <template #default="row">
+              <el-tooltip content="控制" placement="top">
+                <el-button link type="primary" size="default" @click="showControl(row)">
+                  <el-icon>
+                    <Compass/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="修改" placement="top">
+                <el-button link type="primary" size="default" @click="showEdit(row)">
+                  <el-icon>
+                    <Edit/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <el-pagination class="fenye"
+                       v-model:current-page="currentPage"
+                       v-model:page-size="pageSize"
+                       :page-sizes="[10,15, 20, 25, 30]"
+                       background
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="total"
+                       @size-change="handleSizeChange"
+                       @current-change="handleCurrentChange"
+        />
+
+      </div>
+    </el-col>
+  </el-row>
+
+
+  <!--  配置隐藏列-->
+  <el-dialog title="字段配置" v-model="columnVisible">
+    <transition name="fade">
+      <div>
+        <div>选择显示字段</div>
+        <div>
+          <el-checkbox v-model="showColumn.designation">空调位置</el-checkbox>
+          <el-checkbox v-model="showColumn.air_brand">品牌</el-checkbox>
+          <el-checkbox v-model="showColumn.electrify_state">通电状态</el-checkbox>
+          <el-checkbox v-model="showColumn.power_state">开机状态</el-checkbox>
+          <el-checkbox v-model="showColumn.operation_mode">运行模式</el-checkbox>
+          <el-checkbox v-model="showColumn.wind_speed">风速</el-checkbox>
+          <el-checkbox v-model="showColumn.wind_mode">风向</el-checkbox>
+          <el-checkbox v-model="showColumn.set_temperature">设置温度℃</el-checkbox>
+          <el-checkbox v-model="showColumn.room_temperature">室温℃</el-checkbox>
+          <el-checkbox v-model="showColumn.online_state">在线状态</el-checkbox>
+          <el-checkbox v-model="showColumn.voltage">电压</el-checkbox>
+          <el-checkbox v-model="showColumn.electric_current">电流</el-checkbox>
+          <el-checkbox v-model="showColumn.power">功率</el-checkbox>
+          <el-checkbox v-model="showColumn.electric_quantity">电量读取</el-checkbox>
+          <el-checkbox v-model="showColumn.responsible_person">责任人</el-checkbox>
+          <el-checkbox v-model="showColumn.standby_mode">待机状态</el-checkbox>
+        </div>
+      </div>
+    </transition>
+    <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showSelectColumn">取 消</el-button>
+          <el-button type="primary" @click="showSelectColumn">确 定</el-button>
+        </span>
+    </template>
+  </el-dialog>
+  <!--空调控制面板-->
+  <el-dialog title="空调控制" v-model="controlVisible" :close-on-click-modal="false" :width="700">
+    <transition name="fade">
+      <div>
+        <!-- 第一部分：空调信息 -->
+        <div class="part1">
+          <el-form label-width="auto" v-model="controlForm">
+            <el-row>
+              <el-col :span="8">
+                <el-form-item label="">
+                  <h3>{{ editForm.designation }}</h3>
+                </el-form-item>
+              </el-col>
+              <el-col :span="16" :push="8">
+
+              </el-col>
+            </el-row>
+
+            <el-row>
+              <el-col :span="8">
+                <el-form-item label="室温">
+
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="电压">
+                  <span>{{ controlForm.power }}V</span>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="8">
+                <el-form-item label="电量读取">
+                  <span>{{ controlForm.electric_quantity }}度</span>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row>
+              <el-col :span="8" style="font-weight: bolder">
+                <el-form-item :label="controlForm.room_temperature">
+
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="8">
+                <el-form-item label="电流">
+                  <span>{{ controlForm.electric_current }}A</span>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="8">
+                <el-form-item label="人体感应">
+                  <span>未设置</span>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row>
+              <el-col :span="8">
+                <el-form-item label="责任人">
+                  <span>{{ controlForm.responsible_person }}</span>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="8">
+                <el-form-item label="功率">
+                  <span>{{ controlForm.voltage }}W</span>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="8">
+                <el-form-item label="待机状态">
+                  <span>{{ controlForm.standby_mode }}</span>
+                </el-form-item>
+              </el-col>
+
+            </el-row>
+          </el-form>
+        </div>
+
+        <!-- 第二部分：控制面板 -->
+        <div class="part2">
+
+          <el-card class="card-box">
+            <template #header>
+              <div>
+                <span style="font-size: 16px">控制面板</span>
+              </div>
+            </template>
+            <el-row>
+              <el-col :span="12">
+                <el-tag type="primary" effect="dark" size="large">远程控制</el-tag>
+              </el-col>
+
+              <el-col :span="12">
+                <el-button-group>
+                  <!--                  <el-form-item label="通电状态" style="float: left;margin-right: 20px">
+                                      <el-tag round v-if="controlForm.electrify_state === true" type="primary">通电</el-tag>
+                                      <el-tag round v-else type="info">断电</el-tag>
+                                    </el-form-item>-->
+                  <el-switch
+                      v-if="showEleState"
+                      v-model="controlForm.electrify_state"
+                      @change="electrifyChange"
+                      active-text="通电" inactive-text="断电"
+                      style="float: left;margin-right: 20px"/>
+
+                  <el-switch v-if="controlForm.electrify_state === false"
+                             v-model="controlForm.power_state"
+                             active-text="开机" inactive-text="关机" disabled/>
+                  <el-switch v-else v-model="controlForm.power_state" active-text="开机" inactive-text="关机"/>
+                </el-button-group>
+              </el-col>
+
+            </el-row>
+
+            <el-row>
+              <el-col :span="8">
+                <el-card shadow="never">
+                  <template #header>
+                    <h3>温度</h3>
+                  </template>
+                  <el-select v-model="controlForm.set_temperature" placeholder="选择温度">
+                    <el-option label="16℃" value="16℃"/>
+                    <el-option label="17℃" value="17℃"/>
+                    <el-option label="18℃" value="18℃"/>
+                    <el-option label="19℃" value="19℃"/>
+                    <el-option label="20℃" value="20℃"/>
+                    <el-option label="21℃" value="21℃"/>
+                    <el-option label="22℃" value="22℃"/>
+                    <el-option label="23℃" value="23℃"/>
+                    <el-option label="24℃" value="24℃"/>
+                    <el-option label="25℃" value="25℃"/>
+                    <el-option label="26℃" value="26℃"/>
+                    <el-option label="27℃" value="27℃"/>
+                    <el-option label="28℃" value="28℃"/>
+                    <el-option label="29℃" value="29℃"/>
+                    <el-option label="30℃" value="30℃"/>
+                    <el-option label="31℃" value="31℃"/>
+                    <el-option label="32℃" value="32℃"/>
+                  </el-select>
+                </el-card>
+              </el-col>
+
+              <el-col :span="13" :push="2">
+                <el-card shadow="never">
+                  <template #header>
+                    <h3>模式</h3>
+                  </template>
+                  <el-radio-group v-model="controlForm.operation_mode">
+                    <el-radio label="送风" value="送风"/>
+                    <el-radio label="制冷" value="制冷"/>
+                    <el-radio label="制热" value="制热"/>
+                    <el-radio label="除湿" value="除湿"/>
+                  </el-radio-group>
+                </el-card>
+              </el-col>
+            </el-row>
+
+            <el-row>
+              <el-col :span="13" class="card-item">
+                <el-card shadow="never">
+                  <template #header>
+                    <h3>风速</h3>
+                  </template>
+                  <el-radio-group v-model="controlForm.wind_speed">
+                    <el-radio label="自动" value="自动"/>
+                    <el-radio label="低速" value="低风"/>
+                    <el-radio label="中风" value="中风"/>
+                    <el-radio label="高风" value="高风"/>
+                  </el-radio-group>
+                </el-card>
+              </el-col>
+              <el-col :span="8" :push="2" class="card-item">
+                <el-card shadow="never">
+                  <template #header>
+                    <h3>风向</h3>
+                  </template>
+                  <el-radio-group v-model="controlForm.wind_mode">
+                    <el-radio label="走风" :value="1"/>
+                    <el-radio label="扫风" :value="2"/>
+                  </el-radio-group>
+                </el-card>
+              </el-col>
+            </el-row>
+          </el-card>
+
+
+        </div>
+      </div>
+    </transition>
+    <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="closeControl">取 消</el-button>
+          <el-button type="primary" @click="sureControl(colId)">发送指令</el-button>
+        </span>
+    </template>
+  </el-dialog>
+
+  <el-dialog title="编辑" v-model="editVisible" :close-on-click-modal="false" :width="500">
+    <transition name="fade">
+      <el-form
+          label-position="right"
+          label-width="auto"
+          v-model="editForm"
+          style="max-width: 600px"
+      >
+        <el-form-item label="空调位置">
+          <el-input v-model="editForm.designation"/>
+        </el-form-item>
+        <el-form-item label="空调品牌">
+          <el-input v-model="editForm.air_brand"/>
+        </el-form-item>
+        <el-form-item label="责任人">
+          <el-input v-model="editForm.responsible_person"/>
+        </el-form-item>
+      </el-form>
+    </transition>
+    <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="closeEdit">取 消</el-button>
+          <el-button type="primary" @click="sureEdit(colId)">确 定</el-button>
+        </span>
+    </template>
+  </el-dialog>
+</template>
+
+
+<script setup>
+import {onMounted, ref} from 'vue'
+import {clientList} from '@/api/client.js'
+import {getOneAirClient} from '@/api/getAirDetail'
+import {updateAir} from '@/api/updateAir'
+import {controlAir} from '@/api/controlAir'
+import {ElMessage} from 'element-plus'
+
+
+// 配置左侧层级
+const clientId = ref()
+const treeData = ref([])
+const selectData = ref({})
+const defaultProps = {
+  children: 'childs',
+  label: 'clientname'
+}
+// 配置表格
+const airData = ref([])
+const tableData = ref([])
+// 配置表格分页查询
+const currentPage = ref(1)
+const total = ref(0)
+const pageSize = ref(10)
+const noDataMeg = ref('暂无数据')
+const options = ref([
+  {
+    lable: '开机',
+    value: '开机'
+  }, {
+    lable: '关机',
+    value: '关机'
+  }
+])
+const filters = ref({
+  designation: '',
+  online_state: '',
+  power_state: '',
+  operation_mode: '',
+  room_temperature: ''
+  // 添加更多筛选条件...
+})
+
+// 配置表格隐藏列
+const columnVisible = ref(false)
+const showColumn = ref({
+  designation: true,
+  air_brand: true,
+  online_state: false,
+  electrify_state: true,
+  power_state: true,
+  operation_mode: true,
+  wind_speed: true,
+  set_temperature: true,
+  room_temperature: true,
+  voltage: false,
+  electric_current: false,
+  power: false,
+  electric_quantity: false,
+  wind_mode: false,
+  standby_mode: false,
+  responsible_person: false
+})
+
+// 配置默认选中节点
+const defaultExpandedKeys = ref([])
+const default_checked = ref()
+
+// 配置显示和隐藏控制、修改面板
+const controlVisible = ref(false)
+const editVisible = ref(false)
+const colId = ref() // 当前选中的行的数据的id
+const editForm = ref({
+  designation: '',
+  air_brand: '',
+  responsible_person: ''
+})  //编辑表单
+
+// 控制空调
+const controlForm = ref({
+  online_state: '',
+  electrify_state: '',
+  power_state: '',
+  operation_mode: '',
+  wind_speed: '',
+  set_temperature: '',
+  room_temperature: '',
+  voltage: '',
+  electric_current: '',
+  power: '',
+  electric_quantity: '',
+  wind_mode: '',
+  standby_mode: '',
+  responsible_person: ''
+
+})
+
+const cellStyle = ({row, column, rowIndex, columnIndex}) => {
+  // 状态列字体颜色
+  // columnIndex 列下标
+  // rowIndex 行下标
+  // row 行
+  // column 列
+  if (row.electrify_state == '通电' && columnIndex === 3)
+    return {color: "#189EFF", textAlign: "center"}
+  if (row.electrify_state == '断电' && columnIndex === 3) {
+    return {color: "#FB6E6E", textAlign: "center"}
+  }
+  if (row.power_state == '开机' && columnIndex === 4)
+    return {color: "#189EFF", textAlign: "center"}
+  if (row.electrify_state == '关机' && columnIndex === 4) {
+    return {color: "#FB6E6E", textAlign: "center"}
+  }
+  if (row.operation_mode == '制冷' && columnIndex === 5)
+    return {color: "#189EFF", textAlign: "center"}
+  if (row.electrify_state == '制热' && columnIndex === 5) {
+    return {color: "#FB6E6E", textAlign: "center"}
+  }
+  return {textAlign: "center"}
+
+}
+const findFirstTypeOneNode = (nodes) => {
+  for (const node of nodes) {
+    if (node.type === 1) {
+      return node
+    }
+
+    if (node.childs && node.childs.length > 0) {
+      const result = findFirstTypeOneNode(node.childs)
+      if (result) {
+        return result
+      }
+    }
+  }
+
+  return null
+}
+
+
+async function initclientList() {
+  let res = await clientList()
+  treeData.value = [res.data]
+  let defaultChoose = findFirstTypeOneNode(treeData.value)
+  if (defaultChoose) {
+    // 找到第一个 type 为 1 的节点
+    default_checked.value = defaultChoose.id
+    defaultExpandedKeys.value.push(defaultChoose.id)
+    clickNode(defaultChoose)
+  }
+
+}
+
+async function initAirList(id, filters, pageSize, currentPage) {
+  if (clientId.value) {
+    let res = await getOneAirClient(id, filters, pageSize, currentPage)
+    airData.value = res.data
+    tableData.value = airData.value.data
+    total.value = airData.value.total
+  }
+
+}
+
+function clickNode(val) {
+  if (val.type === 1) {
+    selectData.value = val
+    clientId.value = val.id
+    if (val.type === 1) {
+      initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+      noDataMeg.value = '该客户暂时没有导入数据'
+    } else {
+      tableData.value = []
+      noDataMeg.value = '请选择具体客户单位'
+    }
+  }
+
+}
+
+function search() {
+  initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+}
+
+function reset() {
+  filters.value = {
+    designation: '',
+    online_state: '',
+    power_state: '',
+    operation_mode: '',
+    room_temperature: ''
+  }
+  initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+  showColumn.value = {
+    designation: true,
+    air_brand: true,
+    online_state: true,
+    electrify_state: false,
+    power_state: true,
+    operation_mode: true,
+    wind_speed: true,
+    set_temperature: true,
+    room_temperature: true,
+    voltage: false,
+    electric_current: false,
+    power: false,
+    electric_quantity: false,
+    wind_mode: false,
+    standby_mode: false,
+    responsible_person: false
+  }
+}
+
+function showSelectColumn() {
+  columnVisible.value = !columnVisible.value
+}
+
+// 是否显示断电开关
+const showEleState = ref(true)
+
+function showControl(row) {
+  controlVisible.value = !controlVisible.value
+  colId.value = row.row.id
+  editForm.value.designation = row.row.designation
+  controlForm.value.wind_speed = row.row.wind_speed
+  controlForm.value.online_state = row.row.online_state == '在线'
+  controlForm.value.power_state = row.row.power_state == '开机'
+  if (row.row.electrify_state == null || row.row.electrify_state == '') {
+    showEleState.value = false
+    controlForm.value.electrify_state = null
+  } else {
+    controlForm.value.electrify_state = row.row.electrify_state == '通电'
+    showEleState.value = true
+  }
+  controlForm.value.operation_mode = row.row.operation_mode
+  controlForm.value.set_temperature = row.row.set_temperature
+  controlForm.value.room_temperature = row.row.room_temperature
+  controlForm.value.voltage = row.row.voltage
+  controlForm.value.electric_current = row.row.electric_current
+  controlForm.value.power = row.row.power
+  controlForm.value.electric_quantity = row.row.electric_quantity
+  controlForm.value.responsible_person = row.row.responsible_person
+  controlForm.value.wind_mode = row.row.wind_mode == '走风' ? 1 : 2
+  controlForm.value.standby_mode = row.row.standby_mode
+}
+
+function electrifyChange() {
+  controlForm.value.power_state = false
+}
+
+function closeControl() {
+  controlVisible.value = !controlVisible.value
+}
+
+async function sureControl(id) {
+  controlForm.value.power_state = controlForm.value.power_state === true ? '开机' : '关机'
+  controlForm.value.online_state = controlForm.value.online_state === true ? '在线' : '离线'
+  if (controlForm.value.electrify_state != null)
+    controlForm.value.electrify_state = controlForm.value.electrify_state === true ? '通电' : '断电'
+  let res = await controlAir(id, controlForm.value)
+  if (res.code === 201) {
+    ElMessage({
+      message: '发送指令成功:)',
+      type: 'success'
+    })
+    controlVisible.value = !controlVisible.value
+    initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+  }
+}
+
+function showEdit(row) {
+  editVisible.value = !editVisible.value
+  colId.value = row.row.id
+  editForm.value.designation = row.row.designation
+  editForm.value.air_brand = row.row.air_brand
+  editForm.value.responsible_person = row.row.responsible_person
+}
+
+function closeEdit() {
+  editVisible.value = !editVisible.value
+}
+
+async function sureEdit(id) {
+  let res = await updateAir(id, editForm.value)
+  if (res.code === 201) {
+    ElMessage({
+      message: '更新成功:)',
+      type: 'success'
+    })
+    initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+    editVisible.value = !editVisible.value
+  }
+}
+
+const handleCurrentChange = () => {
+  initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+}
+
+const handleSizeChange = () => {
+  initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+}
+
+onMounted(() => {
+  initclientList()
+})
+</script>
+
+<style scoped lang="scss">
+.right-content {
+  /* 右侧内容的样式 */
+  height: 100vh; /* 设置高度为整个视口的高度，可根据需要调整 */
+  padding: 20px; /* 右侧内容的内边距 */
+}
+
+.fenye {
+  margin-top: 20px;
+}
+
+.shaixuan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.searchName,
+.searchTemp,
+.searchOnline,
+.buttonSide {
+  display: flex;
+  align-items: center;
+}
+
+.searchName span,
+.searchTemp span,
+.searchOnline span {
+  margin-right: 10px;
+}
+
+.searchTemp {
+  margin-left: 10px; /* 添加间距 */
+}
+
+.searchOnline {
+  margin-left: 20px; /* 调整间距 */
+}
+
+.buttonSide el-button:first-child {
+  margin-right: 10px; /* 添加间距 */
+}
+
+.control-panel {
+  margin-top: 20px;
+}
+
+.card-item {
+  margin-bottom: 20px;
+}
+
+
+.control-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.card-box .el-col :deep(.el-card__header) {
+  background-color: #FAFAFA;
+  color: #62AFEF;
+}
+
+.part1 .el-row {
+  margin-bottom: -20px;
+}
+
+.part2 {
+  margin-top: 15px;
+}
+
+
+.part2 .el-row {
+  margin-bottom: 20px;
+}
+
+.row-color-red {
+  color: red;
+}
+
+</style>

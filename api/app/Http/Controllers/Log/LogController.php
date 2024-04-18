@@ -7,6 +7,8 @@ use App\Models\Account\Account;
 use App\Models\Client\Client;
 use App\Models\Client\Client_account_relationship;
 use App\Models\Log\Log;
+use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Request;
 
 class LogController extends Controller
@@ -38,11 +40,31 @@ class LogController extends Controller
 // 调用递归函数，遍历对象并将 id 存入数组
        extractIds($data, $allIds);
 
+        // 获取前端传递过来的筛选条件
+        $filters = request()->only(['client', 'account', 'content', 'ip']);
+
+       // 构建查询条件
+       $query = Log::whereIn('client_id', $allIds);
+       // 根据筛选条件过滤数据
+    foreach ($filters as $column => $value) {
+        if (!empty($value)) {
+            $query->where($column, 'like', '%' . $value . '%');
+        }
+    }
+
+        // 处理日期
+       $startDate = date(\request()->query('start_date'));
+       $endDate = date('Y-m-d', strtotime(\request()->query('end_date') . ' +1 day'));
+
+       if ($startDate && $endDate)
+        $query ->where('created_at', '>=', $startDate)
+           ->where('created_at', '<=',$endDate);
+
         $pageSize = \request()->query('pageSize') ?? 10;
         $type = \request()->query('type');
         $type = (integer)$type;
         if($type === 1)
-        $data = Log::where('type',1)->whereIn('client_id',$allIds)->with(['account_detail:id,nickname,account','client_detail:id,clientname'])->orderBy('created_at','desc')->paginate($pageSize);
+        $data = $query->where('type',1)->whereIn('client_id',$allIds)->with(['account_detail:id,nickname,account','client_detail:id,clientname'])->orderBy('created_at','desc')->paginate($pageSize);
         elseif ($type === 2){
             $data = Log::where('type',2)->whereIn('client_id',$allIds)->with(['account_detail:id,nickname,account','client_detail:id,clientname'])->orderBy('created_at','desc')->paginate($pageSize);
 

@@ -21,7 +21,9 @@ export const logListApi = (type, currentPage, pageSize, filters) => {
             client: filters['client'],
             account: filters['account'],
             content: filters['content'],
-            ip: filters['ip']
+            ip: filters['ip'],
+            start_date: filters['start_date'],
+            end_date: filters['end_date']
         }
     })
 }

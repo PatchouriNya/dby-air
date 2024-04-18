@@ -34,7 +34,7 @@ import {ElForm, ElFormItem, ElInput, ElButton, ElCheckbox, ElMessage} from 'elem
 import {useRouter} from 'vue-router'
 import axios from 'axios'
 import {useLoginstateStore} from '@/stores/loginstate.js'
-import {loginCreateApi} from '@/api/log.js'
+import {logCreateApi} from '@/api/log.js'
 
 
 const loginstateStore = useLoginstateStore()
@@ -94,7 +94,7 @@ async function login() {
       localStorage.setItem("token", response.data.data[0].id)
       loginstateStore.id = response.data.data[0].id
       loginLog.value.id = response.data.data[0].id
-      loginCreateApi(loginLog.value)
+      logCreateApi(loginLog.value)
       ElMessage.success('登录成功')
       // 跳转到 index 路由
       await router.push({path: '/'})

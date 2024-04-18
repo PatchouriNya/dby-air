@@ -1,6 +1,6 @@
 import {useRouter} from "vue-router"
 import {ref} from 'vue'
-import {loginCreateApi} from '@/api/log.js'
+import {logCreateApi} from '@/api/log.js'
 
 export default function () {
     const router = useRouter()
@@ -8,7 +8,7 @@ export default function () {
     const logoutLog = ref({
         id: '',
         type: 1,
-        content: '登出系统'
+        content: '退出系统'
     })
 
 
@@ -16,7 +16,7 @@ export default function () {
         // 登出
         logoutLog.value.id = localStorage.getItem('token')
         localStorage.removeItem('token')
-        loginCreateApi(logoutLog.value)
+        logCreateApi(logoutLog.value)
         router.push({path: '/login'})
     }
 

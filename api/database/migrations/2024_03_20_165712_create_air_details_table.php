@@ -25,7 +25,7 @@ class CreateAirDetailsTable extends Migration
             $table->string('power_state',255)->nullable()->comment('开机状态');
             $table->string('operation_mode',255)->nullable()->comment('运行模式');
             $table->string('wind_speed',255)->nullable()->comment('风速');
-            $table->tinyInteger('wind_mode',false)->nullable()->comment('风向模式,1为走风,2为扫风');
+            $table->string('wind_mode',255)->nullable()->comment('风向模式');
             $table->string('set_temperature',255)->nullable()->comment('设置温度');
             $table->string('room_temperature',255)->nullable()->comment('室温');
             $table->string('voltage',255)->nullable()->comment('电压');

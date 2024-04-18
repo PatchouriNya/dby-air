@@ -328,8 +328,8 @@
                     <h3>风向</h3>
                   </template>
                   <el-radio-group v-model="controlForm.wind_mode">
-                    <el-radio label="走风" :value="1"/>
-                    <el-radio label="扫风" :value="2"/>
+                    <el-radio label="走风" value="走风"/>
+                    <el-radio label="扫风" value="扫风"/>
                   </el-radio-group>
                 </el-card>
               </el-col>
@@ -378,14 +378,16 @@
 
 
 <script setup>
-import {onMounted, ref} from 'vue'
-import {clientList} from '@/api/client.js'
+import {onMounted, reactive, ref, watch} from 'vue'
+import {clientList, getMainClientApi} from '@/api/client.js'
 import {getOneAirClient} from '@/api/getAirDetail'
 import {updateAir} from '@/api/updateAir'
 import {controlAir} from '@/api/controlAir'
 import {ElMessage} from 'element-plus'
+import {logCreateApi} from '@/api/log.js'
+import {airDetailApi} from '@/api/air.js'
 
-
+const tableClientId = ref()
 // 配置左侧层级
 const clientId = ref()
 const treeData = ref([])
@@ -507,6 +509,7 @@ const findFirstTypeOneNode = (nodes) => {
     if (node.childs && node.childs.length > 0) {
       const result = findFirstTypeOneNode(node.childs)
       if (result) {
+        tableClientId.value = result.id
         return result
       }
     }
@@ -544,6 +547,7 @@ function clickNode(val) {
     selectData.value = val
     clientId.value = val.id
     if (val.type === 1) {
+      tableClientId.value = val.id
       initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
       noDataMeg.value = '该客户暂时没有导入数据'
     } else {
@@ -551,7 +555,6 @@ function clickNode(val) {
       noDataMeg.value = '请选择具体客户单位'
     }
   }
-
 }
 
 function search() {
@@ -593,8 +596,14 @@ function showSelectColumn() {
 
 // 是否显示断电开关
 const showEleState = ref(true)
+const show_id = ref()
 
-function showControl(row) {
+const airBelongClientname = ref()
+
+async function showControl(row) {
+  let res = await airDetailApi(row.row.id)
+  airBelongClientname.value = res.data.clientname
+  show_id.value = row.row.show_id
   controlVisible.value = !controlVisible.value
   colId.value = row.row.id
   editForm.value.designation = row.row.designation
@@ -616,7 +625,7 @@ function showControl(row) {
   controlForm.value.power = row.row.power
   controlForm.value.electric_quantity = row.row.electric_quantity
   controlForm.value.responsible_person = row.row.responsible_person
-  controlForm.value.wind_mode = row.row.wind_mode == '走风' ? 1 : 2
+  controlForm.value.wind_mode = row.row.wind_mode
   controlForm.value.standby_mode = row.row.standby_mode
 }
 
@@ -628,11 +637,24 @@ function closeControl() {
   controlVisible.value = !controlVisible.value
 }
 
+
+const logForm = reactive({
+  id: localStorage.getItem("token"),
+  type: 2,
+  client_id: '',
+  content: ''
+})
+
+
 async function sureControl(id) {
+
   controlForm.value.power_state = controlForm.value.power_state === true ? '开机' : '关机'
   controlForm.value.online_state = controlForm.value.online_state === true ? '在线' : '离线'
   if (controlForm.value.electrify_state != null)
     controlForm.value.electrify_state = controlForm.value.electrify_state === true ? '通电' : '断电'
+  logForm.client_id = tableClientId.value
+  logForm.content = '操控了' + airBelongClientname.value + '的' + show_id.value + '号机 ' + controlForm.value.electrify_state + ' ' + controlForm.value.power_state + ' ' + controlForm.value.set_temperature + ' ' + controlForm.value.operation_mode + ' ' + controlForm.value.wind_speed + ' ' + controlForm.value.wind_mode
+  await logCreateApi(logForm)
   let res = await controlAir(id, controlForm.value)
   if (res.code === 201) {
     ElMessage({
@@ -675,6 +697,10 @@ const handleCurrentChange = () => {
 const handleSizeChange = () => {
   initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
 }
+watch(controlForm.value, (val) => {
+  if (val.power_state == false)
+    controlForm.value.power_state = '关机'
+})
 
 onMounted(() => {
   initclientList()

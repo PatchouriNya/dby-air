@@ -65,7 +65,7 @@ class Air_detail extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $hidden = ['client_id','created_at','updated_at','deleted_at'];
+    protected $hidden = ['created_at','updated_at','deleted_at'];
     protected $fillable = [
         'designation',
         'responsible_person',

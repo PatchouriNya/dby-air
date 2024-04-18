@@ -39,6 +39,12 @@ const router = createRouter({
                     component: () => import('@/views/energy/intelligentcontrol/splitcontrol/index.vue')
                 },
                 {
+                    path: '/main/energy/intelligentcontrol/log',
+                    name: 'air-log',
+                    component: () => import('@/views/energy/intelligentcontrol/log/index.vue')
+
+                },
+                {
                     path: '/main/client/list',
                     name: 'client-list',
                     component: () => import('@/views/client/list/index.vue')

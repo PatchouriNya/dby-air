@@ -18,7 +18,7 @@ class CreateLogsTable extends Migration
 
             $table->integer('account_id',false)->index('account_id')->comment('账号id');
 
-            $table->string('account',50)->comment('账号名');
+            $table->string('account',50)->nullable()->comment('账号名');
 
             $table->integer('client_id',false)->index('client_id')->nullable()->comment('客户id');
 

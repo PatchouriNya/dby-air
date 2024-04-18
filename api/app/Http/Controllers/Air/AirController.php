@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Air;
 
 use App\Http\Controllers\Controller;
 use App\Models\Air\Air_detail;
+use App\Models\Client\Client;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Validator;
@@ -17,16 +18,6 @@ class AirController extends Controller
         $filters = request()->only(['designation', 'online_state', 'power_state', 'operation_mode', 'wind_speed', 'set_temperature', 'room_temperature','air_brand']);
 
         $data = (new Air_detail())->getOneClient($id, $pageSize, $filters);
-        foreach ($data as $item ){
-            switch ($item->wind_mode){
-                case  1:
-                    $item->wind_mode = '走风';
-                    break;
-                case 2:
-                    $item->wind_mode = '扫风';
-                    break;
-            }
-    }
         return api($data, 200, '获取空调列表成功');
     }
 
@@ -39,10 +30,10 @@ class AirController extends Controller
                 'air_brand' => 'nullable|string|max:255',
                 'online_state' => 'nullable|string|max:255',
                 'electrify_state' => 'nullable|max:255',
-                'power_state' => 'nullable|string|max:255',
+                'power_state' => 'nullable|max:255',
                 'operation_mode' => 'nullable|string|max:255',
                 'wind_speed' => 'nullable|string|max:255',
-                'wind_mode' => 'nullable|between:1,5',
+                'wind_mode' => 'nullable|string|max:255',
                 'set_temperature' => 'nullable|string|max:255',
                 'room_temperature' => 'nullable|string|max:255',
                 'voltage' => 'nullable|string|max:255',
@@ -60,5 +51,13 @@ class AirController extends Controller
         } catch (\Exception $e) {
             return api([], 500, '更新失败: ' . $e->getMessage());
         }
+    }
+
+    // 某台空调信息，暂用于找所属
+    public function show($id)
+    {
+        $client_id = Air_detail::where('id', $id)->first()->client_id;
+        $data = Client::where('id', $client_id)->first(['clientname']);
+        return api($data, 200, '获取空调信息成功');
     }
 }

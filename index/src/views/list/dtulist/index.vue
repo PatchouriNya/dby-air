@@ -4,7 +4,7 @@
       <ClientTree ref="tree"/>
     </el-col>
     <el-col :span="20">
-      <div class="right-content">123</div>
+      <div class="right-content"><img :width="1367" src="@/assets/dtu.jpg" alt=""></div>
     </el-col>
   </el-row>
 

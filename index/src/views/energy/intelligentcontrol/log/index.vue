@@ -1,5 +1,5 @@
 <template>
-  <div class="shaixuan">
+  <div class="shaixuan" @keyup.enter="search">
     <div>
       <span>客户</span>
       <el-input

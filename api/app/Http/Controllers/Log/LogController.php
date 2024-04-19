@@ -106,6 +106,7 @@ class LogController extends Controller
                 return api([],500,'新增日志失败');
             }
         }
+        return api([],500,'服务器错误,新增日志失败');
     }
 
     public function destroy($id){

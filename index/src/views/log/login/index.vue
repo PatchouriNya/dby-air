@@ -36,15 +36,24 @@
         />
       </div>
       <div style="margin-left: 10px">
+        <span>时间</span>
         <el-date-picker
-            v-model="date"
-            type="daterange"
-            range-separator="到"
-            start-placeholder="开始"
-            end-placeholder="截至"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
+            v-model="filters.start_date"
+            type="date"
+            placeholder="起始日期"
+            :shortcuts="shortcuts"
             :size="'default'"
+            value-format="YYYY-MM-DD"
+        />
+        <span style="margin: 0 10px">到</span>
+        <el-date-picker
+            style="margin-left: 5px"
+            v-model="filters.end_date"
+            type="date"
+            placeholder="截止日期"
+            :shortcuts="shortcuts"
+            :size="'default'"
+            value-format="YYYY-MM-DD"
         />
       </div>
       <div style="margin-left: 20px">
@@ -58,8 +67,8 @@
             @selection-change="handleSelectionChange"
             :row-key="getRowKeys"
   >
-    <el-table-column type="selection" :reserve-selection="true" width="55"/>
-    <el-table-column type="index" label="序号" width="80" align="center"/>
+    <!--    <el-table-column type="selection" :reserve-selection="true" width="55"/>
+        <el-table-column type="index" label="序号" width="80" align="center"/>-->
     <el-table-column prop="client_detail.clientname" label="客户" sortable/>
     <el-table-column prop="account" label="账号" sortable/>
     <el-table-column prop="account_detail.nickname" label="昵称" sortable/>
@@ -82,6 +91,7 @@
 <script setup>
 import {logListApi} from '@/api/log.js'
 import {ref, watch} from 'vue'
+import {ElMessage} from 'element-plus'
 
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -96,14 +106,34 @@ const filters = ref({
   // 添加更多筛选条件...
 })
 
-const date = ref()
-watch(date, (newValue, oldValue) => {
-  if (newValue) {
-    filters.value.start_date = newValue[0]
-    filters.value.end_date = newValue[1]
-  } else {
+const shortcuts = [
+  {
+    text: '今天',
+    value: new Date()
+  },
+  {
+    text: '昨天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24)
+      return date
+    }
+  },
+  {
+    text: '一周前',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+      return date
+    }
+  }
+]
+
+watch(filters.value, (val) => {
+  if (val.start_date && val.end_date && val.start_date > val.end_date) {
     filters.value.start_date = ''
     filters.value.end_date = ''
+    ElMessage.error('起始日期不能大于截止日期')
   }
 })
 
@@ -133,9 +163,10 @@ const reset = () => {
     client: '',
     account: '',
     content: '',
-    ip: ''
+    ip: '',
+    start_date: '',
+    end_date: ''
   }
-  date.value = ''
   getLogList()
 }
 const search = () => {

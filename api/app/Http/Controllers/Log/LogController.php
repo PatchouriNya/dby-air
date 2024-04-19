@@ -54,11 +54,19 @@ class LogController extends Controller
 
         // 处理日期
        $startDate = date(\request()->query('start_date'));
-       $endDate = date('Y-m-d', strtotime(\request()->query('end_date') . ' +1 day'));
-
-       if ($startDate && $endDate)
-        $query ->where('created_at', '>=', $startDate)
-           ->where('created_at', '<=',$endDate);
+       $endDate = date(\request()->query('end_date'));
+       if ( $endDate == '' && $startDate != ''){
+           $query ->where('created_at', '>=', $startDate);
+       }
+       elseif ($startDate == '' && $endDate != ''){
+       $endDate = date('Y-m-d', strtotime($endDate . ' +1 day'));
+           $query ->where('created_at', '<=',$endDate);
+       }
+       elseif ($startDate != '' && $endDate != ''){
+           $endDate = date('Y-m-d', strtotime($endDate . ' +1 day'));
+           $query ->where('created_at', '>=', $startDate)
+               ->where('created_at', '<=',$endDate);
+       }
 
         $pageSize = \request()->query('pageSize') ?? 10;
         $type = \request()->query('type');
@@ -99,5 +107,9 @@ class LogController extends Controller
                 return api([],500,'新增日志失败');
             }
         }
+    }
+
+    public function deleteAll(){
+       return 1;
     }
 }

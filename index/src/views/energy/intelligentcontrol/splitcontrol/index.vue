@@ -150,7 +150,7 @@
     </template>
   </el-dialog>
   <!--空调控制面板-->
-  <el-dialog title="空调控制" v-model="controlVisible" :close-on-click-modal="false" :width="700">
+  <el-dialog title="空调控制" v-model="controlVisible" :close-on-click-modal="false" :width="750">
     <transition name="fade">
       <div>
         <!-- 第一部分：空调信息 -->
@@ -299,10 +299,30 @@
                     <h3>模式</h3>
                   </template>
                   <el-radio-group v-model="controlForm.operation_mode">
-                    <el-radio label="送风" value="送风"/>
-                    <el-radio label="制冷" value="制冷"/>
-                    <el-radio label="制热" value="制热"/>
-                    <el-radio label="除湿" value="除湿"/>
+                    <el-radio-button label="送风" value="送风">
+                      <template #default>
+                        <Icon icon="mdi:fan" class="btnIcon"/>
+                        <span class="btnWord">送风</span>
+                      </template>
+                    </el-radio-button>
+                    <el-radio-button label="制冷" value="制冷">
+                      <template #default>
+                        <Icon icon="fluent:weather-snowflake-32-filled" class="btnIcon"/>
+                        <span class="btnWord">制冷</span>
+                      </template>
+                    </el-radio-button>
+                    <el-radio-button label="制热" value="制热">
+                      <template #default>
+                        <Icon icon="solar:sun-2-bold-duotone" class="btnIcon"/>
+                        <span class="btnWord">制热</span>
+                      </template>
+                    </el-radio-button>
+                    <el-radio-button label="除湿" value="除湿">
+                      <template #default>
+                        <Icon icon="fa6-solid:droplet-slash" class="btnIcon"/>
+                        <span class="btnWord">除湿</span>
+                      </template>
+                    </el-radio-button>
                   </el-radio-group>
                 </el-card>
               </el-col>
@@ -379,13 +399,14 @@
 
 <script setup>
 import {onMounted, reactive, ref, watch} from 'vue'
-import {clientList, getMainClientApi} from '@/api/client.js'
+import {clientList} from '@/api/client.js'
 import {getOneAirClient} from '@/api/getAirDetail'
 import {updateAir} from '@/api/updateAir'
 import {controlAir} from '@/api/controlAir'
 import {ElMessage} from 'element-plus'
 import {logCreateApi} from '@/api/log.js'
 import {airDetailApi} from '@/api/air.js'
+import {Icon} from '@iconify/vue'
 
 const tableClientId = ref()
 // 配置左侧层级
@@ -784,10 +805,20 @@ onMounted(() => {
 
 .part2 .el-row {
   margin-bottom: 20px;
+  padding-left: 15px;
 }
 
 .row-color-red {
   color: red;
+}
+
+.btnIcon {
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.btnWord {
+  vertical-align: middle;
 }
 
 </style>

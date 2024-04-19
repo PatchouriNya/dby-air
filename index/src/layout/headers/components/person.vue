@@ -2,7 +2,8 @@
   <div class="person">
     <el-dropdown>
     <span class="el-dropdown-link">
-      {{ accountData && accountData.nickname }}
+<!--      {{ accountData && accountData.nickname }}-->
+      {{ accountData && accountData.account }}
       <el-icon class="el-icon--right">
       </el-icon>
     </span>

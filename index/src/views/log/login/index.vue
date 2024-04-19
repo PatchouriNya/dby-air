@@ -88,7 +88,7 @@
   />
 
 
-  <!--删除账号-->
+  <!--删除-->
   <el-dialog v-model="deleteVisible" title="警告！" width="500" :close-on-click-modal="false">
     <span style="color: red">你正在进行删除该检索条件下一共 <span style="font-size: 24px">{{ total }}</span> 条数据 的操作，确认吗？</span>
     <template #footer>

@@ -650,8 +650,10 @@ async function sureControl(id) {
 
   controlForm.value.power_state = controlForm.value.power_state === true ? '开机' : '关机'
   controlForm.value.online_state = controlForm.value.online_state === true ? '在线' : '离线'
-  if (controlForm.value.electrify_state != null)
+  if (controlForm.value.electrify_state != null && controlForm.value.electrify_state != '')
     controlForm.value.electrify_state = controlForm.value.electrify_state === true ? '通电' : '断电'
+  else
+    controlForm.value.electrify_state = ''
   logForm.client_id = tableClientId.value
   logForm.content = '操控了' + airBelongClientname.value + '的' + show_id.value + '号机 ' + controlForm.value.electrify_state + ' ' + controlForm.value.power_state + ' ' + controlForm.value.set_temperature + ' ' + controlForm.value.operation_mode + ' ' + controlForm.value.wind_speed + ' ' + controlForm.value.wind_mode
   await logCreateApi(logForm)
@@ -698,7 +700,7 @@ const handleSizeChange = () => {
   initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
 }
 watch(controlForm.value, (val) => {
-  if (val.power_state == false)
+  if (val.power_state === false)
     controlForm.value.power_state = '关机'
 })
 

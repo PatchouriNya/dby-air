@@ -74,8 +74,7 @@ class LogController extends Controller
         if($type === 1)
         $data = $query->where('type',1)->whereIn('client_id',$allIds)->with(['account_detail:id,nickname,account','client_detail:id,clientname'])->orderBy('created_at','desc')->paginate($pageSize);
         elseif ($type === 2){
-            $data = Log::where('type',2)->whereIn('client_id',$allIds)->with(['account_detail:id,nickname,account','client_detail:id,clientname'])->orderBy('created_at','desc')->paginate($pageSize);
-
+            $data = $query->where('type',2)->whereIn('client_id',$allIds)->with(['account_detail:id,nickname,account','client_detail:id,clientname'])->orderBy('created_at','desc')->paginate($pageSize);
         }
         return api($data,200,'获取登录日志列表成功');
     }

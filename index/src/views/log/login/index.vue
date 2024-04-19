@@ -59,7 +59,7 @@
       <div style="margin-left: 20px">
         <el-button @click="reset">重置</el-button>
         <el-button type="primary" @click="search">搜索</el-button>
-        <el-button type="danger" @click="deleteRow">删除</el-button>
+        <el-button type="danger" @click="showDelete">删除</el-button>
       </div>
     </div>
   </div>
@@ -86,10 +86,24 @@
                  @size-change="handleSizeChange"
                  @current-change="handleCurrentChange"
   />
+
+
+  <!--删除账号-->
+  <el-dialog v-model="deleteVisible" title="警告！" width="500" :close-on-click-modal="false">
+    <span style="color: red">你正在进行删除该检索条件下一共 <span style="font-size: 24px">{{ total }}</span> 条数据 的操作，确认吗？</span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="showDelete">取消</el-button>
+        <el-button type="primary" @click="sureDelete">
+          确认
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
-import {logListApi} from '@/api/log.js'
+import {logDeleteApi, logListApi} from '@/api/log.js'
 import {ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 
@@ -105,6 +119,7 @@ const filters = ref({
   end_date: ''
   // 添加更多筛选条件...
 })
+let lastPage = 0;
 
 const shortcuts = [
   {
@@ -156,6 +171,7 @@ const getLogList = async () => {
   const res = await logListApi(1, currentPage.value, pageSize.value, filters.value)
   total.value = res.data.total
   tableData.value = res.data.data
+  lastPage = res.data.last_page
 }
 getLogList()
 const reset = () => {
@@ -172,8 +188,31 @@ const reset = () => {
 const search = () => {
   getLogList()
 }
-const deleteRow = () => {
 
+// 删除
+const deleteVisible = ref(false)
+
+const showDelete = () => {
+  deleteVisible.value = !deleteVisible.value
+}
+const sureDelete = async () => {
+  let allIds = [];
+  for (let page = 1; page <= lastPage; page++) {
+    const res = await logListApi(1, page, pageSize.value, filters.value);
+    const pageIds = res.data.data.map(item => item.id);
+    allIds = allIds.concat(pageIds);
+  }
+  // 在这里可以进行删除操作或其他操作
+  for (const id of allIds) {
+    try {
+      await logDeleteApi(id);
+    } catch (error) {
+      console.error(`Failed to delete log with id ${id}:`, error);
+    }
+  }
+  ElMessage.success('删除该条件下的所有日志成功')
+  await getLogList()
+  showDelete()
 }
 </script>
 

@@ -27,3 +27,10 @@ export const logListApi = (type, currentPage, pageSize, filters) => {
         }
     })
 }
+
+export const logDeleteApi = (id) => {
+    return request({
+        url: '/log/' + id,
+        method: 'DELETE'
+    })
+}

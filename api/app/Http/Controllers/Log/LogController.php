@@ -80,7 +80,7 @@ class LogController extends Controller
         return api($data,200,'获取登录日志列表成功');
     }
 
-   public function store(Request $request)
+    public function store(Request $request)
     {
         $form = $request->all(['id','type','content']);
         $id = $form['id'];
@@ -109,7 +109,12 @@ class LogController extends Controller
         }
     }
 
-    public function deleteAll(){
-       return 1;
+    public function destroy($id){
+       $res = Log::where('id',$id)->delete();
+       if ($res){
+           return api([],200,'删除日志成功');
+       }else{
+           return api([],500,'删除日志失败');
+       }
     }
 }

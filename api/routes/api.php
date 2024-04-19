@@ -80,4 +80,5 @@ Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Air','middlewar
 Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Log','middleware'=>['cors']],function (){
     // 资源路由
     Route::resource('log','LogController');
+
 });

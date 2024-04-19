@@ -94,7 +94,7 @@ async function login() {
       localStorage.setItem("token", response.data.data[0].id)
       loginstateStore.id = response.data.data[0].id
       loginLog.value.id = response.data.data[0].id
-      logCreateApi(loginLog.value)
+      await logCreateApi(loginLog.value)
       ElMessage.success('登录成功')
       // 跳转到 index 路由
       await router.push({path: '/'})

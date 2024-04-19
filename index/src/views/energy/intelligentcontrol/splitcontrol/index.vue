@@ -671,7 +671,7 @@ async function sureControl(id) {
 
   controlForm.value.power_state = controlForm.value.power_state === true ? '开机' : '关机'
   controlForm.value.online_state = controlForm.value.online_state === true ? '在线' : '离线'
-  if (controlForm.value.electrify_state != null && controlForm.value.electrify_state != '')
+  if (controlForm.value.electrify_state != null)
     controlForm.value.electrify_state = controlForm.value.electrify_state === true ? '通电' : '断电'
   else
     controlForm.value.electrify_state = ''

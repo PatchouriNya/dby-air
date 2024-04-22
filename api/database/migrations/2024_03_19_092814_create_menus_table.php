@@ -21,6 +21,7 @@ class CreateMenusTable extends Migration
             $table->string('icon',50)->nullable()->comment('图标');
             $table->string('url',50)->nullable()->comment('路由');
             $table->string('permission',100)->nullable()->comment('权限');
+            $table->tinyInteger('show',false)->default(1)->comment('是否显示菜单,1是,0否');
             $table->timestamps();
             $table->softDeletes();
         });

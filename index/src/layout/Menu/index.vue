@@ -17,7 +17,7 @@
     </router-link>
     <div v-for="level1 in menusList">
       <!--      一级菜单-->
-      <el-sub-menu :index="level1.url" :key="level1.id">
+      <el-sub-menu :index="level1.url" :key="level1.id" v-if="level1.show === 1">
         <template #title>
           <el-icon>
             <component :is="level1.icon"/>
@@ -27,7 +27,7 @@
 
         <!--        二级菜单目录-->
         <template v-for="level2 in level1.children" :key="level2.id">
-          <el-sub-menu :index="level2.url" v-if="level2.type ===0">
+          <el-sub-menu :index="level2.url" v-if="level2.type === 0 && level2.show === 1">
             <template #title>
               <el-icon>
                 <component :is="level2.icon"/>
@@ -36,7 +36,7 @@
             </template>
             <!--            三级菜单可点击-->
             <template v-for="level3 in level2.children" :key="level3.id">
-              <el-menu-item :index="level3.url">
+              <el-menu-item :index="level3.url" v-if="level3.show === 1">
                 <template #title>
                   <el-icon>
                     <component :is="level3.icon"/>
@@ -47,7 +47,7 @@
             </template>
           </el-sub-menu>
           <!--        二级菜单可点击-->
-          <el-menu-item :index="level2.url" v-else-if="level2.type ===1">
+          <el-menu-item :index="level2.url" v-else-if="level2.type ===1 && level2.show === 1">
             <template #title>
               <el-icon>
                 <component :is="level2.icon"/>

@@ -7,7 +7,8 @@
       <div class="right-content">
         <h2 style="margin-bottom: 20px;text-align: center">{{ title }}</h2>
         <el-button type="primary" style="margin-bottom: 10px" @click="showAccountCreate">新增账号</el-button>
-        <el-table :data="tableManageData">
+        <el-table :data="tableManageData"
+                  :row-class-name="tableRowClass">
           <el-table-column property="account.account" label="账号"/>
           <el-table-column property="account.nickname" label="昵称"/>
           <el-table-column property="account.email" label="邮箱"/>
@@ -33,6 +34,14 @@
                            @click="showAccountDelete(row)">
                   <el-icon>
                     <Delete/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="设置为主管账号" placement="top">
+                <el-button v-if="accountStore.accountData.id !== row.row.id" link type="primary" size="default"
+                           @click="">
+                  <el-icon>
+                    <User/>
                   </el-icon>
                 </el-button>
               </el-tooltip>
@@ -165,6 +174,13 @@ const {accountCreateForm, accountCreateVisible, showAccountCreate, sureAccountCr
 // 删除账号
 const {accountDeleteVisible, showAccountDelete, sureAccountDelete, accountDelName} = useAccountDelete()
 
+// 改颜色
+function tableRowClass({row}) {
+  if (row.account.main === 1)
+    return 'row-color-blue'
+}
+
+
 eventBus.on('node-clicked', (val) => {
   title.value = val.clientname
   client_id.value = val.id
@@ -184,5 +200,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-
+.row-color-blue {
+  color: darkblue;
+}
 </style>

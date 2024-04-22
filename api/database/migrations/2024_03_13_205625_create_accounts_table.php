@@ -28,6 +28,8 @@ class CreateAccountsTable extends Migration
             $table->string('upgrade_permission_flag',30)->nullable()->comment('升级权限标志位');
             $table->boolean('account_offline_status')->default(false)->comment('账号是否离线');
             $table->boolean('account_status')->default(false)->comment('账号是否停用');
+            $table->tinyInteger('main',false)->default(0)->comment('是否为主账号,1是,0否');
+
             $table->timestamps();
             $table->softDeletes();
         });

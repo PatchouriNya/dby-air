@@ -76,7 +76,15 @@ class Client extends Model
             $query->where('account_id', $accountId);
         })
             ->with(['childsSelect' => function ($query) use ($clientId) {
-                $query->where('id', '!=', $clientId); // 排除指定的客户
+                $query->where('id', '!=', $clientId) // 排除指定的客户
+                    ->with(['childsSelect' => function ($query) use ($clientId) {
+                        $query->where('id', '!=', $clientId)->with(['childsSelect' => function ($query) use ($clientId) {
+                            $query->where('id', '!=', $clientId) // 排除指定的客户
+                            ->where('type', '!=', 1); // 排除 type 为 1 的客户
+                        }]) // 排除指定的客户
+                            ->where('type', '!=', 1); // 排除 type 为 1 的客户
+                    }])
+                    ->where('type', '!=', 1); // 排除 type 为 1 的客户
             }])
             ->where('id', '!=', $clientId) // 排除指定的客户
             ->where('type', '!=', 1) // 排除 type 为 1 的客户

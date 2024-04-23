@@ -8,7 +8,7 @@
         <h2 style="margin-bottom: 20px;text-align: center">{{ title }}</h2>
         <el-button type="primary" style="margin-bottom: 10px" @click="showAccountCreate">新增账号</el-button>
         <el-table :data="tableManageData"
-                  :row-class-name="tableRowClass">
+                  :row-style="tableRow">
           <el-table-column property="account.account" label="账号"/>
           <el-table-column property="account.nickname" label="昵称"/>
           <el-table-column property="account.email" label="邮箱"/>
@@ -38,8 +38,9 @@
                 </el-button>
               </el-tooltip>
               <el-tooltip content="设置为主管账号" placement="top">
-                <el-button v-if="accountStore.accountData.id !== row.row.id" link type="primary" size="default"
-                           @click="">
+                <el-button v-if="mainFlag === 1 &&row.row.account.main !== 1" link type="primary"
+                           size="default"
+                           @click="showAccountSetMain(row.row)">
                   <el-icon>
                     <User/>
                   </el-icon>
@@ -136,11 +137,24 @@
       </div>
     </template>
   </el-dialog>
+  <!--设置主账号-->
+  <el-dialog v-model="accountSetMainVisible" title="警告！" width="500" :close-on-click-modal="false">
+    <span style="color: red">您将要设置（{{
+        accountSetMainName
+      }}）为主管账号,这将会使您的账号不再拥有主管账号身份，<br><br>确认吗？</span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="showAccountSetMain">取消</el-button>
+        <el-button type="primary" @click="sureAccountSetMain">
+          确认
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
 import ClientTree from "@/components/ClientTree.vue"
-import useAccountManage from '@/hooks/views/client/account/useAccountManage.js'
 import useChangePwd from '@/hooks/views/client/account/useChangePwd.js'
 import useInnerEdit from '@/hooks/views/client/account/useInnerEdit.js'
 import eventBus from '@/listen/event-bus.js'
@@ -150,6 +164,8 @@ import useAccountDelete from "@/hooks/views/client/account/useAccountDelete.js";
 import {useClientStore} from "@/store/client.js";
 import {storeToRefs} from 'pinia'
 import {useAccountStore} from '@/store/account.js'
+import useSetMain from '@/hooks/views/client/account/useSetMain.js'
+import {account} from '@/api/account.js'
 
 const tree = ref()
 const title = ref()
@@ -158,9 +174,6 @@ const client_id = ref()
 const clientStore = useClientStore()
 const {tableManageData} = storeToRefs(clientStore)
 const accountStore = useAccountStore()
-
-/*// 账号管理(目前失去作用 使用pinia代替)
-const {accountList} = useAccountManage()*/
 
 // 账号管理下的修改密码
 const {showCpdVisible, cancelCpd, cpwForm, showCpd, sureChange} = useChangePwd()
@@ -174,10 +187,13 @@ const {accountCreateForm, accountCreateVisible, showAccountCreate, sureAccountCr
 // 删除账号
 const {accountDeleteVisible, showAccountDelete, sureAccountDelete, accountDelName} = useAccountDelete()
 
+// 设置主账号
+const {accountSetMainVisible, accountSetMainName, showAccountSetMain, sureAccountSetMain, mainFlag} = useSetMain()
+
 // 改颜色
-function tableRowClass({row}) {
+function tableRow({row}) {
   if (row.account.main === 1)
-    return 'row-color-blue'
+    return {color: 'darkblue'}
 }
 
 
@@ -200,7 +216,5 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.row-color-blue {
-  color: darkblue;
-}
+
 </style>

@@ -50,6 +50,9 @@ Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Account','middl
 
     // 获取客户的所有账号列表
     Route::get('accountlist/{id}','AccountController@getAccountListByClient');
+
+    // 设置为主账号
+    Route::put('setmain/{id}','AccountController@setMainAccount');
 });
 
 // 登录

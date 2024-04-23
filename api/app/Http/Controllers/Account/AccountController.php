@@ -173,4 +173,23 @@ class AccountController extends Controller
             return api(null, 500, '服务器出错了');
         }
     }
+
+    public function setMainAccount($id)
+    {
+        $res = Client_account_relationship::where('account_id', $id)->first(['client_id'])->toArray();
+        $res = Client_account_relationship::where('client_id', $res['client_id'])->where('account_id','!=',$id)->get(['account_id'])->toArray();
+
+        foreach ($res as $value){
+           $res =  Account::findOrFail($value['account_id'])->main;
+           if ($res === 1){
+               Account::where('id',$value['account_id'])->update(['main' => 0]);
+               break;
+           }
+        }
+        $account = Account::findOrFail($id);
+        $account->main = 1;
+        $account->save();
+        return api(null, 201, '设为主账号成功!');
+
+    }
 }

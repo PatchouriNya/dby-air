@@ -6,3 +6,10 @@ export const account = () => {
         url: '/account/' + token
     })
 }
+
+export const accountSetMainApi = (id) => {
+    return request({
+        url: '/setmain/' + id,
+        method: 'PUT'
+    })
+}

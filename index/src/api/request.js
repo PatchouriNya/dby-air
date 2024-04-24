@@ -24,7 +24,7 @@ service.interceptors.request.use(
 
 service.interceptors.response.use((response) => {
     const {data} = response
-    if (data.code === 200 || data.code === 201) {
+    if (data.code >= 200 && data.code <= 300) {
         return data
     } else {
         ElMessage.error(data.msg)

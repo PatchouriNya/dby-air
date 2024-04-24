@@ -8,6 +8,7 @@ export default function () {
     const accountSetMainName = ref('')
     const id = ref()
     const clientStore = useClientStore()
+    // 是否为主管
     const mainFlag = ref()
 
     // 初始化

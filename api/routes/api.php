@@ -53,12 +53,19 @@ Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Account','middl
 
     // 设置为主账号
     Route::put('setmain/{id}','AccountController@setMainAccount');
+
 });
 
 // 登录
 Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Login','middleware'=>['cors']],function (){
     // 登录
     Route::post('login','LoginController@login');
+
+    // 检验过期时间
+    Route::get('login/check/{id}','LoginController@check');
+
+    // 登出
+    Route::get('logout/{id}','LoginController@logout');
 });
 
 // 菜单

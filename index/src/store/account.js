@@ -18,6 +18,7 @@ export const useAccountStore = defineStore('account', () => {
     async function getMainClient() {
         const res = await getMainClientApi()
         mainClient.value = res.data
+        localStorage.setItem('client_id', res.data.id)
     }
 
     async function getSystemClient() {

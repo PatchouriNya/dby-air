@@ -6,7 +6,9 @@
     <el-col :span="20">
       <div class="right-content">
         <h2 style="margin-bottom: 20px;text-align: center">{{ title }}</h2>
-        <el-button type="primary" style="margin-bottom: 10px" @click="showAccountCreate">新增账号</el-button>
+        <el-button type="primary" style="margin-bottom: 10px" @click="showAccountCreate">
+          新增账号
+        </el-button>
         <el-table :data="tableManageData"
                   :row-style="tableRow">
           <el-table-column property="account.account" label="账号"/>
@@ -16,31 +18,41 @@
           <el-table-column fixed="right" label="操作">
             <template #default="row">
               <el-tooltip content="修改密码" placement="top">
-                <el-button link type="primary" size="default" @click="showCpd(row)">
+                <el-button link type="primary" size="default"
+                           v-if="isSystem || (row.row.client_id === mainClientId && mainFlag === 1 || accountStore.accountData.id === row.row.id)"
+                           @click="showCpd(row)">
                   <el-icon>
                     <Compass/>
                   </el-icon>
                 </el-button>
               </el-tooltip>
               <el-tooltip content="编辑" placement="top">
-                <el-button link type="primary" size="default" @click="showInnerEdit(row)">
+                <el-button link type="primary" size="default"
+                           v-if="isSystem || (row.row.client_id === mainClientId && mainFlag === 1 || accountStore.accountData.id === row.row.id)"
+                           @click="showInnerEdit(row)">
                   <el-icon>
                     <Edit/>
                   </el-icon>
                 </el-button>
               </el-tooltip>
               <el-tooltip content="删除" placement="top">
-                <el-button v-if="accountStore.accountData.id !== row.row.id" link type="primary" size="default"
-                           @click="showAccountDelete(row)">
+                <el-button
+                    v-if="accountStore.accountData.id !== row.row.id && (isSystem || (row.row.client_id === mainClientId && mainFlag === 1))"
+                    link
+                    type="primary" size="default"
+                    @click="showAccountDelete(row)">
                   <el-icon>
                     <Delete/>
                   </el-icon>
                 </el-button>
               </el-tooltip>
               <el-tooltip content="设置为主管账号" placement="top">
-                <el-button v-if="mainFlag === 1 &&row.row.account.main !== 1" link type="primary"
-                           size="default"
-                           @click="showAccountSetMain(row.row)">
+                <el-button
+                    v-if="(mainFlag === 1 || isSystem) &&row.row.account.main !== 1 && (row.row.client_id === mainClientId || isSystem)"
+                    link
+                    type="primary"
+                    size="default"
+                    @click="showAccountSetMain(row.row)">
                   <el-icon>
                     <User/>
                   </el-icon>
@@ -141,7 +153,7 @@
   <el-dialog v-model="accountSetMainVisible" title="警告！" width="500" :close-on-click-modal="false">
     <span style="color: red">您将要设置（{{
         accountSetMainName
-      }}）为主管账号,这将会使您的账号不再拥有主管账号身份，<br><br>确认吗？</span>
+      }}）为主管账号,同一单位下只能同时存在一个主管<br><br>确认吗？</span>
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="showAccountSetMain">取消</el-button>
@@ -165,7 +177,6 @@ import {useClientStore} from "@/store/client.js";
 import {storeToRefs} from 'pinia'
 import {useAccountStore} from '@/store/account.js'
 import useSetMain from '@/hooks/views/client/account/useSetMain.js'
-import {account} from '@/api/account.js'
 
 const tree = ref()
 const title = ref()
@@ -174,7 +185,8 @@ const client_id = ref()
 const clientStore = useClientStore()
 const {tableManageData} = storeToRefs(clientStore)
 const accountStore = useAccountStore()
-
+let mainClientId = 0
+let isSystem = localStorage.getItem('token_')
 // 账号管理下的修改密码
 const {showCpdVisible, cancelCpd, cpwForm, showCpd, sureChange} = useChangePwd()
 
@@ -205,12 +217,12 @@ eventBus.on('node-clicked', (val) => {
 })
 
 
-onMounted(() => {
+onMounted(async () => {
   eventBus.on('defaultNode', (val) => {
     eventBus.emit('node-clicked', val)
     clientStore.clientId = val.id
   })
-
+  mainClientId = parseInt(localStorage.getItem('client_id'))
 })
 
 </script>

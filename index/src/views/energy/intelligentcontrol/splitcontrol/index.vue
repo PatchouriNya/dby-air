@@ -150,7 +150,7 @@
     </template>
   </el-dialog>
   <!--空调控制面板-->
-  <el-dialog title="空调控制" v-model="controlVisible" :close-on-click-modal="false" :width="750">
+  <el-dialog title="空调控制" v-model="controlVisible" :close-on-click-modal="false" :width="744">
     <transition name="fade">
       <div>
         <!-- 第一部分：空调信息 -->
@@ -269,7 +269,9 @@
               <el-col :span="8">
                 <el-card shadow="never">
                   <template #header>
-                    <h3>温度</h3>
+                    <h3>
+                      <Icon icon="material-symbols:thermometer-gain-outline-rounded"/>
+                      <span>温度</span></h3>
                   </template>
                   <el-select v-model="controlForm.set_temperature" placeholder="选择温度">
                     <el-option label="16℃" value="16℃"/>
@@ -296,7 +298,9 @@
               <el-col :span="13" :push="2">
                 <el-card shadow="never">
                   <template #header>
-                    <h3>模式</h3>
+                    <h3>
+                      <Icon icon="ri:function-fill"/>
+                      <span>模式</span></h3>
                   </template>
                   <el-radio-group v-model="controlForm.operation_mode">
                     <el-radio-button label="送风" value="送风">
@@ -329,27 +333,65 @@
             </el-row>
 
             <el-row>
-              <el-col :span="13" class="card-item">
+
+              <el-col :span="8" class="card-item">
                 <el-card shadow="never">
                   <template #header>
-                    <h3>风速</h3>
+                    <h3>
+                      <Icon icon="streamline:hotel-air-conditioner"/>
+                      <span>风向</span>
+                    </h3>
                   </template>
-                  <el-radio-group v-model="controlForm.wind_speed">
-                    <el-radio label="自动" value="自动"/>
-                    <el-radio label="低速" value="低风"/>
-                    <el-radio label="中风" value="中风"/>
-                    <el-radio label="高风" value="高风"/>
+                  <el-radio-group v-model="controlForm.wind_mode">
+                    <el-radio-button label="走风" value="走风">
+                      <template #default>
+                        <Icon icon="mdi:wind-power" class="btnIcon"/>
+                        <span class="btnWord">走风</span>
+                      </template>
+                    </el-radio-button>
+                    <el-radio-button label="扫风" value="扫风">
+                      <template #default>
+                        <Icon icon="carbon:wind-stream" class="btnIcon"/>
+                        <span class="btnWord">扫风</span>
+                      </template>
+                    </el-radio-button>
                   </el-radio-group>
                 </el-card>
               </el-col>
-              <el-col :span="8" :push="2" class="card-item">
+
+              <el-col :span="13" :push="2" class="card-item">
                 <el-card shadow="never">
                   <template #header>
-                    <h3>风向</h3>
+                    <h3>
+                      <Icon icon="bx:wind"/>
+                      <span>风速</span>
+                    </h3>
                   </template>
-                  <el-radio-group v-model="controlForm.wind_mode">
-                    <el-radio label="走风" value="走风"/>
-                    <el-radio label="扫风" value="扫风"/>
+                  <el-radio-group v-model="controlForm.wind_speed">
+                    <el-radio-button label="自动" value="自动">
+                      <template #default>
+                        <Icon icon="mdi:refresh-auto" class="btnIcon"/>
+                        <span class="btnWord">自动</span>
+                      </template>
+                    </el-radio-button>
+                    <el-radio-button label="低风" value="低风">
+                      <template #default>
+                        <Icon icon="mdi:fan-speed-1" class="btnIcon"/>
+                        <span class="btnWord">低风</span>
+                      </template>
+                    </el-radio-button>
+                    <el-radio-button label="中风" value="中风">
+                      <template #default>
+                        <Icon icon="mdi:fan-speed-2" class="btnIcon"/>
+                        <span class="btnWord">中风</span>
+                      </template>
+                    </el-radio-button>
+                    <el-radio-button label="高风" value="高风">
+                      <template #default>
+                        <Icon icon="mdi:fan-speed-3" class="btnIcon"/>
+                        <span class="btnWord">高风</span>
+                      </template>
+                    </el-radio-button>
                   </el-radio-group>
                 </el-card>
               </el-col>
@@ -737,6 +779,7 @@ onMounted(() => {
   padding: 20px; /* 右侧内容的内边距 */
 }
 
+
 .fenye {
   margin-top: 20px;
 }
@@ -792,6 +835,15 @@ onMounted(() => {
 .card-box .el-col :deep(.el-card__header) {
   background-color: #FAFAFA;
   color: #62AFEF;
+}
+
+h3 {
+  display: flex;
+  align-items: center;
+}
+
+h3 span {
+  margin-left: 8px;
 }
 
 .part1 .el-row {

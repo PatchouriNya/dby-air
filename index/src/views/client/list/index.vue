@@ -89,7 +89,7 @@
     <el-form :model="clientEditForm" :label-position='"top"'>
       <el-form-item label="类型">
         <el-switch v-model="clientEditForm.type" active-text="实际单位" inactive-text="目录单位" :active-value="1"
-                   :inactive-value="0"/>
+                   :inactive-value="0" disabled/>
       </el-form-item>
       <el-form-item label="所属单位">
         <el-select style="margin-top: 15px"

@@ -17,11 +17,43 @@
 <script setup>
 import Menu from './Menu/index.vue'
 import Headers from './headers/index.vue'
-import {ref} from 'vue'
+import {onMounted, ref, watch, watchEffect} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
+import {loginCheckApi} from '@/api/login.js'
 
 const asideWidth = ref('210px')
+const router = useRouter()
+const route = useRoute()
+const time = ref()
 
-
+watch(
+    () => route.fullPath,
+    (to, from) => {
+      loginCheck()
+    }
+)
+const loginCheck = async () => {
+  const id = localStorage.getItem('token')
+  const res = await loginCheckApi(id)
+  if (res.code === 200) {
+    time.value = res.data
+    setTimeout(() => {
+      localStorage.clear()
+      ElMessage.error('登录过期,请重新登录')
+      router.push('/login')
+    }, time.value * 1000)
+    return true
+  } else {
+    localStorage.clear()
+    ElMessage.error('登录过期,请重新登录')
+    await router.push('/login')
+    return false
+  }
+}
+onMounted(async () => {
+  await loginCheck()
+})
 </script>
 
 <style lang="scss" scoped>

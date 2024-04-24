@@ -1,6 +1,7 @@
 import {useRouter} from "vue-router"
 import {ref} from 'vue'
 import {logCreateApi} from '@/api/log.js'
+import {loginOutApi} from '@/api/login.js'
 
 export default function () {
     const router = useRouter()
@@ -12,12 +13,13 @@ export default function () {
     })
 
 
-    function logout() {
+    async function logout() {
         // 登出
         logoutLog.value.id = localStorage.getItem('token')
-        localStorage.removeItem('token')
-        logCreateApi(logoutLog.value)
-        router.push({path: '/login'})
+        await loginOutApi(logoutLog.value.id)
+        localStorage.clear()
+        await logCreateApi(logoutLog.value)
+        await router.push({path: '/login'})
     }
 
     return {logout}

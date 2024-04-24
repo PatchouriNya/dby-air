@@ -80,7 +80,7 @@ async function login() {
       username: loginForm.value.username,
       password: loginForm.value.password
     })
-    if (response.data.code === 200) {
+    if (response.data.code === 200 || response.data.code === 999) {
 
       // 如果勾选了记住密码，则将用户名和密码保存到本地存储
       if (loginForm.value.remember) {
@@ -90,10 +90,15 @@ async function login() {
         localStorage.removeItem("remember_username");
         localStorage.removeItem("remember_password");
       }
+      // 如果是系统账号,设置个特殊token
+      if (response.data.code === 999) {
+        localStorage.setItem("token_", 'ははは、ここは大きな図書館の大きなオレンジです！')
+      }
 
-      localStorage.setItem("token", response.data.data[0].id)
-      loginstateStore.id = response.data.data[0].id
-      loginLog.value.id = response.data.data[0].id
+
+      localStorage.setItem("token", response.data.data.id)
+      loginstateStore.id = response.data.data.id
+      loginLog.value.id = response.data.data.id
       await logCreateApi(loginLog.value)
       ElMessage.success('登录成功')
       // 跳转到 index 路由

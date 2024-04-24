@@ -9,8 +9,9 @@ export default function () {
     const accountDelName = ref()
     const clientStore = useClientStore()
     const showAccountDelete = (row) => {
+        console.log(row)
         accountDeleteVisible.value = !accountDeleteVisible.value
-        id.value = row.row.id
+        id.value = row.row.account_id
         accountDelName.value = row.row.account.account
     }
     const sureAccountDelete = async () => {

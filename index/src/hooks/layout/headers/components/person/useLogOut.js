@@ -17,7 +17,10 @@ export default function () {
         // 登出
         logoutLog.value.id = localStorage.getItem('token')
         await loginOutApi(logoutLog.value.id)
-        localStorage.clear()
+        localStorage.removeItem('token')
+        localStorage.removeItem('token_')
+        localStorage.removeItem('client_id')
+        localStorage.removeItem('loginstate')
         await logCreateApi(logoutLog.value)
         await router.push({path: '/login'})
     }

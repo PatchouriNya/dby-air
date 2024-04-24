@@ -26,7 +26,7 @@ const asideWidth = ref('210px')
 const router = useRouter()
 const route = useRoute()
 const time = ref()
-
+const timeoutId = ref()
 watch(
     () => route.fullPath,
     (to, from) => {
@@ -38,14 +38,22 @@ const loginCheck = async () => {
   const res = await loginCheckApi(id)
   if (res.code === 200) {
     time.value = res.data
-    setTimeout(() => {
-      localStorage.clear()
+    // 清除之前的计时器用于重新计时,防止出现多个提示
+    clearTimeout(timeoutId.value)
+    timeoutId.value = setTimeout(() => {
+      localStorage.removeItem('token')
+      localStorage.removeItem('token_')
+      localStorage.removeItem('client_id')
+      localStorage.removeItem('loginstate')
       ElMessage.error('登录过期,请重新登录')
       router.push('/login')
     }, time.value * 1000)
     return true
   } else {
-    localStorage.clear()
+    localStorage.removeItem('token')
+    localStorage.removeItem('token_')
+    localStorage.removeItem('client_id')
+    localStorage.removeItem('loginstate')
     ElMessage.error('登录过期,请重新登录')
     await router.push('/login')
     return false

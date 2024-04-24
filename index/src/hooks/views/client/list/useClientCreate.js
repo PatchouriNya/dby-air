@@ -24,7 +24,7 @@ export default function () {
         clientCreateForm.province = ''
         clientCreateForm.city = ''
         clientCreateForm.district = ''
-        clientCreateForm.type = null
+        clientCreateForm.type = 0
         clientCreateForm.info = ''
     }
 

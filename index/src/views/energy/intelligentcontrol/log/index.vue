@@ -59,7 +59,7 @@
       <div style="margin-left: 20px">
         <el-button @click="reset">重置</el-button>
         <el-button type="primary" @click="search">搜索</el-button>
-        <el-button type="danger" @click="showDelete">删除</el-button>
+        <el-button type="danger" @click="showDelete" v-if="mainFlag === 1 || isSystem">删除</el-button>
       </div>
     </div>
   </div>
@@ -106,6 +106,7 @@
 import {logDeleteApi, logListApi} from '@/api/log.js'
 import {ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
+import {account} from '@/api/account.js'
 
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -214,6 +215,18 @@ const sureDelete = async () => {
   await getLogList()
   showDelete()
 }
+
+// 控制下主管和系统账户
+let isSystem = localStorage.getItem('token_')
+
+const mainFlag = ref()
+
+async function getAccountData() {
+  let res = await account()
+  mainFlag.value = res.data.main
+}
+
+getAccountData()
 </script>
 
 <style scoped>

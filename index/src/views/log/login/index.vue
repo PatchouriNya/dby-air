@@ -69,12 +69,12 @@
   >
     <!--    <el-table-column type="selection" :reserve-selection="true" width="55"/>
         <el-table-column type="index" label="序号" width="80" align="center"/>-->
-    <el-table-column prop="client_detail.clientname" label="客户" sortable/>
-    <el-table-column prop="account" label="账号" sortable/>
-    <el-table-column prop="account_detail.nickname" label="昵称" sortable/>
+    <el-table-column prop="client_detail.clientname" label="客户" sortable width="200px"/>
+    <el-table-column prop="account" label="账号" sortable width="200px"/>
+    <el-table-column prop="account_detail.nickname" label="昵称" sortable width="200px"/>
     <el-table-column prop="content" label="操作内容" sortable/>
-    <el-table-column prop="ip" label="IP" sortable/>
-    <el-table-column prop="created_at" label="时间" sortable/>
+    <el-table-column prop="ip" label="IP" sortable width="200px"/>
+    <el-table-column prop="created_at" label="时间" sortable width="230px"/>
   </el-table>
   <el-pagination class="fenye"
                  v-model:current-page="currentPage"

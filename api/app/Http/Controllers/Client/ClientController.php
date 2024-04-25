@@ -62,6 +62,13 @@ class ClientController extends Controller
         return api($data,200,'获取账号对应的客户成功');
     }
 
+    // 客户详细信息
+    public function show($id)
+    {
+        $data = Client::findOrFail($id);
+        return api($data,200,'获取客户信息成功');
+    }
+
     // 添加客户
     public function store(Request $request)
     {

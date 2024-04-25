@@ -1,5 +1,5 @@
 <template>
-  <el-button v-if="flag" type="primary" style="margin-bottom: 10px"
+  <el-button v-if="flag && mainFlag === 1" type="primary" style="margin-bottom: 10px"
              @click="showClientCreate(false)">
     新增客户
   </el-button>
@@ -18,7 +18,7 @@
     <el-table-column prop="district" label="市区" sortable/>
     <el-table-column fixed="right" label="操作">
       <template #default="row">
-        <el-tooltip v-if="row.row.type !== 1" content="添加子客户" placement="top">
+        <el-tooltip v-if="row.row.type !== 1 && mainFlag === 1" content="添加子客户" placement="top">
           <el-button link type="primary" size="default" @click="showClientCreate(row)">
             <el-icon>
               <Plus/>
@@ -32,13 +32,13 @@
           </el-icon>
         </el-button>
         <el-tooltip content="编辑" placement="top">
-          <el-button link type="primary" size="default" @click="showClientEdit(row.row)">
+          <el-button v-if="mainFlag === 1" link type="primary" size="default" @click="showClientEdit(row.row)">
             <el-icon>
               <Edit/>
             </el-icon>
           </el-button>
         </el-tooltip>
-        <el-tooltip v-if="!row.row.children" content="删除" placement="top">
+        <el-tooltip v-if="!row.row.children && mainFlag === 1" content="删除" placement="top">
           <el-button link type="primary" size="default" @click="showClientDelete(row.row)">
             <el-icon>
               <Delete/>
@@ -157,6 +157,8 @@ import {storeToRefs} from 'pinia'
 import useClientCreate from '@/hooks/views/client/list/useClientCreate.js'
 import useClientDelete from '@/hooks/views/client/list/useClientDelete.js'
 import useClientEdit from '@/hooks/views/client/list/useClientEdit.js'
+import {ref} from 'vue'
+import {account} from '@/api/account.js'
 
 const clientWithoutHeadStore = useClientWithoutHeadStore()
 const {tableData, flag} = storeToRefs(clientWithoutHeadStore)
@@ -164,6 +166,17 @@ const {tableData, flag} = storeToRefs(clientWithoutHeadStore)
 function tableRowClass({row}) {
   if (row.type === 0)
     return 'row-color-blue'
+}
+
+// 是否为主管
+const mainFlag = ref()
+
+// 初始化
+getAccountData()
+
+async function getAccountData() {
+  let res = await account()
+  mainFlag.value = res.data.main
 }
 
 // 添加客户

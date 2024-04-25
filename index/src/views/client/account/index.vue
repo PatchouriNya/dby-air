@@ -6,7 +6,8 @@
     <el-col :span="20">
       <div class="right-content">
         <h2 style="margin-bottom: 20px;text-align: center">{{ title }}</h2>
-        <el-button type="primary" style="margin-bottom: 10px" @click="showAccountCreate">
+        <el-button v-if="isSystem || (mainFlag === 1 && client_id === currentAccountClientId)" type="primary"
+                   style="margin-bottom: 10px" @click="showAccountCreate">
           新增账号
         </el-button>
         <el-table :data="tableManageData"
@@ -113,7 +114,7 @@
         <el-input v-model="accountCreateForm.account" autocomplete="off"/>
       </el-form-item>
       <el-form-item label="密码">
-        <el-input v-model="accountCreateForm.password" autocomplete="off" type="password"/>
+        <el-input v-model="accountCreateForm.password" autocomplete="new-password" type="password"/>
       </el-form-item>
       <el-form-item label="确认密码">
         <el-input v-model="accountCreateForm.password_confirmation" autocomplete="off" type="password"/>
@@ -187,6 +188,7 @@ const {tableManageData} = storeToRefs(clientStore)
 const accountStore = useAccountStore()
 let mainClientId = 0
 let isSystem = localStorage.getItem('token_')
+const currentAccountClientId = parseInt(localStorage.getItem('client_id'))
 // 账号管理下的修改密码
 const {showCpdVisible, cancelCpd, cpwForm, showCpd, sureChange} = useChangePwd()
 

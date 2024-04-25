@@ -52,3 +52,9 @@ export const clientDeleteApi = (id) => {
         method: 'DELETE'
     })
 }
+
+export const clientDetailApi = (id) => {
+    return request({
+        url: '/client/' + id
+    })
+}

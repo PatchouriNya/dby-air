@@ -139,6 +139,10 @@ class AccountController extends Controller
         $data['account_status'] = false;
         $data['avatar'] = '/uploads/default.jpg';
         $data['password'] = makePassword($data['password']);
+        // 默认给没有账号的客户主管权限
+            $res = Client_account_relationship::where('client_id', $client_id)->first();
+            if (!$res)
+                $data['main'] = 1;
         unset($data['client_id']);
         // 创建账号
         $account = Account::create($data);

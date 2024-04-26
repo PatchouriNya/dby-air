@@ -42,8 +42,15 @@ export default function () {
     }
 
     const showAccountCreate = async () => {
+        // 拿当前账号对应的客户名称,用来写日志
         const res = await clientDetailApi(accountCreateForm.value.client_id)
         client.value = res.data.clientname
+        accountCreateForm.value.account = ''
+        accountCreateForm.value.password = ''
+        accountCreateForm.value.password_confirmation = ''
+        accountCreateForm.value.email = ''
+        accountCreateForm.value.mobile = ''
+        accountCreateForm.value.nickname = ''
         accountCreateVisible.value = !accountCreateVisible.value
     }
 

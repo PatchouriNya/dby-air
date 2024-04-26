@@ -13,7 +13,7 @@ export default function () {
     const mainFlag = ref()
 
     // 操作日志
-    const account = ref()
+    const accountname = ref()
     const logForm = reactive({
         id: localStorage.getItem("token"),
         type: 1,
@@ -34,14 +34,14 @@ export default function () {
         accountSetMainVisible.value = !accountSetMainVisible.value
         accountSetMainName.value = row.account.account
         id.value = row.account.id
-        account.value = row.account.account
+        accountname.value = row.account.account
     }
 
     // 确定设置主账号
     const sureAccountSetMain = async () => {
         const res = await accountSetMainApi(id.value)
         if (res.code === 201) {
-            logForm.content = '设置' + account.value + '为主管'
+            logForm.content = '设置' + accountname.value + '为主管'
             await logCreateApi(logForm)
             ElMessage({
                 message: res.msg,

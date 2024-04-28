@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Air_group whereInfo($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Air_group whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Air_group whereUpdatedAt($value)
+ * @property int|null $strategy_id 关联的策略ID
+ * @method static \Illuminate\Database\Eloquent\Builder|Air_group whereStrategyId($value)
  * @mixin \Eloquent
  */
 class Air_group extends Model

@@ -11,9 +11,20 @@ use Nette\Schema\ValidationException;
 class GroupController extends Controller
 {
     public function index(Request $request){
+        $pageSize = $request->query('pageSize') ?? 5;
         $client_id = $request->input('client_id');
-        $data = Air_group::where('client_id',$client_id)->get();
-        return api($data,200,'获取组列表成功');
+        $name = $request->input('name');
+
+        $query = Air_group::where('client_id', $client_id);
+
+        // 如果提供了名称，添加名称检索条件
+        if ($name) {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+
+        $data = $query->paginate($pageSize);
+
+        return api($data, 200, '获得该客户下空调组成功');
     }
 
     public function store(Request $request)

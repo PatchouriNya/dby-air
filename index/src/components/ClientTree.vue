@@ -84,7 +84,6 @@ function clickNode(val) {
 defineExpose({defaultExpand, currentKey, expandedKeys})
 onMounted(() => {
   initclientList()
-
 })
 
 </script>

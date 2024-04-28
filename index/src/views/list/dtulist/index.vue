@@ -1,7 +1,7 @@
 <template>
   <el-row>
     <el-col :span="4">
-      <ClientTree ref="tree"/>
+      <ClientTree ref="tree" style="width: 100%"/>
     </el-col>
     <el-col :span="20">
       <div class="right-content"><img :width="1367" src="@/assets/dtu.jpg" alt=""></div>
@@ -10,27 +10,33 @@
 
 </template>
 <script setup>
-import ClientTree from "@/components/ClientTree.vue"
-import eventBus from "@/listen/event-bus"
-import {onMounted, ref} from "vue";
+import ClientTree from '@/components/ClientTree.vue'
+import {onMounted, ref} from 'vue'
+import eventBus from '@/listen/event-bus.js'
 
+eventBus.off('defaultNode')
+eventBus.off('node-clicked')
 const tree = ref()
-const selectData = ref({})
-eventBus.on('node-clicked', (val) => {
-  selectData.value = val
-})
-onMounted(() => {
-  const defaultCurrentKey = 3
-  const defaultExpandedKeys = [3]
+const client_id = ref()
 
-  tree.value.defaultExpand(defaultCurrentKey, defaultExpandedKeys)
+eventBus.on('node-clicked', (val) => {
+  client_id.value = val.id
+
+  console.log(val)
+})
+
+
+onMounted(async () => {
+  eventBus.on('defaultNode', (val) => {
+    eventBus.emit('node-clicked', val)
+  })
 })
 </script>
 
 <style scoped lang="scss">
 .right-content {
   /* 右侧内容的样式 */
-  height: 100vh; /* 设置高度为整个视口的高度，可根据需要调整 */
   margin: 20px /* 右侧内容的外边距 */
+
 }
 </style>

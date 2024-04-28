@@ -1,7 +1,7 @@
 <template>
   <el-row>
     <el-col :span="4">
-      <ClientTree ref="tree" :tree="tree"/>
+      <ClientTree ref="tree" :tree="tree" style="width: 100%"/>
     </el-col>
     <el-col :span="20">
       <div class="right-content">
@@ -179,6 +179,8 @@ import {storeToRefs} from 'pinia'
 import {useAccountStore} from '@/store/account.js'
 import useSetMain from '@/hooks/views/client/account/useSetMain.js'
 
+eventBus.off('defaultNode')
+eventBus.off('node-clicked')
 const tree = ref()
 const title = ref()
 const client_id = ref()

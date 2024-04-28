@@ -51,6 +51,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Account withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Account withoutTrashed()
  * @property-read Client_account_relationship|null $withClient
+ * @property int|null $main 是否为主账号
+ * @method static \Illuminate\Database\Eloquent\Builder|Account whereMain($value)
  * @mixin \Eloquent
  */
 class Account extends Model

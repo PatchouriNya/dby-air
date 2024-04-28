@@ -39,6 +39,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Menu whereUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Menu withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Menu withoutTrashed()
+ * @property int $show 是否显示菜单,1是,0否
+ * @method static \Illuminate\Database\Eloquent\Builder|Menu whereShow($value)
  * @mixin \Eloquent
  */
 class Menu extends Model

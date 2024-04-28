@@ -34,6 +34,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Log whereIp($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Log whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Log whereUpdatedAt($value)
+ * @property-read Account|null $account_detail
+ * @property-read Client|null $client_detail
  * @mixin \Eloquent
  */
 class Log extends Model

@@ -45,6 +45,22 @@ const router = createRouter({
 
                 },
                 {
+                    path: '/main/energy/intelligentcontrol/groupcontrol',
+                    name: 'group-control',
+                    component: () => import('@/views/energy/intelligentcontrol/groupcontrol/index.vue')
+
+                },
+                {
+                    path: '/main/energy/group',
+                    name: 'energy-group',
+                    component: () => import('@/views/energy/group/index.vue')
+                },
+                {
+                    path: '/main/energy/strategy',
+                    name: 'energy-strategy',
+                    component: () => import('@/views/energy/strategy/index.vue')
+                },
+                {
                     path: '/main/client/list',
                     name: 'client-list',
                     component: () => import('@/views/client/list/index.vue')

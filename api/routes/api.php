@@ -82,8 +82,12 @@ Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Air','middlewar
     Route::get('airs/{id}','AirController@getAirById');
 
     // 资源路由
-    Route::resource('air','AirController');
+    Route::apiResource('air','AirController');
+
+    // 分组资源路由
+    Route::apiResource('group','GroupController');
 });
+
 
 // 日志
 
@@ -92,3 +96,5 @@ Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Log','middlewar
     Route::resource('log','LogController');
 
 });
+
+

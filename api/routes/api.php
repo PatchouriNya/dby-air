@@ -86,6 +86,16 @@ Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Air','middlewar
 
     // 分组资源路由
     Route::apiResource('group','GroupController');
+
+    // 添加某台空调至分组
+    Route::post('group/add/{id}','GroupController@addAirToGroup');
+
+    // 将空调从分组移出
+    Route::delete('group/remove/{id}','GroupController@removeAirFromGroup');
+
+    // 查询指定组的所有空调
+    Route::get('group/air/{id}','GroupController@getAirByGroup');
+
 });
 
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Air;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client\Air_group;
+use App\Models\Client\Air_group_relationship;
 use Illuminate\Http\Request;
 use Nette\Schema\ValidationException;
 
@@ -67,4 +68,55 @@ class GroupController extends Controller
             return api(null,500, $e->getMessage());
         }
     }
+
+    public function addAirToGroup(Request $request,$id)
+    {
+        $air_ids = $request->input('air_id');
+        $air_id_array = explode(',', $air_ids);
+        $error_air_id_array = [];
+        foreach ($air_id_array as $air_id) {
+            // 在这里对每个 $air_id 进行操作
+           $res =  Air_group_relationship::create(['air_id' => $air_id, 'group_id' => $id]);
+           if (!$res){
+               $error_air_id_array[] = $air_id;
+           }
+        }
+
+        if (count($error_air_id_array) > 0){
+            return api(null,400,'添加失败,请检查air_id是否正确添加失败的id如下:'.implode(',', $error_air_id_array));
+        }
+        return api(null,201,'添加成功');
+    }
+
+    public function removeAirFromGroup(Request $request, $id)
+    {
+        $air_ids = $request->input('air_id');
+        $air_id_array = explode(',', $air_ids);
+        $error_air_id_array = [];
+
+        foreach ($air_id_array as $air_id) {
+            // 在这里对每个 $air_id 进行操作
+            $res = Air_group_relationship::where('air_id', $air_id)->where('group_id', $id)->delete();
+            if (!$res) {
+                $error_air_id_array[] = $air_id;
+            }
+        }
+
+        if (count($error_air_id_array) > 0) {
+            return api(null, 400, '移除失败，请检查air_id是否正确。失败的id如下: ' . implode(',', $error_air_id_array));
+        }
+
+        return api(null, 204, '移除成功');
+    }
+
+
+    public function getAirByGroup($id)
+    {
+        $pageSize = \request()->query('pageSize') ?? 10;
+        $data = Air_group_relationship::where('group_id', $id)->with(['airDetail:id,client_id,show_id,designation,responsible_person'])->paginate($pageSize);
+        // 返回空调详情数组
+        return api($data, 200, '成功获取指定组的所有空调');
+    }
+
+
 }

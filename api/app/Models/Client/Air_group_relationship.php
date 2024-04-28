@@ -2,6 +2,7 @@
 
 namespace App\Models\Client;
 
+use App\Models\Air\Air_detail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,6 +28,11 @@ class Air_group_relationship extends Model
 {
     protected $guarded = [];
     protected $hidden = ['created_at', 'updated_at'];
+
+    public function airDetail()
+    {
+        return $this->belongsTo(Air_detail::class, 'air_id', 'id');
+    }
 
     use HasFactory;
 }

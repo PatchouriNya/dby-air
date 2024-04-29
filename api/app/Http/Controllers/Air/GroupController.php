@@ -73,7 +73,7 @@ class GroupController extends Controller
             $data = $validator->validate();
             $res = Air_group::where('id',$id)->update($data);
             if ($res)
-                return api($res,200,'更新组成功');
+                return api($res,201,'更新组成功');
             return api(null,404,'更新组失败');
         }catch (\Exception $e){
             return api(null,500, $e->getMessage());

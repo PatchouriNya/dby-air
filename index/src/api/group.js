@@ -15,3 +15,25 @@ export const getGroupListByClientApi = (id, pageSize, currentPage, name) => {
     })
 }
 
+export const addGroupApi = (data) => {
+    return request({
+        url: '/group',
+        method: 'post',
+        data
+    })
+}
+
+export const editGroupApi = (id, data) => {
+    return request({
+        url: '/group/' + id,
+        method: 'put',
+        data
+    })
+}
+
+export const deleteGroupApi = (id) => {
+    return request({
+        url: '/group/' + id,
+        method: 'delete'
+    })
+}

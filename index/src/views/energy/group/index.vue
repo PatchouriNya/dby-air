@@ -11,7 +11,7 @@
 
           <div class="searchName">
             <el-button v-if="isSystem || mainFlag === 1" type="primary"
-                       style="margin-right: 20px" @click="">
+                       style="margin-right: 20px" @click="addVisible = true">
               新增组
             </el-button>
             <span>组名</span>
@@ -33,6 +33,34 @@
           <el-table-column prop="name" label="组名" width="180"/>
           <el-table-column prop="strategy_id" label="策略" width="180"/>
           <el-table-column prop="info" label="组信息"/>
+          <el-table-column fixed="right" label="操作">
+            <template #default="row">
+              <el-tooltip content="设置策略" placement="top">
+                <el-button link type="primary" size="default">
+                  <el-icon>
+                    <Compass/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="编辑" placement="top">
+                <el-button link type="primary" size="default" @click="showEditGroup(row.row)">
+                  <el-icon>
+                    <Edit/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="删除" placement="top">
+                <el-button
+                    link
+                    type="primary" size="default"
+                    @click="showDeleteGroup(row.row)">
+                  <el-icon>
+                    <Delete/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+            </template>
+          </el-table-column>
         </el-table>
         <el-pagination class="fenye"
                        v-model:current-page="currentPage"
@@ -48,6 +76,60 @@
 
     </el-col>
   </el-row>
+  <!--新增-->
+  <el-dialog v-model="addVisible" title="新增组" width="500" :close-on-click-modal="false">
+    <el-form :model="addForm" :label-position='"top"'>
+      <el-form-item label="组名">
+        <el-input v-model="addForm.name" autocomplete="off"/>
+      </el-form-item>
+      <el-form-item label="简介">
+        <el-input v-model="addForm.info" autocomplete="off"/>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="addVisible = false">取消</el-button>
+        <el-button type="primary" @click="sureAddGroup">
+          确认
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!--编辑-->
+  <el-dialog v-model="editVisible" title="编辑组" width="500" :close-on-click-modal="false">
+    <el-form :model="editForm" :label-position='"top"'>
+      <el-form-item label="组名">
+        <el-input v-model="editForm.name" autocomplete="off"/>
+      </el-form-item>
+      <el-form-item label="简介">
+        <el-input v-model="editForm.info" autocomplete="off"/>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="editVisible = false">取消</el-button>
+        <el-button type="primary" @click="sureEditGroup">
+          确认
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!--删除-->
+  <el-dialog v-model="deleteVisible" title="警告！" width="500" :close-on-click-modal="false">
+    <span style="color: red">你正在进行删除组 <span style="font-size: 24px">{{
+        deleteName
+      }}</span> 的操作，确认吗？</span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="deleteVisible = false">取消</el-button>
+        <el-button type="primary" @click="sureDeleteGroup">
+          确认
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -55,13 +137,12 @@ import ClientTree from '@/components/ClientTree.vue'
 import {onMounted, ref} from 'vue'
 import eventBus from '@/listen/event-bus.js'
 import useAuthControl from '@/hooks/useAuthControl.js'
-import useAirGroupList from '@/hooks/views/energy/useAirGroupList.js'
+import {useGroupAdd, useGroupDelete, useGroupEdit, useGroupList} from '@/hooks/views/energy/useAirGroupList.js'
 
 eventBus.off('defaultNode')
 eventBus.off('node-clicked')
 const tree = ref()
 const client_id = ref()
-
 // 权限控制
 const {isSystem, mainFlag} = useAuthControl()
 
@@ -77,8 +158,16 @@ const {
   handleCurrentChange,
   reset,
   search
-} = useAirGroupList()
+} = useGroupList()
 
+// 添加组
+const {addForm, addVisible, sureAddGroup} = useGroupAdd()
+
+// 编辑组
+const {editForm, editVisible, showEditGroup, sureEditGroup} = useGroupEdit()
+
+// 删除组
+const {deleteVisible, deleteName, showDeleteGroup, sureDeleteGroup} = useGroupDelete()
 onMounted(async () => {
   eventBus.on('defaultNode', (val) => {
     eventBus.emit('node-clicked', val)

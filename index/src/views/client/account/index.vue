@@ -18,27 +18,27 @@
           <el-table-column property="account.mobile" label="手机号"/>
           <el-table-column fixed="right" label="操作">
             <template #default="row">
-              <el-tooltip content="修改密码" placement="top">
-                <el-button link type="primary" size="default"
-                           v-if="isSystem || (row.row.client_id === mainClientId && mainFlag === 1 || accountStore.accountData.id === row.row.id)"
-                           @click="showCpd(row)">
+              <el-tooltip content="修改密码" placement="top"
+                          v-if="isSystem || (row.row.client_id === mainClientId && mainFlag === 1 || accountStore.accountData.id === row.row.id)"
+                          @click="showCpd(row)">
+                <el-button link type="primary" size="default">
                   <el-icon>
                     <Compass/>
                   </el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="编辑" placement="top">
+              <el-tooltip content="编辑" placement="top"
+                          v-if="isSystem || (row.row.client_id === mainClientId && mainFlag === 1 || accountStore.accountData.id === row.row.id)">
                 <el-button link type="primary" size="default"
-                           v-if="isSystem || (row.row.client_id === mainClientId && mainFlag === 1 || accountStore.accountData.id === row.row.id)"
                            @click="showInnerEdit(row)">
                   <el-icon>
                     <Edit/>
                   </el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="删除" placement="top">
+              <el-tooltip content="删除" placement="top"
+                          v-if="accountStore.accountData.id !== row.row.id && (isSystem || (row.row.client_id === mainClientId && mainFlag === 1))">
                 <el-button
-                    v-if="accountStore.accountData.id !== row.row.id && (isSystem || (row.row.client_id === mainClientId && mainFlag === 1))"
                     link
                     type="primary" size="default"
                     @click="showAccountDelete(row)">
@@ -47,9 +47,9 @@
                   </el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="设置为主管账号" placement="top">
+              <el-tooltip content="设置为主管账号" placement="top"
+                          v-if="(mainFlag === 1 || isSystem) &&row.row.account.main !== 1 && (row.row.client_id === mainClientId || isSystem)">
                 <el-button
-                    v-if="(mainFlag === 1 || isSystem) &&row.row.account.main !== 1 && (row.row.client_id === mainClientId || isSystem)"
                     link
                     type="primary"
                     size="default"

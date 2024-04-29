@@ -147,7 +147,8 @@
   </el-dialog>
 
   <!--组列表-->
-  <el-dialog v-model="listVisible" title="组成员管理" :close-on-click-modal="false" style="text-align: center">
+  <el-dialog v-model="listVisible" title="组成员管理" width="600" :close-on-click-modal="false"
+             style="text-align: center">
     <el-transfer v-model="memberValue" :data="memberData" @change="handleTransferChange"
                  :titles="['未分组空调', '组内空调']"/>
   </el-dialog>

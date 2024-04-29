@@ -37,3 +37,34 @@ export const deleteGroupApi = (id) => {
         method: 'delete'
     })
 }
+
+export const getUnGroupedAirByClientApi = (id, group_id) => {
+    return request({
+        url: '/air/ungrouped/' + id,
+        params: {
+            group_id
+        }
+    })
+}
+
+export const getGroupedAirByClientApi = (id) => {
+    return request({
+        url: '/air/grouped/' + id
+    })
+}
+
+export const addAirToGroup = (id, data) => {
+    return request({
+        url: '/group/add/' + id,
+        method: 'post',
+        data: {air_id: data}
+    })
+}
+
+export const removeAirFromGroup = (id, data) => {
+    return request({
+        url: '/group/remove/' + id,
+        method: 'delete',
+        data: {air_id: data}
+    })
+}

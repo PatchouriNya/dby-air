@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Air;
 
 use App\Http\Controllers\Controller;
+use App\Models\Air\Air_detail;
 use App\Models\Client\Air_group;
 use App\Models\Client\Air_group_relationship;
 use Illuminate\Http\Request;
@@ -90,7 +91,9 @@ class GroupController extends Controller
            $res =  Air_group_relationship::create(['air_id' => $air_id, 'group_id' => $id]);
            if (!$res){
                $error_air_id_array[] = $air_id;
-           }
+           }else
+               Air_detail::where('id',$air_id)->update(['is_grouped'=>1]);
+
         }
 
         if (count($error_air_id_array) > 0){
@@ -110,7 +113,8 @@ class GroupController extends Controller
             $res = Air_group_relationship::where('air_id', $air_id)->where('group_id', $id)->delete();
             if (!$res) {
                 $error_air_id_array[] = $air_id;
-            }
+            }else
+                Air_detail::where('id',$air_id)->update(['is_grouped'=>0]);
         }
 
         if (count($error_air_id_array) > 0) {

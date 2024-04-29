@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Air;
 
 use App\Http\Controllers\Controller;
 use App\Models\Air\Air_detail;
+use App\Models\Client\Air_group_relationship;
 use App\Models\Client\Client;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -20,6 +21,30 @@ class AirController extends Controller
         $data = (new Air_detail())->getOneClient($id, $pageSize, $filters);
         return api($data, 200, '获取空调列表成功');
     }
+
+    // 获取客户的指定组的空调列表(首先先把整个air里面属于该客户的所有未分组的找出来,然后把属于该组的所有空调找出来,最后合并)
+    public function getUnGroupedAirByClient(int $id)
+    {
+        $group_id = request()->query('group_id');
+        $data = Air_detail::where('client_id', $id)->where('is_grouped',0)->get(['id','designation']);
+        $data2 = Air_group_relationship::where('group_id', $group_id)->with(['airDetail:id,designation'])->get();
+        // 提取数据2中的 air_detail
+        $airDetails = collect($data2)->map(function ($item) {
+            return $item->airDetail;
+        });
+
+        // 合并到数据1中
+        $data = $data->merge($airDetails);
+
+        return api($data, 200, '获取未分组空调列表成功');
+    }
+    // 获取客户的未分组空调列表,并以id数组的形式返回
+    public function getGroupedAirByClient(int $id){
+        $data = Air_group_relationship::where('group_id', $id)->pluck('air_id');
+        return api($data, 200, '获取已分组空调列表成功');
+    }
+
+
 
     // 修改某一台空调
     public function update($id, Request $request)

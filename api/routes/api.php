@@ -96,6 +96,11 @@ Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Air','middlewar
     // 查询指定组的所有空调
     Route::get('group/air/{id}','GroupController@getAirByGroup');
 
+    // 获取客户的未分组空调列表
+    Route::get('air/ungrouped/{id}','AirController@getUnGroupedAirByClient');
+
+    // 获取客户的未分组空调列表,并以数组的形式返回
+    Route::get('air/grouped/{id}','AirController@getGroupedAirByClient');
 });
 
 

@@ -51,7 +51,7 @@ import ClientTree from '@/components/ClientTree.vue'
 import {onMounted, ref} from 'vue'
 import eventBus from '@/listen/event-bus.js'
 import useAuthControl from '@/hooks/useAuthControl.js'
-import useAirGroupList from '@/hooks/views/energy/useAirGroupList.js'
+import {useGroupList} from '@/hooks/views/energy/useAirGroupList.js'
 
 eventBus.off('defaultNode')
 eventBus.off('node-clicked')
@@ -73,7 +73,7 @@ const {
   handleCurrentChange,
   reset,
   search
-} = useAirGroupList()
+} = useGroupList()
 
 onMounted(async () => {
   eventBus.on('defaultNode', (val) => {

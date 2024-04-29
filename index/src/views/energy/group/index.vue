@@ -62,6 +62,18 @@
                   </el-icon>
                 </el-button>
               </el-tooltip>
+              <el-tooltip content="空调成员管理" placement="top"
+                          v-if="isSystem || (client_id === localClient && mainFlag === 1)">
+                <el-button
+                    link
+                    type="primary" size="default"
+                    @click="showMemberList(row.row)"
+                >
+                  <el-icon>
+                    <Icon icon="solar:condicioner-line-duotone"/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
             </template>
           </el-table-column>
         </el-table>
@@ -133,6 +145,12 @@
       </div>
     </template>
   </el-dialog>
+
+  <!--组列表-->
+  <el-dialog v-model="listVisible" title="组成员管理" :close-on-click-modal="false" style="text-align: center">
+    <el-transfer v-model="memberValue" :data="memberData" @change="handleTransferChange"
+                 :titles="['未分组空调', '组内空调']"/>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -141,6 +159,8 @@ import {onMounted, ref} from 'vue'
 import eventBus from '@/listen/event-bus.js'
 import useAuthControl from '@/hooks/useAuthControl.js'
 import {useGroupAdd, useGroupDelete, useGroupEdit, useGroupList} from '@/hooks/views/energy/useAirGroupList.js'
+import {Icon} from '@iconify/vue'
+import {useGroupMemberList} from '@/hooks/views/energy/useGroupMember.js'
 
 eventBus.off('defaultNode')
 eventBus.off('node-clicked')
@@ -172,6 +192,11 @@ const {editForm, editVisible, showEditGroup, sureEditGroup} = useGroupEdit()
 
 // 删除组
 const {deleteVisible, deleteName, showDeleteGroup, sureDeleteGroup} = useGroupDelete()
+
+// 添加组成员
+const {listVisible, memberValue, memberData, showMemberList, handleTransferChange} = useGroupMemberList()
+
+
 onMounted(async () => {
   eventBus.on('defaultNode', (val) => {
     eventBus.emit('node-clicked', val)

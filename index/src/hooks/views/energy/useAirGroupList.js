@@ -18,8 +18,6 @@ const getGroupListByClient = async () => {
 }
 
 export function useGroupList() {
-
-
     const handleSizeChange = async (val) => {
         await getGroupListByClient()
     }
@@ -39,7 +37,19 @@ export function useGroupList() {
         title.value = val.clientname
         await getGroupListByClient(client_id.value)
     })
-    return {tableData, currentPage, total, pageSize, title, name, handleSizeChange, handleCurrentChange, reset, search}
+    return {
+        tableData,
+        currentPage,
+        total,
+        pageSize,
+        title,
+        name,
+        client_id,
+        handleSizeChange,
+        handleCurrentChange,
+        reset,
+        search
+    }
 }
 
 export function useGroupAdd() {

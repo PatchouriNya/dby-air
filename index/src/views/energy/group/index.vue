@@ -35,21 +35,24 @@
           <el-table-column prop="info" label="组信息"/>
           <el-table-column fixed="right" label="操作">
             <template #default="row">
-              <el-tooltip content="设置策略" placement="top">
+              <el-tooltip content="设置策略" placement="top"
+                          v-if="isSystem || (client_id === localClient && mainFlag === 1)">
                 <el-button link type="primary" size="default">
                   <el-icon>
                     <Compass/>
                   </el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="编辑" placement="top">
+              <el-tooltip content="编辑" placement="top"
+                          v-if="isSystem || (client_id === localClient && mainFlag === 1)">
                 <el-button link type="primary" size="default" @click="showEditGroup(row.row)">
                   <el-icon>
                     <Edit/>
                   </el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="删除" placement="top">
+              <el-tooltip content="删除" placement="top"
+                          v-if="isSystem || (client_id === localClient && mainFlag === 1)">
                 <el-button
                     link
                     type="primary" size="default"
@@ -142,8 +145,8 @@ import {useGroupAdd, useGroupDelete, useGroupEdit, useGroupList} from '@/hooks/v
 eventBus.off('defaultNode')
 eventBus.off('node-clicked')
 const tree = ref()
-const client_id = ref()
 // 权限控制
+const localClient = parseInt(localStorage.getItem('client_id'))
 const {isSystem, mainFlag} = useAuthControl()
 
 // 表格展示
@@ -154,6 +157,7 @@ const {
   pageSize,
   title,
   name,
+  client_id,
   handleSizeChange,
   handleCurrentChange,
   reset,

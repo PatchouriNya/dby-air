@@ -150,7 +150,7 @@
   <el-dialog v-model="listVisible" title="组成员管理" width="600" :close-on-click-modal="false"
              style="text-align: center">
     <el-transfer v-model="memberValue" :data="memberData" @change="handleTransferChange"
-                 :titles="['未分组空调', '组内空调']"/>
+                 :titles="['未分组空调', '组内空调']" filterable filter-placeholder="请输入名称"/>
   </el-dialog>
 </template>
 

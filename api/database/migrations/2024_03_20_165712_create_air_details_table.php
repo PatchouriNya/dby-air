@@ -33,6 +33,8 @@ class CreateAirDetailsTable extends Migration
             $table->string('power',255)->nullable()->comment('功率');
             $table->string('electric_quantity',255)->nullable()->comment('电量读取');
             $table->tinyInteger('standby_mode',false)->nullable()->comment('待机状态');
+            $table->unsignedTinyInteger('is_grouped',false)->default(0)->comment('是否已被分组,是为1,否为0');
+
             $table->timestamps();
             $table->softDeletes();
         });

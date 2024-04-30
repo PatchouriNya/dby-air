@@ -102,6 +102,12 @@ Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Air','middlewar
     // 获取客户的未分组空调列表,并以数组的形式返回
     Route::get('air/grouped/{id}','AirController@getGroupedAirByClient');
 });
+// 策略
+
+Route::group(['prefix'=>'dby','namespace'=>'App\Http\Controllers\Strategy','middleware'=>['cors']],function (){
+    // 资源路由
+    Route::apiResource('strategy','StrategyController');
+});
 
 
 // 日志

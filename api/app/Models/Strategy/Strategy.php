@@ -37,5 +37,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Strategy extends Model
 {
+    protected $guarded = [];
+    protected $hidden = ['created_at', 'updated_at'];
     use HasFactory;
+
+
 }

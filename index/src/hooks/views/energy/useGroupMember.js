@@ -17,7 +17,7 @@ export function useGroupMemberList() {
             memberData.value = ungroupedRes.data
                 .map(item => ({
                     key: item.id,
-                    label: item.designation ? item.designation : item.show_id, // 使用 designation 作为显示文本
+                    label: item.designation + '(' + item.show_id + ')', // 使用 designation 作为显示文本
                     disabled: false // 所有未分组的成员都可选
                 }))
         }

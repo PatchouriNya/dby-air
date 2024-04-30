@@ -33,9 +33,11 @@ export function useGroupList() {
         await getGroupListByClient()
     }
     eventBus.on('node-clicked', async (val) => {
-        client_id.value = val.id
-        title.value = val.clientname
-        await getGroupListByClient(client_id.value)
+        if (val.type === 1) {
+            client_id.value = val.id
+            title.value = val.clientname
+            await getGroupListByClient(client_id.value)
+        }
     })
     return {
         tableData,

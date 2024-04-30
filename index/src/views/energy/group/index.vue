@@ -147,10 +147,13 @@
   </el-dialog>
 
   <!--组列表-->
-  <el-dialog v-model="listVisible" title="组成员管理" width="600" :close-on-click-modal="false"
+  <el-dialog v-model="listVisible" title="组成员管理" :close-on-click-modal="false"
              style="text-align: center">
-    <el-transfer v-model="memberValue" :data="memberData" @change="handleTransferChange"
-                 :titles="['未分组空调', '组内空调']" filterable filter-placeholder="请输入名称"/>
+    <div class="edit_dev">
+      <el-transfer v-model="memberValue" :data="memberData" @change="handleTransferChange"
+                   :titles="['未分组空调', '组内空调']" style="height: 400px;" filterable
+                   filter-placeholder="请输入名称"/>
+    </div>
   </el-dialog>
 </template>
 
@@ -228,4 +231,10 @@ onMounted(async () => {
 .searchOnline span {
   margin-right: 10px;
 }
+
+.edit_dev >>> .el-transfer-panel {
+  width: 300px;
+}
+
+
 </style>

@@ -51,6 +51,8 @@ class GroupController extends Controller
     }
 
     public function destroy($id){
+        if (Air_group_relationship::where('group_id',$id)->first())
+            return api(null,400,'该组下有空调,不能删除,请清空后再尝试');
         $data = Air_group::where('id',$id)->delete();
         if ($data)
         return api($data,204,'删除组成功');

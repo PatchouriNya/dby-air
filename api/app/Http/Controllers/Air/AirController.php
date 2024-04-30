@@ -26,8 +26,8 @@ class AirController extends Controller
     public function getUnGroupedAirByClient(int $id)
     {
         $group_id = request()->query('group_id');
-        $data = Air_detail::where('client_id', $id)->where('is_grouped',0)->get(['id','designation']);
-        $data2 = Air_group_relationship::where('group_id', $group_id)->with(['airDetail:id,designation'])->get();
+        $data = Air_detail::where('client_id', $id)->where('is_grouped',0)->get(['id','designation','show_id']);
+        $data2 = Air_group_relationship::where('group_id', $group_id)->with(['airDetail:id,designation,show_id'])->get();
         // 提取数据2中的 air_detail
         $airDetails = collect($data2)->map(function ($item) {
             return $item->airDetail;

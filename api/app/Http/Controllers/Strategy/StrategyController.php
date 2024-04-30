@@ -19,7 +19,17 @@ class StrategyController extends Controller
     {
         // 获取策略列表
         try {
-            $data = Strategy::all();
+            // 分页
+            $pageSize = \request()->query('pageSize') ?? 5;
+            $name = \request()->input('name');
+            // 如果提供了名称，添加名称检索条件
+            $query = Strategy::query();
+            if ($name) {
+                $query->where('name', 'like', '%' . $name . '%');
+            }
+
+            $data = $query->paginate($pageSize);
+
             return api($data, 200, '获取策略列表成功');
         } catch (\Exception $e) {
             return api(null, 500, $e->getMessage());

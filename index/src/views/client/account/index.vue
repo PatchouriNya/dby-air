@@ -232,5 +232,7 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-
+.right-content {
+  margin-left: 20px;
+}
 </style>

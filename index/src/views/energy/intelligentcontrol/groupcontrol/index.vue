@@ -83,6 +83,10 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.right-content {
+  margin-left: 20px;
+}
+
 .fenye {
   margin-top: 20px;
 }

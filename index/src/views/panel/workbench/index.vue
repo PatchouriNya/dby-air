@@ -126,6 +126,7 @@ onMounted(() => {
   /* 右侧内容的样式 */
   height: 100vh; /* 设置高度为整个视口的高度，可根据需要调整 */
   padding: 20px; /* 右侧内容的内边距 */
+  margin-left: 20px;
 }
 
 .data-card {

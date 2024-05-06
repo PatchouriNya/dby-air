@@ -3,7 +3,7 @@
 
     <div class="searchName">
       <el-button v-if="isSystem || mainFlag === 1" type="primary"
-                 style="margin-right: 20px" @click="addVisible = true">
+                 style="margin-right: 20px" @click="showAdd">
         新增策略
       </el-button>
       <span>策略名</span>
@@ -20,8 +20,34 @@
     </div>
 
   </div>
-  <el-table>
-    <el-table-column label="策略名称" prop="name"></el-table-column>
+  <el-table :data="tableData" border style="width: 100%">
+    <el-table-column label="序号" type="index" width="120"></el-table-column>
+    <el-table-column label="策略名称" prop="name" width="180"></el-table-column>
+    <el-table-column label="策略简介" prop="info"></el-table-column>
+    <el-table-column fixed="right" width="500" label="操作">
+      <template #default="row">
+        <el-tooltip content="更新策略" placement="top"
+                    v-if="isSystem || mainFlag === 1">
+          <el-button link type="primary" size="default" @click="showEdit(row.row)">
+            <el-icon>
+              <Compass/>
+            </el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="删除" placement="top"
+                    v-if="isSystem || mainFlag === 1">
+          <el-button
+              link
+              type="primary" size="default"
+              @click="showDelete(row.row)">
+            <el-icon>
+              <Delete/>
+            </el-icon>
+          </el-button>
+        </el-tooltip>
+      </template>
+    </el-table-column>
+
   </el-table>
   <el-pagination class="fenye"
                  v-model:current-page="currentPage"
@@ -34,7 +60,7 @@
                  @current-change="handleCurrentChange"
   />
   <!--空调策略控制面板-->
-  <el-dialog title="创建空调控制策略" v-model="addVisible" :close-on-click-modal="false" :width="744">
+  <el-dialog title="空调控制策略" v-model="formVisible" :close-on-click-modal="false" :width="744">
     <div style="display: flex">
       <el-form-item label="策略名称">
         <el-input style="width: 200px" v-model="controlForm.name" autocomplete="off"/>
@@ -54,7 +80,9 @@
         </template>
         <el-row>
           <el-col :span="12">
-            <el-tag type="primary" effect="dark" size="large">创建策略</el-tag>
+            <el-tag v-if="opFlag === 1" type="primary" effect="dark" size="large">创建策略</el-tag>
+            <el-tag v-else type="primary" effect="dark" size="large">更新策略</el-tag>
+
           </el-col>
 
           <el-col :span="12">
@@ -201,9 +229,26 @@
     </div>
     <template #footer>
         <span class="dialog-footer">
-          <el-button @click="addVisible = false">取 消</el-button>
-          <el-button type="primary" @click="sureAdd">创建策略</el-button>
+          <el-button @click="formVisible = false">取 消</el-button>
+          <el-button v-if="opFlag === 1" type="primary" @click="sureAdd">创建策略</el-button>
+          <el-button v-else type="primary" @click="sureEdit">更新策略</el-button>
+
         </span>
+    </template>
+  </el-dialog>
+
+  <!--删除-->
+  <el-dialog v-model="deleteVisible" title="警告！" width="500" :close-on-click-modal="false">
+    <span style="color: red">你正在进行删除策略 <span style="font-size: 24px">{{
+        deleteName
+      }}</span> 的操作，确认吗？</span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="deleteVisible = false">取消</el-button>
+        <el-button type="primary" @click="sureDelete">
+          确认
+        </el-button>
+      </div>
     </template>
   </el-dialog>
 </template>
@@ -211,15 +256,37 @@
 <script setup>
 // 权限控制
 import useAuthControl from '@/hooks/useAuthControl.js'
-import {useStrategyAdd} from '@/hooks/views/energy/strategy/useStrategy.js'
+import {
+  useStrategyAdd,
+  useStrategyDelete,
+  useStrategyEdit,
+  useStrategyList
+} from '@/hooks/views/energy/strategy/useStrategy.js'
 import {Icon} from '@iconify/vue'
 
 const localClient = parseInt(localStorage.getItem('client_id'))
 const {isSystem, mainFlag} = useAuthControl()
+
+// 策略列表
+const {
+  tableData,
+  currentPage,
+  total,
+  pageSize,
+  name,
+  handleSizeChange,
+  handleCurrentChange,
+  reset,
+  search
+} = useStrategyList()
 // 新增策略
-const {addVisible, controlForm, sureAdd} = useStrategyAdd()
+const {formVisible, controlForm, opFlag, showAdd, sureAdd} = useStrategyAdd()
 
+// 修改策略
+const {showEdit, sureEdit} = useStrategyEdit()
 
+// 删除策略
+const {deleteVisible, deleteName, showDelete, sureDelete} = useStrategyDelete()
 </script>
 
 <style scoped>

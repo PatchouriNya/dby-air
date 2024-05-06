@@ -102,7 +102,7 @@ class StrategyController extends Controller
                 return api(null, 404, '策略不存在');
             }
             $strategy->update($data);
-            return api($strategy, 200, '更新策略成功');
+            return api($strategy, 201, '更新策略成功');
     }catch (\Exception $e) {
             return api(null,500, $e->getMessage());
         }

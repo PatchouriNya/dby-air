@@ -1,14 +1,14 @@
 <template>
   <el-row>
     <el-col :span="4">
-      <div style="width: 250px">
+      <div style="width: 100%">
         <el-tree
             :data="treeData"
             :props="defaultProps"
             :node-key="defaultProps.label"
             :expand-on-click-node="true"
             default-expand-all
-            style="background-color: #f5f5f5"
+            style="background-color: #f5f5f5 ;width:100%"
             @node-click="clickNode"
         />
       </div>

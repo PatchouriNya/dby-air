@@ -100,6 +100,7 @@ export const useStrategyAdd = () => {
                 end_time: '',
                 interval_time: 5
             }
+            await getStrategyList()
             ElMessage.success(res.msg)
         }
     }
@@ -146,8 +147,8 @@ export const useStrategyEdit = () => {
         const res = await editStrategyApi(id.value, controlForm.value)
         if (res.code === 201) {
             formVisible.value = false
-            ElMessage.success(res.msg)
             await getStrategyList()
+            ElMessage.success(res.msg)
         }
     }
     return {controlForm, showEdit, sureEdit}

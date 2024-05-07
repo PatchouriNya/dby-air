@@ -337,6 +337,7 @@ const {
   options,
   handleSizeChange,
   handleCurrentChange,
+  getStrategyList,
   reset,
   search
 } = useStrategyList()
@@ -348,6 +349,8 @@ const {showEdit, sureEdit} = useStrategyEdit()
 
 // 删除策略
 const {deleteVisible, deleteName, showDelete, sureDelete} = useStrategyDelete()
+
+getStrategyList()
 </script>
 
 <style scoped>

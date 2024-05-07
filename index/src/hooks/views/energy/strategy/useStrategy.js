@@ -22,7 +22,6 @@ const getStrategyList = async () => {
     tableData.value = res.data.data
     total.value = res.data.total
 }
-getStrategyList()
 const controlForm = ref({
     name: '',
     info: '',
@@ -62,6 +61,7 @@ export const useStrategyList = () => {
         options,
         handleSizeChange,
         handleCurrentChange,
+        getStrategyList,
         reset,
         search
     }

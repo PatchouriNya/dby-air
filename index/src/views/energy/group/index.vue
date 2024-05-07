@@ -31,7 +31,7 @@
         <el-table :data="tableData" border style="width: 100%">
           <el-table-column type="index" label="序号" width="180"/>
           <el-table-column prop="name" label="组名" width="180"/>
-          <el-table-column prop="strategy_id" label="策略" width="180"/>
+          <el-table-column prop="with_strategy.name" label="策略" width="180"/>
           <el-table-column prop="info" label="组信息"/>
           <el-table-column fixed="right" label="操作">
             <template #default="row">

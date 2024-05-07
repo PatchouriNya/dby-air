@@ -25,7 +25,7 @@ class GroupController extends Controller
             $query->where('name', 'like', '%' . $name . '%');
         }
 
-        $data = $query->paginate($pageSize);
+        $data = $query->with(['withStrategy:id,name'])->paginate($pageSize);
 
         return api($data, 200, '获得该客户下空调组成功');
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models\Client;
 
+use App\Models\Strategy\Strategy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,4 +33,9 @@ class Air_group extends Model
     protected $guarded = [];
     protected $hidden = ['created_at', 'updated_at'];
     use HasFactory;
+
+    public function withStrategy()
+    {
+        return $this->hasOne(Strategy::class, 'id', 'strategy_id');
+    }
 }

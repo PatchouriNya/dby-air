@@ -59,9 +59,10 @@ class GroupController extends Controller
         $ori_id = $airGroup->strategy_id;
         $res = $airGroup->delete();
         if ($res) {
-            event(new AirGroupStrategyUpdated($airGroup));
             $res = Air_group::where('strategy_id', $ori_id)->exists();
-            if (!$res) {
+            if ($res) {
+                Strategy::find($ori_id)->update(['status' => 1]);
+            } else {
                 Strategy::find($ori_id)->update(['status' => 0]);
             }
             return api(null, 204, '删除组成功');
@@ -151,9 +152,11 @@ class GroupController extends Controller
         $ori_id = $airGroup->strategy_id;
         $res = $airGroup->update(['strategy_id' => \request('strategy_id')]);
         if ($res) {
-            event(new AirGroupStrategyUpdated($airGroup, $ori_id));
+            Strategy::find(\request('strategy_id'))->update(['status' => 1]);
             $res = Air_group::where('strategy_id', $ori_id)->exists();
-            if (!$res) {
+            if ($res) {
+                Strategy::find($ori_id)->update(['status' => 1]);
+            } else {
                 Strategy::find($ori_id)->update(['status' => 0]);
             }
             return api(null, 201, '策略设置成功');

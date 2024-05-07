@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Air\Air_detail;
 use App\Models\Client\Air_group;
 use App\Models\Client\Air_group_relationship;
+use App\Models\Strategy\Strategy;
 use Illuminate\Http\Request;
 use Nette\Schema\ValidationException;
 
@@ -55,34 +56,18 @@ class GroupController extends Controller
         if (Air_group_relationship::where('group_id', $id)->first())
             return api(null, 400, '该组下有空调,不能删除,请清空后再尝试');
         $airGroup = Air_group::find($id);
+        $ori_id = $airGroup->strategy_id;
         $res = $airGroup->delete();
         if ($res) {
             event(new AirGroupStrategyUpdated($airGroup));
-            return api($res, 204, '删除组成功');
+            $res = Air_group::where('strategy_id', $ori_id)->exists();
+            if (!$res) {
+                Strategy::find($ori_id)->update(['status' => 0]);
+            }
+            return api(null, 204, '删除组成功');
         }
 
         return api(null, 404, '删除组失败');
-    }
-
-    public function addAirToGroup(Request $request, $id)
-    {
-        $air_ids = $request->input('air_id');
-        $air_id_array = explode(',', $air_ids);
-        $error_air_id_array = [];
-        foreach ($air_id_array as $air_id) {
-            // 在这里对每个 $air_id 进行操作
-            $res = Air_group_relationship::create(['air_id' => $air_id, 'group_id' => $id]);
-            if (!$res) {
-                $error_air_id_array[] = $air_id;
-            } else
-                Air_detail::where('id', $air_id)->update(['is_grouped' => 1]);
-
-        }
-
-        if (count($error_air_id_array) > 0) {
-            return api(null, 400, '添加失败,请检查air_id是否正确添加失败的id如下:' . implode(',', $error_air_id_array));
-        }
-        return api(null, 201, '添加成功');
     }
 
     public function update(Request $request, $id)
@@ -106,6 +91,27 @@ class GroupController extends Controller
         } catch (\Exception $e) {
             return api(null, 500, $e->getMessage());
         }
+    }
+
+    public function addAirToGroup(Request $request, $id)
+    {
+        $air_ids = $request->input('air_id');
+        $air_id_array = explode(',', $air_ids);
+        $error_air_id_array = [];
+        foreach ($air_id_array as $air_id) {
+            // 在这里对每个 $air_id 进行操作
+            $res = Air_group_relationship::create(['air_id' => $air_id, 'group_id' => $id]);
+            if (!$res) {
+                $error_air_id_array[] = $air_id;
+            } else
+                Air_detail::where('id', $air_id)->update(['is_grouped' => 1]);
+
+        }
+
+        if (count($error_air_id_array) > 0) {
+            return api(null, 400, '添加失败,请检查air_id是否正确添加失败的id如下:' . implode(',', $error_air_id_array));
+        }
+        return api(null, 201, '添加成功');
     }
 
     public function removeAirFromGroup(Request $request, $id)
@@ -142,9 +148,14 @@ class GroupController extends Controller
     public function setStrategy($id)
     {
         $airGroup = Air_group::find($id);
+        $ori_id = $airGroup->strategy_id;
         $res = $airGroup->update(['strategy_id' => \request('strategy_id')]);
         if ($res) {
-            event(new AirGroupStrategyUpdated($airGroup));
+            event(new AirGroupStrategyUpdated($airGroup, $ori_id));
+            $res = Air_group::where('strategy_id', $ori_id)->exists();
+            if (!$res) {
+                Strategy::find($ori_id)->update(['status' => 0]);
+            }
             return api(null, 201, '策略设置成功');
         }
         return api(null, 400, '策略设置失败');

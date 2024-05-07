@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Strategy;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client\Air_group;
 use App\Models\Strategy\Strategy;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,7 +20,7 @@ class StrategyController extends Controller
     {
         // 获取策略列表
         try {
-            if (\request()->query('all_data')) {
+            if (\request()->query('all_data') == 'true') {
                 // 如果存在 all_data 参数 为 true，直接返回所有数据
                 $data = Strategy::all();
             } else {
@@ -77,6 +78,30 @@ class StrategyController extends Controller
         }
     }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function destroy($id)
+    {
+        // 删除策略
+        try {
+            $strategy = Strategy::find($id);
+            if (!$strategy) {
+                return api(null, 404, '策略不存在');
+            }
+            $res = $strategy->delete();
+            if ($res) {
+                Air_group::where('strategy_id', $id)->update(['strategy_id' => null]);
+                return api(null, 204, '删除策略成功');
+            }
+            return api(null, 500, '删除策略失败');
+        } catch (\Exception $e) {
+            return api(null, 500, $e->getMessage());
+        }
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -113,27 +138,6 @@ class StrategyController extends Controller
             }
             $strategy->update($data);
             return api($strategy, 201, '更新策略成功');
-        } catch (\Exception $e) {
-            return api(null, 500, $e->getMessage());
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        // 删除策略
-        try {
-            $strategy = Strategy::find($id);
-            if (!$strategy) {
-                return api(null, 404, '策略不存在');
-            }
-            $strategy->delete();
-            return api(null, 204, '删除策略成功');
         } catch (\Exception $e) {
             return api(null, 500, $e->getMessage());
         }

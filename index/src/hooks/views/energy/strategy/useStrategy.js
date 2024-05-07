@@ -18,7 +18,7 @@ const options = ref([{label: '1分钟', value: 1}, {label: '5分钟', value: 5},
 }])
 const getStrategyList = async () => {
     // 获取分组列表
-    const res = await getStrategyListApi(pageSize.value, currentPage.value, name.value)
+    const res = await getStrategyListApi(false, pageSize.value, currentPage.value, name.value)
     tableData.value = res.data.data
     total.value = res.data.total
 }

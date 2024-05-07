@@ -37,7 +37,6 @@ class StrategyController extends Controller
     }
 
 
-
     /**
      * Store a newly created resource in storage.
      *
@@ -49,14 +48,17 @@ class StrategyController extends Controller
         // 新增策略
         try {
             $validator = \Validator::make($request->all(), [
-                'name' =>'required|string|max:20',
-                'info' =>'required|string|max:50',
-                'power_state' =>'required|string|max:20',
-                'operation_mode' =>'required|string|max:20',
-                'wind_speed' =>'required|string|max:20',
-                'wind_mode' =>'required|string|max:20',
-                'set_temperature' =>'required|string|max:20',
-                'electrify_state' =>'nullable|string|max:20'
+                    'name'            => 'required|string|max:20',
+                    'info'            => 'required|string|max:50',
+                    'power_state'     => 'required|string|max:20',
+                    'operation_mode'  => 'required|string|max:20',
+                    'wind_speed'      => 'required|string|max:20',
+                    'wind_mode'       => 'required|string|max:20',
+                    'set_temperature' => 'required|string|max:20',
+                    'electrify_state' => 'nullable|string|max:20',
+                    'start_time'      => 'required|string|max:20',
+                    'end_time'        => 'required|string|max:20',
+                    'interval_time'   => 'numeric|min:1|max:30'
                 ]
             );
             if ($validator->fails()) {
@@ -66,7 +68,7 @@ class StrategyController extends Controller
             $strategy = Strategy::create($data);
             return api($strategy, 201, '新增策略成功');
         } catch (\Exception $e) {
-            return api(null,500, $e->getMessage());
+            return api(null, 500, $e->getMessage());
         }
     }
 
@@ -83,14 +85,17 @@ class StrategyController extends Controller
         // 更新策略
         try {
             $validator = \Validator::make($request->all(), [
-                'name' =>'required|string|max:20',
-                'info' =>'required|string|max:50',
-                'power_state' =>'required|string|max:20',
-                'operation_mode' =>'required|string|max:20',
-                'wind_speed' =>'required|string|max:20',
-                'wind_mode' =>'required|string|max:20',
-                'set_temperature' =>'required|string|max:20',
-                'electrify_state' =>'nullable|string|max:20'
+                    'name'            => 'required|string|max:20',
+                    'info'            => 'required|string|max:50',
+                    'power_state'     => 'required|string|max:20',
+                    'operation_mode'  => 'required|string|max:20',
+                    'wind_speed'      => 'required|string|max:20',
+                    'wind_mode'       => 'required|string|max:20',
+                    'set_temperature' => 'required|string|max:20',
+                    'electrify_state' => 'nullable|string|max:20',
+                    'start_time'      => 'required|string|max:20',
+                    'end_time'        => 'required|string|max:20',
+                    'interval_time'   => 'numeric|min:1|max:30'
                 ]
             );
             if ($validator->fails()) {
@@ -103,15 +108,15 @@ class StrategyController extends Controller
             }
             $strategy->update($data);
             return api($strategy, 201, '更新策略成功');
-    }catch (\Exception $e) {
-            return api(null,500, $e->getMessage());
+        } catch (\Exception $e) {
+            return api(null, 500, $e->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return Response
      */
     public function destroy($id)

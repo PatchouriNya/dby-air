@@ -19,16 +19,21 @@ class StrategyController extends Controller
     {
         // 获取策略列表
         try {
-            // 分页
-            $pageSize = \request()->query('pageSize') ?? 5;
-            $name = \request()->input('name');
-            // 如果提供了名称，添加名称检索条件
-            $query = Strategy::query();
-            if ($name) {
-                $query->where('name', 'like', '%' . $name . '%');
-            }
+            if (\request()->query('all_data')) {
+                // 如果存在 all_data 参数 为 true，直接返回所有数据
+                $data = Strategy::all();
+            } else {
+                // 分页
+                $pageSize = \request()->query('pageSize') ?? 5;
+                $name = \request()->input('name');
+                // 如果提供了名称，添加名称检索条件
+                $query = Strategy::query();
+                if ($name) {
+                    $query->where('name', 'like', '%' . $name . '%');
+                }
 
-            $data = $query->paginate($pageSize);
+                $data = $query->paginate($pageSize);
+            }
 
             return api($data, 200, '获取策略列表成功');
         } catch (\Exception $e) {

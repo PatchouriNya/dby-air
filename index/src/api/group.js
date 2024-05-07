@@ -68,3 +68,10 @@ export const removeAirFromGroup = (id, data) => {
         data: {air_id: data}
     })
 }
+export const setStrategyApi = (id, strategy_id) => {
+    return request({
+        url: '/group/strategy/' + id,
+        method: 'put',
+        data: {strategy_id}
+    })
+}

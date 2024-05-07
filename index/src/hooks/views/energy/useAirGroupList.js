@@ -1,7 +1,8 @@
 import {ref, watch} from 'vue'
 import eventBus from '@/listen/event-bus.js'
-import {addGroupApi, deleteGroupApi, editGroupApi, getGroupListByClientApi} from '@/api/group.js'
+import {addGroupApi, deleteGroupApi, editGroupApi, getGroupListByClientApi, setStrategyApi} from '@/api/group.js'
 import {ElMessage} from 'element-plus'
+import {getStrategyListApi} from '@/api/strategy.js'
 
 const tableData = ref()
 const client_id = ref()
@@ -124,6 +125,30 @@ export function useGroupDelete() {
         }
     }
     return {deleteVisible, deleteName, showDeleteGroup, sureDeleteGroup}
+}
+
+export function useSetStrategy() {
+    // 策略设置
+    const setStrategyVisible = ref(false)
+    const group_id = ref()
+    const strategyList = ref([])
+    const strategy_id = ref()
+    const showSetStrategy = async (row) => {
+        setStrategyVisible.value = true
+        group_id.value = row.id
+        const res = await getStrategyListApi(true)
+        if (res.code === 200)
+            strategyList.value = res.data
+    }
+    const sureSetStrategy = async () => {
+        const res = await setStrategyApi(group_id.value, strategy_id.value)
+        if (res.code === 201) {
+            setStrategyVisible.value = false
+            await getGroupListByClient()
+            ElMessage.success(res.msg)
+        }
+    }
+    return {setStrategyVisible, strategy_id, strategyList, showSetStrategy, sureSetStrategy}
 }
 
 

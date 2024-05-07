@@ -26,14 +26,6 @@
     <el-table-column label="策略简介" prop="info"></el-table-column>
     <el-table-column fixed="right" width="500" label="操作">
       <template #default="row">
-        <el-tooltip content="设置时间" placement="top"
-                    v-if="isSystem || mainFlag === 1">
-          <el-button link type="primary" size="default" @click="">
-            <el-icon>
-              <Compass/>
-            </el-icon>
-          </el-button>
-        </el-tooltip>
         <el-tooltip content="更新策略" placement="top"
                     v-if="isSystem || mainFlag === 1">
           <el-button link type="primary" size="default" @click="showEdit(row.row)">

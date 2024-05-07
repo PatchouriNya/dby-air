@@ -37,7 +37,7 @@
             <template #default="row">
               <el-tooltip content="设置策略" placement="top"
                           v-if="isSystem || (client_id === localClient && mainFlag === 1)">
-                <el-button link type="primary" size="default">
+                <el-button link type="primary" size="default" @click="showSetStrategy(row.row)">
                   <el-icon>
                     <Compass/>
                   </el-icon>
@@ -155,6 +155,28 @@
                    filter-placeholder="请输入名称"/>
     </div>
   </el-dialog>
+
+  <!--设置策略-->
+  <el-dialog v-model="setStrategyVisible" title="设置策略" width="500" :close-on-click-modal="false">
+    <el-form-item label="策略">
+      <el-select v-model="strategy_id" placeholder="请选择策略">
+        <el-option
+            v-for="item in strategyList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+        />
+      </el-select>
+    </el-form-item>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="setStrategyVisible = false">取消</el-button>
+        <el-button type="primary" @click=sureSetStrategy>
+          确认
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -162,7 +184,13 @@ import ClientTree from '@/components/ClientTree.vue'
 import {onMounted, ref} from 'vue'
 import eventBus from '@/listen/event-bus.js'
 import useAuthControl from '@/hooks/useAuthControl.js'
-import {useGroupAdd, useGroupDelete, useGroupEdit, useGroupList} from '@/hooks/views/energy/useAirGroupList.js'
+import {
+  useGroupAdd,
+  useGroupDelete,
+  useGroupEdit,
+  useGroupList,
+  useSetStrategy
+} from '@/hooks/views/energy/useAirGroupList.js'
 import {Icon} from '@iconify/vue'
 import {useGroupMemberList} from '@/hooks/views/energy/useGroupMember.js'
 
@@ -200,7 +228,8 @@ const {deleteVisible, deleteName, showDeleteGroup, sureDeleteGroup} = useGroupDe
 // 添加组成员
 const {listVisible, memberValue, memberData, showMemberList, handleTransferChange} = useGroupMemberList()
 
-
+// 设置策略
+const {setStrategyVisible, strategy_id, strategyList, showSetStrategy, sureSetStrategy} = useSetStrategy()
 onMounted(async () => {
   eventBus.on('defaultNode', (val) => {
     eventBus.emit('node-clicked', val)

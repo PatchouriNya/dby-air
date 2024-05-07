@@ -24,6 +24,14 @@
     <el-table-column label="序号" type="index" width="120"></el-table-column>
     <el-table-column label="策略名称" prop="name" width="180"></el-table-column>
     <el-table-column label="策略简介" prop="info"></el-table-column>
+    <el-table-column label="开始时间" prop="start_time"></el-table-column>
+    <el-table-column label="结束时间" prop="end_time"></el-table-column>
+    <el-table-column label="启用状态" prop="status" width="180">
+      <template #default="scope">
+        <el-tag v-if="scope.row.status === 1" type="primary">正在启用</el-tag>
+        <el-tag v-else type="danger">未被启用</el-tag>
+      </template>
+    </el-table-column>
     <el-table-column fixed="right" width="500" label="操作">
       <template #default="row">
         <el-tooltip content="更新策略" placement="top"

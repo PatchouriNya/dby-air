@@ -8,6 +8,14 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const name = ref('')
+// 下拉框选项1-15
+const options = ref([{label: '1分钟', value: 1}, {label: '5分钟', value: 5}, {
+    label: '10分钟',
+    value: 10
+}, {label: '15分钟', value: 15}, {label: '20分钟', value: 20}, {label: '25分钟', value: 25}, {
+    label: '30分钟',
+    value: 30
+}])
 const getStrategyList = async () => {
     // 获取分组列表
     const res = await getStrategyListApi(pageSize.value, currentPage.value, name.value)
@@ -18,11 +26,14 @@ getStrategyList()
 const controlForm = ref({
     name: '',
     info: '',
-    power_state: '',
+    power_state: '关机',
     operation_mode: '',
     wind_mode: '',
     wind_speed: '',
-    set_temperature: ''
+    set_temperature: '',
+    start_time: '',
+    end_time: '',
+    interval_time: 5
 })
 const opFlag = ref(1)
 const formVisible = ref(false)
@@ -48,6 +59,7 @@ export const useStrategyList = () => {
         total,
         pageSize,
         name,
+        options,
         handleSizeChange,
         handleCurrentChange,
         reset,
@@ -62,11 +74,14 @@ export const useStrategyAdd = () => {
         controlForm.value = {
             name: '',
             info: '',
-            power_state: '',
+            power_state: '关机',
             operation_mode: '',
             wind_mode: '',
             wind_speed: '',
-            set_temperature: ''
+            set_temperature: '',
+            start_time: '',
+            end_time: '',
+            interval_time: 5
         }
     }
     const sureAdd = async () => {
@@ -76,11 +91,14 @@ export const useStrategyAdd = () => {
             controlForm.value = {
                 name: '',
                 info: '',
-                power_state: '',
+                power_state: '关机',
                 operation_mode: '',
                 wind_mode: '',
                 wind_speed: '',
-                set_temperature: ''
+                set_temperature: '',
+                start_time: '',
+                end_time: '',
+                interval_time: 5
             }
             ElMessage.success(res.msg)
         }
@@ -90,11 +108,14 @@ export const useStrategyAdd = () => {
             controlForm.value = {
                 name: '',
                 info: '',
-                power_state: '',
+                power_state: '关机',
                 operation_mode: '',
                 wind_mode: '',
                 wind_speed: '',
-                set_temperature: ''
+                set_temperature: '',
+                start_time: '',
+                end_time: '',
+                interval_time: 5
             }
         }
     })
@@ -115,7 +136,10 @@ export const useStrategyEdit = () => {
             operation_mode: row.operation_mode,
             wind_mode: row.wind_mode,
             wind_speed: row.wind_speed,
-            set_temperature: row.set_temperature
+            set_temperature: row.set_temperature,
+            start_time: row.start_time,
+            end_time: row.end_time,
+            interval_time: row.interval_time
         }
     }
     const sureEdit = async () => {

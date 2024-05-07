@@ -26,11 +26,19 @@
     <el-table-column label="策略简介" prop="info"></el-table-column>
     <el-table-column fixed="right" width="500" label="操作">
       <template #default="row">
+        <el-tooltip content="设置时间" placement="top"
+                    v-if="isSystem || mainFlag === 1">
+          <el-button link type="primary" size="default" @click="">
+            <el-icon>
+              <Compass/>
+            </el-icon>
+          </el-button>
+        </el-tooltip>
         <el-tooltip content="更新策略" placement="top"
                     v-if="isSystem || mainFlag === 1">
           <el-button link type="primary" size="default" @click="showEdit(row.row)">
             <el-icon>
-              <Compass/>
+              <Edit/>
             </el-icon>
           </el-button>
         </el-tooltip>
@@ -61,14 +69,66 @@
   />
   <!--空调策略控制面板-->
   <el-dialog title="空调控制策略" v-model="formVisible" :close-on-click-modal="false" :width="744">
-    <div style="display: flex">
-      <el-form-item label="策略名称">
-        <el-input style="width: 200px" v-model="controlForm.name" autocomplete="off"/>
-      </el-form-item>
-      <el-form-item style="margin-left: 20px" label="策略描述">
-        <el-input style="width: 200px" v-model="controlForm.info" autocomplete="off"/>
-      </el-form-item>
-    </div>
+    <el-row>
+      <el-col :span="12">
+        <el-form-item label="策略名称">
+          <el-input style="width: 240px" v-model="controlForm.name" autocomplete="off"/>
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="策略描述">
+          <el-input style="width: 240px" v-model="controlForm.info" autocomplete="off"/>
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="12">
+        <el-form-item label="开始时间">
+          <el-time-select
+              v-model="controlForm.start_time"
+              style="width: 240px"
+              :max-time="controlForm.end_time"
+              class="mr-4"
+              placeholder="开始时间"
+              start="08:30"
+              step="00:15"
+              end="18:30"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="结束时间">
+          <el-time-select
+              v-model="controlForm.end_time"
+              style="width: 240px"
+              :min-time="controlForm.start_time"
+              placeholder="结束时间"
+              start="08:30"
+              step="00:15"
+              end="18:30"
+          />
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="12">
+        <el-form-item label="执行间隔">
+          <el-select
+              v-model="controlForm.interval_time"
+              placeholder="请选择(单位分钟)"
+              size="default"
+              style="width: 240px"
+          >
+            <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
 
 
     <div class="part2">
@@ -274,6 +334,7 @@ const {
   total,
   pageSize,
   name,
+  options,
   handleSizeChange,
   handleCurrentChange,
   reset,

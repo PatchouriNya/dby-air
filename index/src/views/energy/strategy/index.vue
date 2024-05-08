@@ -24,6 +24,8 @@
     <el-table-column label="序号" type="index" width="120"></el-table-column>
     <el-table-column label="策略名称" prop="name" width="180"></el-table-column>
     <el-table-column label="策略简介" prop="info"></el-table-column>
+    <el-table-column label="开始日期" prop="start_date"></el-table-column>
+    <el-table-column label="结束时间" prop="end_date"></el-table-column>
     <el-table-column label="开始时间" prop="start_time"></el-table-column>
     <el-table-column label="结束时间" prop="end_time"></el-table-column>
     <el-table-column label="启用状态" prop="status" width="180">
@@ -83,6 +85,30 @@
     </el-row>
     <el-row>
       <el-col :span="12">
+        <el-form-item label="开始日期">
+          <el-date-picker
+              v-model="controlForm.start_date"
+              type="date"
+              placeholder="开始日期"
+              value-format="YYYY-MM-DD"
+              style="width: 240px"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="结束日期">
+          <el-date-picker
+              v-model="controlForm.end_date"
+              type="date"
+              placeholder="结束日期"
+              value-format="YYYY-MM-DD"
+              style="width: 240px"
+          />
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="12">
         <el-form-item label="开始时间">
           <el-time-select
               v-model="controlForm.start_time"
@@ -115,12 +141,30 @@
         <el-form-item label="执行间隔">
           <el-select
               v-model="controlForm.interval_time"
-              placeholder="请选择(单位分钟)"
+              placeholder="请选择间隔"
               size="default"
               style="width: 240px"
           >
             <el-option
-                v-for="item in options"
+                v-for="item in options1"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="执行星期">
+          <el-select
+              multiple
+              v-model="controlForm.week_days"
+              placeholder="请选择星期"
+              size="default"
+              style="width: 240px"
+          >
+            <el-option
+                v-for="item in options2"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -334,7 +378,8 @@ const {
   total,
   pageSize,
   name,
-  options,
+  options1,
+  options2,
   handleSizeChange,
   handleCurrentChange,
   getStrategyList,

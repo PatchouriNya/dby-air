@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Strategy;
 use App\Http\Controllers\Controller;
 use App\Models\Client\Air_group;
 use App\Models\Strategy\Strategy;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
@@ -62,15 +63,19 @@ class StrategyController extends Controller
                     'wind_mode'       => 'required|string|max:20',
                     'set_temperature' => 'required|string|max:20',
                     'electrify_state' => 'nullable|string|max:20',
+                    'start_date'      => 'required|date',
+                    'end_date'        => 'required|date',
                     'start_time'      => 'required|string|max:20',
                     'end_time'        => 'required|string|max:20',
-                    'interval_time'   => 'numeric|min:1|max:30'
+                    'interval_time'   => 'numeric|min:1|max:30',
+                    'week_days'       => 'required|array|min:1|max:7'
                 ]
             );
             if ($validator->fails()) {
                 return api(null, 400, $validator->errors()->first());
             }
             $data = $validator->validate();
+            $data['week_days'] = json_encode($data['week_days']);
             $strategy = Strategy::create($data);
             return api($strategy, 201, '新增策略成功');
         } catch (\Exception $e) {
@@ -123,9 +128,12 @@ class StrategyController extends Controller
                     'wind_mode'       => 'required|string|max:20',
                     'set_temperature' => 'required|string|max:20',
                     'electrify_state' => 'nullable|string|max:20',
+                    'start_date'      => 'required|date',
+                    'end_date'        => 'required|date',
                     'start_time'      => 'required|string|max:20',
                     'end_time'        => 'required|string|max:20',
-                    'interval_time'   => 'numeric|min:1|max:30'
+                    'interval_time'   => 'numeric|min:1|max:30',
+                    'week_days'       => 'required|array|min:1|max:7'
                 ]
             );
             if ($validator->fails()) {
@@ -136,6 +144,7 @@ class StrategyController extends Controller
             if (!$strategy) {
                 return api(null, 404, '策略不存在');
             }
+            $data['week_days'] = json_encode($data['week_days']);
             $strategy->update($data);
             return api($strategy, 201, '更新策略成功');
         } catch (\Exception $e) {

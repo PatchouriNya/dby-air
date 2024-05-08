@@ -2,6 +2,7 @@
 
 namespace App\Models\Strategy;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,5 +42,21 @@ class Strategy extends Model
     protected $hidden = ['created_at', 'updated_at'];
     use HasFactory;
 
+    // 定义 week_days 字段的访问器
+    public function getWeekDaysAttribute($value)
+    {
+        return json_decode($value);
+    }
 
+    // 定义 start_date 的访问器
+    public function getStartDateAttribute($value)
+    {
+        return Carbon::parse($value)->toDateString();
+    }
+
+    // 定义 end_date 的访问器
+    public function getEndDateAttribute($value)
+    {
+        return Carbon::parse($value)->toDateString();
+    }
 }

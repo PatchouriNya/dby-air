@@ -9,10 +9,15 @@ const pageSize = ref(10)
 const total = ref(0)
 const name = ref('')
 // 下拉框选项1-15
-const options = ref([])
+const options1 = ref([])
+const options2 = ref([{label: '星期一', value: 1}, {label: '星期二', value: 2}, {
+    label: '星期三',
+    value: 3
+}, {label: '星期四', value: 4}, {label: '星期五', value: 5}, {label: '星期六', value: 6}, {label: '星期日', value: 7}])
 for (let i = 1; i <= 15; i++) {
-    options.value.push({label: `${i}分钟`, value: i});
+    options1.value.push({label: `${i}分钟`, value: i});
 }
+
 const getStrategyList = async () => {
     // 获取分组列表
     const res = await getStrategyListApi(false, pageSize.value, currentPage.value, name.value)
@@ -27,8 +32,11 @@ const controlForm = ref({
     wind_mode: '',
     wind_speed: '',
     set_temperature: '',
+    start_date: '',
+    end_date: '',
     start_time: '',
     end_time: '',
+    week_days: [],
     interval_time: 5
 })
 const opFlag = ref(1)
@@ -55,7 +63,8 @@ export const useStrategyList = () => {
         total,
         pageSize,
         name,
-        options,
+        options1,
+        options2,
         handleSizeChange,
         handleCurrentChange,
         getStrategyList,
@@ -68,53 +77,20 @@ export const useStrategyAdd = () => {
     const showAdd = () => {
         formVisible.value = true
         opFlag.value = 1
-        controlForm.value = {
-            name: '',
-            info: '',
-            power_state: '关机',
-            operation_mode: '',
-            wind_mode: '',
-            wind_speed: '',
-            set_temperature: '',
-            start_time: '',
-            end_time: '',
-            interval_time: 5
-        }
+        controlForm.value = {}
     }
     const sureAdd = async () => {
         const res = await addStrategyApi(controlForm.value)
         if (res.code === 201) {
             formVisible.value = false
-            controlForm.value = {
-                name: '',
-                info: '',
-                power_state: '关机',
-                operation_mode: '',
-                wind_mode: '',
-                wind_speed: '',
-                set_temperature: '',
-                start_time: '',
-                end_time: '',
-                interval_time: 5
-            }
+            controlForm.value = {}
             await getStrategyList()
             ElMessage.success(res.msg)
         }
     }
     watch(formVisible, val => {
         if (val === false) {
-            controlForm.value = {
-                name: '',
-                info: '',
-                power_state: '关机',
-                operation_mode: '',
-                wind_mode: '',
-                wind_speed: '',
-                set_temperature: '',
-                start_time: '',
-                end_time: '',
-                interval_time: 5
-            }
+            controlForm.value = {}
         }
     })
     return {formVisible, controlForm, opFlag, showAdd, sureAdd}
@@ -126,7 +102,6 @@ export const useStrategyEdit = () => {
         formVisible.value = true
         opFlag.value = 2
         id.value = row.id
-
         controlForm.value = {
             name: row.name,
             info: row.info,
@@ -135,9 +110,12 @@ export const useStrategyEdit = () => {
             wind_mode: row.wind_mode,
             wind_speed: row.wind_speed,
             set_temperature: row.set_temperature,
+            start_date: row.start_date,
+            end_date: row.end_date,
             start_time: row.start_time,
             end_time: row.end_time,
-            interval_time: row.interval_time
+            interval_time: row.interval_time,
+            week_days: row.week_days
         }
     }
     const sureEdit = async () => {
@@ -172,4 +150,11 @@ export function useStrategyDelete() {
     return {deleteVisible, deleteName, showDelete, sureDelete}
 }
 
+watch(() => controlForm.value, (val) => {
+    if (val.start_date && val.end_date && val.start_date > val.end_date) {
+        controlForm.value.start_date = ''
+        controlForm.value.end_date = ''
+        ElMessage.error('开始日期不能大于结束日期')
+    }
+}, {deep: true})
 

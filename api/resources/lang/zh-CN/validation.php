@@ -188,8 +188,11 @@ return [
         'wind_mode'             => '风向',
         'set_temperature'       => '温度',
         'electrify_state'       => '电源状态',
+        'start_date'            => '开始日期',
+        'end_date'              => '结束日期',
         'start_time'            => '开始时间',
         'end_time'              => '结束时间',
         'interval_time'         => '间隔时间',
+        'week_days'             => '运行周期',
     ],
 ];

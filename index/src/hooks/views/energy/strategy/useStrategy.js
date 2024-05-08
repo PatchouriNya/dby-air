@@ -9,13 +9,10 @@ const pageSize = ref(10)
 const total = ref(0)
 const name = ref('')
 // 下拉框选项1-15
-const options = ref([{label: '1分钟', value: 1}, {label: '5分钟', value: 5}, {
-    label: '10分钟',
-    value: 10
-}, {label: '15分钟', value: 15}, {label: '20分钟', value: 20}, {label: '25分钟', value: 25}, {
-    label: '30分钟',
-    value: 30
-}])
+const options = ref([])
+for (let i = 1; i <= 15; i++) {
+    options.value.push({label: `${i}分钟`, value: i});
+}
 const getStrategyList = async () => {
     // 获取分组列表
     const res = await getStrategyListApi(false, pageSize.value, currentPage.value, name.value)

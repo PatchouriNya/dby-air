@@ -1,7 +1,11 @@
 <template>
   <el-row>
     <el-col :span="6">
-      <ClientTree ref="tree"/>
+      <div style="width: 270px">
+
+        <ClientTree ref="tree" style="width: 100%; height: 100%"/>
+      </div>
+
     </el-col>
     <el-col :span="18">
       <div class="right-content">

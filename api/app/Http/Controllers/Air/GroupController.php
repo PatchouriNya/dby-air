@@ -154,7 +154,8 @@ class GroupController extends Controller
         $ori_id = $airGroup->strategy_id;
         $res = $airGroup->update(['strategy_id' => \request('strategy_id')]);
         if ($res) {
-            Strategy::find(\request('strategy_id'))->update(['status' => 1]);
+            if (\request('strategy_id') != null)
+                Strategy::find(\request('strategy_id'))->update(['status' => 1]);
             if ($ori_id) {
                 $res = Air_group::where('strategy_id', $ori_id)->exists();
                 if ($res) {

@@ -149,7 +149,16 @@ export function useSetStrategy() {
             ElMessage.success(res.msg)
         }
     }
-    return {setStrategyVisible, strategy_id, strategyList, showSetStrategy, sureSetStrategy}
+    const stopSetStrategy = async () => {
+        strategy_id.value = null
+        const res = await setStrategyApi(group_id.value, strategy_id.value)
+        if (res.code === 201) {
+            setStrategyVisible.value = false
+            await getGroupListByClient()
+            ElMessage.success('策略已停用')
+        }
+    }
+    return {setStrategyVisible, strategy_id, strategyList, showSetStrategy, sureSetStrategy, stopSetStrategy}
 }
 
 

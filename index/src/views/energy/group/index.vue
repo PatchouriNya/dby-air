@@ -31,7 +31,12 @@
         <el-table :data="tableData" border style="width: 100%">
           <el-table-column type="index" label="序号" width="180"/>
           <el-table-column prop="name" label="组名" width="180"/>
-          <el-table-column prop="with_strategy.name" label="策略" width="180"/>
+          <el-table-column prop="with_strategy.name" label="策略" width="180">
+            <template #default="scope">
+              <span v-if="scope.row.with_strategy"><el-tag>{{ scope.row.with_strategy.name }}</el-tag></span>
+              <span v-else><el-tag type="danger">策略已停用</el-tag></span>
+            </template>
+          </el-table-column>
           <el-table-column prop="info" label="组信息"/>
           <el-table-column fixed="right" label="操作">
             <template #default="row">
@@ -159,20 +164,23 @@
   <!--设置策略-->
   <el-dialog v-model="setStrategyVisible" title="设置策略" width="500" :close-on-click-modal="false">
     <el-form-item label="策略">
-      <el-select v-model="strategy_id" placeholder="请选择策略">
+      <el-select v-model="strategy_id" placeholder="已停用">
         <el-option
             v-for="item in strategyList"
             :key="item.id"
             :label="item.name"
             :value="item.id"
         />
+        <template #footer>
+          <el-button @click="stopSetStrategy" size="small" type="danger">停用策略</el-button>
+        </template>
       </el-select>
     </el-form-item>
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="setStrategyVisible = false">取消</el-button>
         <el-button type="primary" @click=sureSetStrategy>
-          确认
+          启用
         </el-button>
       </div>
     </template>
@@ -229,7 +237,14 @@ const {deleteVisible, deleteName, showDeleteGroup, sureDeleteGroup} = useGroupDe
 const {listVisible, memberValue, memberData, showMemberList, handleTransferChange} = useGroupMemberList()
 
 // 设置策略
-const {setStrategyVisible, strategy_id, strategyList, showSetStrategy, sureSetStrategy} = useSetStrategy()
+const {
+  setStrategyVisible,
+  strategy_id,
+  strategyList,
+  showSetStrategy,
+  sureSetStrategy,
+  stopSetStrategy
+} = useSetStrategy()
 onMounted(async () => {
   eventBus.on('defaultNode', (val) => {
     eventBus.emit('node-clicked', val)

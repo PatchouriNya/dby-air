@@ -1,13 +1,14 @@
 import request from '@/api/request.js'
 
-export const getStrategyListApi = (allData = false, pageSize, currentPage, name) => {
+export const getStrategyListApi = (allData = false, pageSize, currentPage, name, client_id) => {
     return request({
         url: '/strategy',
         params: {
             all_data: allData,
             pageSize,
             page: currentPage,
-            name
+            name,
+            client_id
         }
     })
 }

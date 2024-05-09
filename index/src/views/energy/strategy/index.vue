@@ -1,74 +1,85 @@
 <template>
-  <div class="shaixuan">
+  <el-row>
+    <el-col :span="4">
+      <ClientTree ref="tree" :tree="tree" style="width: 100%"/>
+    </el-col>
+    <el-col :span="20">
+      <div class="right-content">
+        <h2 style="margin-bottom: 20px;text-align: center">{{ title }}</h2>
+        <div class="shaixuan">
 
-    <div class="searchName">
-      <el-button v-if="isSystem || mainFlag === 1" type="primary"
-                 style="margin-right: 20px" @click="showAdd">
-        新增策略
-      </el-button>
-      <span>策略名</span>
-      <el-input
-          v-model="name"
-          style="width: 240px"
-          placeholder="请输入策略名称"
-          clearable
-      />
-      <div class="buttonSide" style="margin-left: 20px">
-        <el-button @click="reset">重置</el-button>
-        <el-button type="primary" @click="search">搜索</el-button>
+          <div class="searchName">
+            <el-button v-if="isSystem || mainFlag === 1" type="primary"
+                       style="margin-right: 20px" @click="showAdd">
+              新增策略
+            </el-button>
+            <span>策略名</span>
+            <el-input
+                v-model="name"
+                style="width: 240px"
+                placeholder="请输入策略名称"
+                clearable
+            />
+            <div class="buttonSide" style="margin-left: 20px">
+              <el-button @click="reset">重置</el-button>
+              <el-button type="primary" @click="search">搜索</el-button>
+            </div>
+          </div>
+
+        </div>
+        <el-table :data="tableData" border style="width: 100%">
+          <el-table-column label="序号" type="index" width="120"></el-table-column>
+          <el-table-column label="策略名称" prop="name" width="180"></el-table-column>
+          <el-table-column label="策略简介" prop="info" width="180"></el-table-column>
+          <el-table-column label="开始日期" prop="start_date" width="150"></el-table-column>
+          <el-table-column label="结束时间" prop="end_date" width="150"></el-table-column>
+          <el-table-column label="开始时间" prop="start_time" width="150"></el-table-column>
+          <el-table-column label="结束时间" prop="end_time" width="150"></el-table-column>
+          <el-table-column label="启用状态" prop="status" width="150">
+            <template #default="scope">
+              <el-tag v-if="scope.row.status === 1" type="primary">正在启用</el-tag>
+              <el-tag v-else type="danger">未被启用</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column fixed="right" label="操作">
+            <template #default="row">
+              <el-tooltip content="更新策略" placement="top"
+                          v-if="isSystem || mainFlag === 1">
+                <el-button link type="primary" size="default" @click="showEdit(row.row)">
+                  <el-icon>
+                    <Edit/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="删除" placement="top"
+                          v-if="isSystem || mainFlag === 1">
+                <el-button
+                    link
+                    type="primary" size="default"
+                    @click="showDelete(row.row)">
+                  <el-icon>
+                    <Delete/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+
+        </el-table>
+        <el-pagination class="fenye"
+                       v-model:current-page="currentPage"
+                       v-model:page-size="pageSize"
+                       :page-sizes="[10,15, 20, 25, 30]"
+                       background
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="total"
+                       @size-change="handleSizeChange"
+                       @current-change="handleCurrentChange"
+        />
       </div>
-    </div>
 
-  </div>
-  <el-table :data="tableData" border style="width: 100%">
-    <el-table-column label="序号" type="index" width="120"></el-table-column>
-    <el-table-column label="策略名称" prop="name" width="180"></el-table-column>
-    <el-table-column label="策略简介" prop="info"></el-table-column>
-    <el-table-column label="开始日期" prop="start_date"></el-table-column>
-    <el-table-column label="结束时间" prop="end_date"></el-table-column>
-    <el-table-column label="开始时间" prop="start_time"></el-table-column>
-    <el-table-column label="结束时间" prop="end_time"></el-table-column>
-    <el-table-column label="启用状态" prop="status" width="180">
-      <template #default="scope">
-        <el-tag v-if="scope.row.status === 1" type="primary">正在启用</el-tag>
-        <el-tag v-else type="danger">未被启用</el-tag>
-      </template>
-    </el-table-column>
-    <el-table-column fixed="right" width="500" label="操作">
-      <template #default="row">
-        <el-tooltip content="更新策略" placement="top"
-                    v-if="isSystem || mainFlag === 1">
-          <el-button link type="primary" size="default" @click="showEdit(row.row)">
-            <el-icon>
-              <Edit/>
-            </el-icon>
-          </el-button>
-        </el-tooltip>
-        <el-tooltip content="删除" placement="top"
-                    v-if="isSystem || mainFlag === 1">
-          <el-button
-              link
-              type="primary" size="default"
-              @click="showDelete(row.row)">
-            <el-icon>
-              <Delete/>
-            </el-icon>
-          </el-button>
-        </el-tooltip>
-      </template>
-    </el-table-column>
-
-  </el-table>
-  <el-pagination class="fenye"
-                 v-model:current-page="currentPage"
-                 v-model:page-size="pageSize"
-                 :page-sizes="[10,15, 20, 25, 30]"
-                 background
-                 layout="total, sizes, prev, pager, next, jumper"
-                 :total="total"
-                 @size-change="handleSizeChange"
-                 @current-change="handleCurrentChange"
-  />
+    </el-col>
+  </el-row>
   <!--空调策略控制面板-->
   <el-dialog title="空调控制策略" v-model="formVisible" :close-on-click-modal="false" :width="744">
     <el-row>
@@ -358,6 +369,10 @@
 </template>
 
 <script setup>
+import eventBus from '@/listen/event-bus.js'
+
+eventBus.off('defaultNode')
+eventBus.off('node-clicked')
 // 权限控制
 import useAuthControl from '@/hooks/useAuthControl.js'
 import {
@@ -367,6 +382,8 @@ import {
   useStrategyList
 } from '@/hooks/views/energy/strategy/useStrategy.js'
 import {Icon} from '@iconify/vue'
+import ClientTree from '@/components/ClientTree.vue'
+import {onMounted} from 'vue'
 
 const localClient = parseInt(localStorage.getItem('client_id'))
 const {isSystem, mainFlag} = useAuthControl()
@@ -378,11 +395,11 @@ const {
   total,
   pageSize,
   name,
+  title,
   options1,
   options2,
   handleSizeChange,
   handleCurrentChange,
-  getStrategyList,
   reset,
   search
 } = useStrategyList()
@@ -395,10 +412,18 @@ const {showEdit, sureEdit} = useStrategyEdit()
 // 删除策略
 const {deleteVisible, deleteName, showDelete, sureDelete} = useStrategyDelete()
 
-getStrategyList()
+onMounted(async () => {
+  eventBus.on('defaultNode', (val) => {
+    eventBus.emit('node-clicked', val)
+  })
+})
 </script>
 
 <style scoped>
+.right-content {
+  margin-left: 20px;
+}
+
 .fenye {
   margin-top: 20px;
 }

@@ -68,7 +68,7 @@ class StrategyController extends Controller
                     'start_time'      => 'required|string|max:20',
                     'end_time'        => 'required|string|max:20',
                     'interval_time'   => 'numeric|min:1|max:30',
-                    'week_days'       => 'required|array|min:1|max:7'
+                    'week_days'       => 'required|array|min:0|max:6'
                 ]
             );
             if ($validator->fails()) {

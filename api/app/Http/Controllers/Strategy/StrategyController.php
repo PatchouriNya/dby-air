@@ -97,6 +97,10 @@ class StrategyController extends Controller
             if (!$strategy) {
                 return api(null, 404, '策略不存在');
             }
+            $used = Air_group::where('strategy_id', $id)->first();
+            if ($used) {
+                return api(null, 400, '策略正在被使用,请确保没用单位正在使用后再尝试删除');
+            }
             $res = $strategy->delete();
             if ($res) {
                 Air_group::where('strategy_id', $id)->update(['strategy_id' => null]);

@@ -44,11 +44,7 @@
           <el-table-column fixed="right" label="操作">
             <template #default="row">
               <el-tooltip content="更新策略" placement="top"
-<<<<<<< HEAD
                           v-if="isSystem || (client_id === localClient && mainFlag === 1)">
-=======
-                          v-if="isSystem || mainFlag === 1">
->>>>>>> bec9e26f14b9cd45d8e69c9e27030a0146dcfd64
                 <el-button link type="primary" size="default" @click="showEdit(row.row)">
                   <el-icon>
                     <Edit/>
@@ -56,11 +52,7 @@
                 </el-button>
               </el-tooltip>
               <el-tooltip content="删除" placement="top"
-<<<<<<< HEAD
                           v-if="isSystem || (client_id === localClient && mainFlag === 1)">
-=======
-                          v-if="isSystem || mainFlag === 1">
->>>>>>> bec9e26f14b9cd45d8e69c9e27030a0146dcfd64
                 <el-button
                     link
                     type="primary" size="default"

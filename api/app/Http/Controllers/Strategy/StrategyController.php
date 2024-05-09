@@ -17,24 +17,25 @@ class StrategyController extends Controller
      *
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
         // 获取策略列表
         try {
-            if (\request()->query('all_data') == 'true') {
+            $client_id = $request->query('client_id');
+            if ($request->query('all_data') == 'true') {
                 // 如果存在 all_data 参数 为 true，直接返回所有数据
-                $data = Strategy::all();
+                $data = Strategy::where('client_id', $client_id)->get();
             } else {
                 // 分页
-                $pageSize = \request()->query('pageSize') ?? 5;
-                $name = \request()->input('name');
+                $pageSize = $request->query('pageSize') ?? 5;
+                $name = $request->input('name');
                 // 如果提供了名称，添加名称检索条件
                 $query = Strategy::query();
                 if ($name) {
                     $query->where('name', 'like', '%' . $name . '%');
                 }
 
-                $data = $query->paginate($pageSize);
+                $data = $query->where('client_id', $client_id)->paginate($pageSize);
             }
 
             return api($data, 200, '获取策略列表成功');
@@ -55,6 +56,7 @@ class StrategyController extends Controller
         // 新增策略
         try {
             $validator = \Validator::make($request->all(), [
+                    'client_id'       => 'required|integer',
                     'name'            => 'required|string|max:20',
                     'info'            => 'required|string|max:50',
                     'power_state'     => 'required|string|max:20',

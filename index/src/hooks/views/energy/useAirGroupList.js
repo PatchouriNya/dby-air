@@ -137,7 +137,7 @@ export function useSetStrategy() {
         setStrategyVisible.value = true
         group_id.value = row.id
         strategy_id.value = row.strategy_id
-        const res = await getStrategyListApi(true)
+        const res = await getStrategyListApi(true, 1, 1, 1, client_id.value)
         if (res.code === 200)
             strategyList.value = res.data
     }

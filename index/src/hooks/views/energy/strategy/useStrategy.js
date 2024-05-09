@@ -2,8 +2,11 @@ import {onMounted, ref, watch} from 'vue'
 import {addStrategyApi, deleteStrategyApi, editStrategyApi, getStrategyListApi} from '@/api/strategy.js'
 import {ElMessage} from 'element-plus'
 import {deleteGroupApi} from '@/api/group.js'
+import eventBus from '@/listen/event-bus.js'
 
 const tableData = ref()
+const client_id = ref()
+const title = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -20,7 +23,7 @@ for (let i = 1; i <= 15; i++) {
 
 const getStrategyList = async () => {
     // 获取分组列表
-    const res = await getStrategyListApi(false, pageSize.value, currentPage.value, name.value)
+    const res = await getStrategyListApi(false, pageSize.value, currentPage.value, name.value, client_id.value)
     tableData.value = res.data.data
     total.value = res.data.total
 }
@@ -39,6 +42,7 @@ const controlForm = ref({
     week_days: [],
     interval_time: 5
 })
+// 判断是新增还是编辑
 const opFlag = ref(1)
 const formVisible = ref(false)
 
@@ -57,10 +61,19 @@ export const useStrategyList = () => {
     const search = async () => {
         await getStrategyList()
     }
+    eventBus.on('node-clicked', async (val) => {
+        if (val.type === 1) {
+            client_id.value = val.id
+            title.value = val.clientname
+            await getStrategyList()
+        }
+    })
     return {
         tableData,
+        client_id,
         currentPage,
         total,
+        title,
         pageSize,
         name,
         options1,
@@ -80,6 +93,7 @@ export const useStrategyAdd = () => {
         controlForm.value = {}
     }
     const sureAdd = async () => {
+        controlForm.value.client_id = client_id.value
         const res = await addStrategyApi(controlForm.value)
         if (res.code === 201) {
             formVisible.value = false

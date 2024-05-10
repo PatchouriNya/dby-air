@@ -118,7 +118,15 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Strategy',
 
 Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Log', 'middleware' => ['cors']], function () {
     // 资源路由
-    Route::resource('log', 'LogController');
+    Route::apiResource('log', 'LogController');
+
+});
+
+// 问题
+
+Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Question', 'middleware' => ['cors']], function () {
+    // 资源路由
+    Route::apiResource('faq', 'QuestionController');
 
 });
 

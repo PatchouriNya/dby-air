@@ -11,14 +11,14 @@ class MenuController extends Controller
     // 获取全部菜单
     public function getMenu()
     {
-        $data = Menu::with('children')->where('pid', 0)->orderBy('sort', 'asc')->get()->toArray();
-//        $data = Menu::with('children')->where('pid', 0)->ordered()->get()->toArray();
-        return api($data,200,'获取菜单信息成功');
+        $data = Menu::with('children')->where('pid', 0)->where('show', 1)->orderBy('sort', 'asc')->get()->toArray();
+        //        $data = Menu::with('children')->where('pid', 0)->ordered()->get()->toArray();
+        return api($data, 200, '获取菜单信息成功');
     }
 
     public function getMenuRoute(Request $request)
     {
-        $route =  $request->get('route');
+        $route = $request->get('route');
         $res = Menu::getAncestorsByUrl($route);
         $data = '';
         if ($res) {
@@ -28,6 +28,6 @@ class MenuController extends Controller
             }
         }
         $data = rtrim($data, '-');
-        return api($data,200,'获取当前路由地址成功');
+        return api($data, 200, '获取当前路由地址成功');
     }
 }

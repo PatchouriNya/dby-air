@@ -69,7 +69,7 @@ class RefreshOverviews extends Command
                 'air_conditioning_power'  => $air_conditioning_power,
             ]);
 
-            $this->info($client->clientname . '概览数据刷新成功');
+            $this->info(now()->format('Y-m-d H:i:s') . ' ' . $client->clientname . ' 概览数据刷新成功');
         } else {
             // 处理目录客户的情况
             $children = Client::where('pid', $client->id)->get(['id']);
@@ -92,7 +92,7 @@ class RefreshOverviews extends Command
                 'air_conditioning_power'  => $averageConditioningPower,
             ]);
 
-            $this->info($client->clientname . '概览数据刷新成功');
+            $this->info(now()->format('Y-m-d H:i:s') . ' ' . $client->clientname . ' 概览数据刷新成功');
         }
     }
 }

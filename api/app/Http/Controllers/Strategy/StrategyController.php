@@ -64,6 +64,7 @@ class StrategyController extends Controller
                     'wind_speed'      => 'required|string|max:20',
                     'wind_mode'       => 'required|string|max:20',
                     'set_temperature' => 'required|string|max:20',
+                    'delta'           => 'numeric|min:0|max:5',
                     'electrify_state' => 'nullable|string|max:20',
                     'start_date'      => 'required|date',
                     'end_date'        => 'required|date',
@@ -101,7 +102,7 @@ class StrategyController extends Controller
             }
             $used = Air_group::where('strategy_id', $id)->first();
             if ($used) {
-                return api(null, 400, '策略正在被使用,请确保没用单位正在使用后再尝试删除');
+                return api(null, 400, '策略正在被使用,请停用后再尝试删除');
             }
             $res = $strategy->delete();
             if ($res) {
@@ -133,6 +134,7 @@ class StrategyController extends Controller
                     'wind_speed'      => 'required|string|max:20',
                     'wind_mode'       => 'required|string|max:20',
                     'set_temperature' => 'required|string|max:20',
+                    'delta'           => 'numeric|min:0|max:5',
                     'electrify_state' => 'nullable|string|max:20',
                     'start_date'      => 'required|date',
                     'end_date'        => 'required|date',

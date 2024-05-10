@@ -124,6 +124,7 @@ export const useStrategyEdit = () => {
             wind_mode: row.wind_mode,
             wind_speed: row.wind_speed,
             set_temperature: row.set_temperature,
+            delta: row.delta,
             start_date: row.start_date,
             end_date: row.end_date,
             start_time: row.start_time,

@@ -58,15 +58,34 @@ class ExecuteStrategies extends Command
                     ($strategy->start_time <= $time && $strategy->end_time >= $time)
                     && ($strategy->start_date <= $date && $strategy->end_date >= $date)
                     && in_array($week_day, $strategy->week_days)) {
+                    $delta = $strategy->delta;
                     $airIds = Air_group_relationship::where('group_id', $group->id)->pluck('air_id');
-                    Air_detail::whereIn('id', $airIds)
-                        ->update([
-                            'power_state'     => $strategy->power_state,
-                            'operation_mode'  => $strategy->operation_mode,
-                            'wind_speed'      => $strategy->wind_speed,
-                            'wind_mode'       => $strategy->wind_mode,
-                            'set_temperature' => $strategy->set_temperature,
-                        ]);
+                    if ($delta === 0) {
+                        Air_detail::whereIn('id', $airIds)
+                            ->update([
+                                'power_state'     => $strategy->power_state,
+                                'operation_mode'  => $strategy->operation_mode,
+                                'wind_speed'      => $strategy->wind_speed,
+                                'wind_mode'       => $strategy->wind_mode,
+                                'set_temperature' => $strategy->set_temperature,
+                            ]);
+
+                    } else {
+                        foreach ($airIds as $airId) {
+                            $air = Air_detail::find($airId);
+                            $temperature = (int)$air->set_temperature;
+                            if (!(($temperature <= (int)$strategy->set_temperature + $delta) && ($temperature >= (int)$strategy->set_temperature - $delta))) {
+                                $temperature = (int)$strategy->set_temperature;
+                            }
+                            $air->update([
+                                'power_state'     => $strategy->power_state,
+                                'operation_mode'  => $strategy->operation_mode,
+                                'wind_speed'      => $strategy->wind_speed,
+                                'wind_mode'       => $strategy->wind_mode,
+                                'set_temperature' => $temperature . '℃'
+                            ]);
+                        }
+                    }
                     $group->updated_at = now();
                     $group->save();
                     $clientname = Client::find($group->client_id)->clientname;

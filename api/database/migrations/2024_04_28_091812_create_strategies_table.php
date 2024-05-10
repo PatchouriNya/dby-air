@@ -23,6 +23,7 @@ class CreateStrategiesTable extends Migration
             $table->string('wind_speed', 255)->comment('风速');
             $table->string('wind_mode', 255)->comment('风向模式');
             $table->string('set_temperature', 255)->comment('设置温度');
+            $table->tinyInteger('delta')->default(0)->comment('正负区间');
             $table->string('electrify_state', 255)->nullable()->comment('通电状态');
             $table->timestamp('start_date')->nullable()->comment('开始日期');
             $table->timestamp('end_date')->nullable()->comment('结束日期');

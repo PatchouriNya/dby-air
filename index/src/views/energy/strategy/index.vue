@@ -215,9 +215,9 @@
               <template #header>
                 <h3>
                   <Icon icon="material-symbols:thermometer-gain-outline-rounded"/>
-                  <span>温度</span></h3>
+                  <span>设置温度/区间</span></h3>
               </template>
-              <el-select v-model="controlForm.set_temperature" placeholder="选择温度">
+              <el-select v-model="controlForm.set_temperature" placeholder="选择温度" style="width: 80px">
                 <el-option label="16℃" value="16℃"/>
                 <el-option label="17℃" value="17℃"/>
                 <el-option label="18℃" value="18℃"/>
@@ -236,6 +236,14 @@
                 <el-option label="31℃" value="31℃"/>
                 <el-option label="32℃" value="32℃"/>
               </el-select>
+              <el-select v-model="controlForm.delta" placeholder="+/-℃" style="width: 80px;margin-left: 15px">
+                <el-option label="×不设置" :value="0"/>
+                <el-option label="±1℃" :value="1"/>
+                <el-option label="±2℃" :value="2"/>
+                <el-option label="±3℃" :value="3"/>
+                <el-option label="±4℃" :value="4"/>
+              </el-select>
+
             </el-card>
           </el-col>
 

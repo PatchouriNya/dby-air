@@ -15,7 +15,13 @@ class CreateQuestionsTable extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('menu_id')->comment('菜单ID');
+            $table->text('question')->comment('问题');
+            $table->text('answer')->comment('回答');
+            $table->integer('sort')->comment('排序');
             $table->timestamps();
+
+            $table->foreign('menu_id')->references('id')->on('menus')->onDelete('cascade');
         });
     }
 

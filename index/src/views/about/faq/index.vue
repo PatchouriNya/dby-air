@@ -8,7 +8,7 @@
           highlight-current
           @node-click="handleNodeClick"
           node-key="id"
-          :current-node-key="currentNodeKey"
+          default-expand-all
           :default-expanded-keys="[1]"
       />
     </el-col>
@@ -39,7 +39,6 @@ const data = ref({
   0: {question: '我该如何使用帮助中心？', answer: '请选择左侧你想要咨询的菜单分类，即可查看相关问题的解答。'},
   1: {question: '我该如何联系客服？', answer: '请使用左侧菜单中关于我们下的联系我们按钮查看联系方式。'}
 })
-const currentNodeKey = ref(null)
 
 async function initMenusList() {
   let res = await menuList()

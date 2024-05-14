@@ -16,11 +16,11 @@
       <div class="right-content">
         <h2 style="margin-bottom: 20px;text-align: center">关于{{ title }}</h2>
         <el-card>
-          <div v-for="(item, index) in data" :key="item.id">
-            <h3>{{ parseInt(index) + 1 }}.{{ item.question }}</h3>
-            <br>
-            <p> {{ item.answer }}</p>
-            <br>
+          <div v-for="(item, index) in data" :key="item.id" style="margin-bottom:20px">
+            <h3 style="margin-bottom: 10px">{{ parseInt(index) + 1 }}.{{ item.question }}</h3>
+            <el-text style="white-space: pre-line;font-size: 16px">
+              {{ item.answer }}
+            </el-text>
           </div>
         </el-card>
       </div>
@@ -29,7 +29,7 @@
 </template>
 <script setup>
 import {menuList} from '@/api/menu.js'
-import {onMounted, ref} from 'vue'
+import {ref} from 'vue'
 import {getQuestionListApi} from '@/api/question.js'
 
 const menuTree = ref()
@@ -44,7 +44,6 @@ async function initMenusList() {
 }
 
 const handleNodeClick = async (val) => {
-  console.log(val)
   title.value = val.name
   const res = await getQuestionListApi(val.id)
   data.value = res.data

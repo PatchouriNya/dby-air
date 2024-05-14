@@ -105,6 +105,9 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Air', 'mid
 
     // 设置分组策略
     Route::put('group/strategy/{id}', 'GroupController@setStrategy');
+
+    // 刷新真实空调数据(指定客户)
+    Route::get('air/refresh/{id}', 'AirController@refreshAirByClient');
 });
 // 策略
 

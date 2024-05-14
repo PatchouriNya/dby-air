@@ -34,7 +34,7 @@
           <el-table-column prop="with_strategy.name" label="策略" width="180">
             <template #default="scope">
               <span v-if="scope.row.with_strategy"><el-tag>{{ scope.row.with_strategy.name }}</el-tag></span>
-              <span v-else><el-tag type="danger">策略已停用</el-tag></span>
+              <span v-else><el-tag type="danger">暂无策略</el-tag></span>
             </template>
           </el-table-column>
           <el-table-column prop="info" label="组信息"/>
@@ -164,7 +164,7 @@
   <!--设置策略-->
   <el-dialog v-model="setStrategyVisible" title="设置策略" width="500" :close-on-click-modal="false">
     <el-form-item label="策略">
-      <el-select v-model="strategy_id" placeholder="已停用">
+      <el-select v-model="strategy_id" placeholder="请选择策略, 若没有可用的策略，请先添加策略">
         <el-option
             v-for="item in strategyList"
             :key="item.id"

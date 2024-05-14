@@ -56,6 +56,7 @@
               <el-button @click="reset">重置</el-button>
               <el-button type="primary" @click="search">搜索</el-button>
               <el-button type="primary" @click="showSelectColumn">选择列</el-button>
+              <el-button type="danger" @click="getAirTrueData">刷新</el-button>
             </div>
           </div>
 
@@ -445,9 +446,9 @@ import {clientList} from '@/api/client.js'
 import {getOneAirClient} from '@/api/getAirDetail'
 import {updateAir} from '@/api/updateAir'
 import {controlAir} from '@/api/controlAir'
-import {ElMessage} from 'element-plus'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import {logCreateApi} from '@/api/log.js'
-import {airDetailApi} from '@/api/air.js'
+import {airDetailApi, getAirTrueDataApi} from '@/api/air.js'
 import {Icon} from '@iconify/vue'
 
 const tableClientId = ref()
@@ -762,6 +763,34 @@ const handleCurrentChange = () => {
 const handleSizeChange = () => {
   initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
 }
+
+const getAirTrueData = async () => {
+  ElMessageBox.confirm(
+      '读取真实数据时间较长,要继续吗?',
+      '警告',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+  )
+      .then(async () => {
+        const res = await getAirTrueDataApi(clientId.value)
+        if (res.code === 201) {
+          ElMessage({
+            message: res.msg,
+            type: 'success'
+          })
+          await initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+        }
+      })
+      .catch(() => {
+
+      })
+
+
+}
+
 watch(controlForm.value, (val) => {
   if (val.power_state === false)
     controlForm.value.power_state = '关机'

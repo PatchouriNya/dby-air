@@ -5,3 +5,9 @@ export const airDetailApi = (id) => {
         url: '/air/' + id
     })
 }
+
+export const getAirTrueDataApi = (id) => {
+    return request({
+        url: '/air/refresh/' + id
+    })
+}

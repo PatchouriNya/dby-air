@@ -1,7 +1,7 @@
 import request from './request.js'
 
-export const menuList = () => {
+export const menuList = (faq) => {
     return request({
-        url: '/menu'
+        url: '/menu/' + faq
     })
 }

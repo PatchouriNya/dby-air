@@ -81,7 +81,7 @@ const icon = ref('menu')
 
 
 async function initMenusList() {
-  let res = await menuList()
+  let res = await menuList(0)
   menusList.value = res.data
 }
 

@@ -9,9 +9,13 @@ use Illuminate\Http\Request;
 class MenuController extends Controller
 {
     // 获取全部菜单
-    public function getMenu()
+    public function getMenu($faq)
     {
-        $data = Menu::with('children')->where('pid', 0)->where('show', 1)->orderBy('sort', 'asc')->get()->toArray();
+        if ($faq) {
+            $data = Menu::with('children')->whereIn('pid', [0, 999])->where('show', 1)->orderBy('sort', 'asc')->get()->toArray();
+
+        } else
+            $data = Menu::with('children')->where('pid', 0)->where('pid', '!=', 999)->where('show', 1)->orderBy('sort', 'asc')->get()->toArray();
         //        $data = Menu::with('children')->where('pid', 0)->ordered()->get()->toArray();
         return api($data, 200, '获取菜单信息成功');
     }

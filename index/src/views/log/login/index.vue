@@ -105,7 +105,7 @@
 <script setup>
 import {logDeleteApi, logListApi} from '@/api/log.js'
 import {ref, watch} from 'vue'
-import {ElMessage} from 'element-plus'
+import {ElLoading, ElMessage} from 'element-plus'
 import {account} from '@/api/account.js'
 
 const currentPage = ref(1)
@@ -197,6 +197,12 @@ const showDelete = () => {
   deleteVisible.value = !deleteVisible.value
 }
 const sureDelete = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '删除中……',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
+  await getLogList()
   let allIds = [];
   for (let page = 1; page <= lastPage; page++) {
     const res = await logListApi(1, page, pageSize.value, filters.value);
@@ -211,6 +217,7 @@ const sureDelete = async () => {
       console.error(`Failed to delete log with id ${id}:`, error);
     }
   }
+  loading.close()
   ElMessage.success('删除该条件下的所有日志成功')
   await getLogList()
   showDelete()

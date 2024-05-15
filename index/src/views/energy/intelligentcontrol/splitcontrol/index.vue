@@ -446,7 +446,7 @@ import {clientList} from '@/api/client.js'
 import {getOneAirClient} from '@/api/getAirDetail'
 import {updateAir} from '@/api/updateAir'
 import {controlAir} from '@/api/controlAir'
-import {ElMessage, ElMessageBox} from 'element-plus'
+import {ElLoading, ElMessage, ElMessageBox} from 'element-plus'
 import {logCreateApi} from '@/api/log.js'
 import {airDetailApi, getAirTrueDataApi} from '@/api/air.js'
 import {Icon} from '@iconify/vue'
@@ -775,6 +775,11 @@ const getAirTrueData = async () => {
       }
   )
       .then(async () => {
+        const loading = ElLoading.service({
+          lock: true,
+          text: '加载中……',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
         const res = await getAirTrueDataApi(clientId.value)
         if (res.code === 201) {
           ElMessage({
@@ -782,6 +787,7 @@ const getAirTrueData = async () => {
             type: 'success'
           })
           await initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+          loading.close()
         }
       })
       .catch(() => {

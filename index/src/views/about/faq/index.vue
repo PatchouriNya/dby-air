@@ -16,12 +16,14 @@
       <div class="right-content">
         <h2 style="margin-bottom: 20px;text-align: center">关于{{ title }}</h2>
         <el-card>
-          <div v-for="(item, index) in data" :key="item.id" style="margin-bottom:20px">
-            <h3 style="margin-bottom: 10px">{{ parseInt(index) + 1 }}.{{ item.question }}</h3>
-            <el-text style="white-space: pre-line;font-size: 16px">
-              {{ item.answer }}
-            </el-text>
-          </div>
+          <el-skeleton class="content" v-for="(item, index) in data" :key="item.id" :loading="loading" animated>
+            <div class="content">
+              <h3 style="margin-bottom: 10px">{{ parseInt(index) + 1 }}.{{ item.question }}</h3>
+              <el-text style="white-space: pre-line;font-size: 16px">
+                {{ item.answer }}
+              </el-text>
+            </div>
+          </el-skeleton>
         </el-card>
       </div>
     </el-col>
@@ -32,6 +34,7 @@ import {menuList} from '@/api/menu.js'
 import {ref} from 'vue'
 import {getQuestionListApi} from '@/api/question.js'
 
+const loading = ref(true)
 const menuTree = ref()
 const title = ref('帮助中心')
 
@@ -44,9 +47,14 @@ async function initMenusList() {
 }
 
 const handleNodeClick = async (val) => {
+  loading.value = true
   title.value = val.name
   const res = await getQuestionListApi(val.id)
   data.value = res.data
+  setTimeout(() => {
+    loading.value = false
+  }, 300)
+
 }
 const defaultProps = {
   children: 'children',
@@ -59,5 +67,9 @@ handleNodeClick({id: 31, name: '帮助中心'})
 <style scoped lang="scss">
 .right-content {
   margin-left: 20px;
+}
+
+.content {
+  margin-bottom: 20px;
 }
 </style>

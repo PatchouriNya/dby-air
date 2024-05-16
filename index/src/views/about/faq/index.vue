@@ -19,6 +19,7 @@
           <el-button type="primary" @click="addQuestion">
             新增问题
           </el-button>
+          <!--          <span style="margin-left: 10px">空格请自取:( )</span>-->
         </div>
         <el-card>
           <el-skeleton class="content" v-for="(item, index) in data" :key="item.id" :loading="loading" animated
@@ -36,7 +37,7 @@
 
 
               <el-text ref="answer" class="editable"
-                       style="white-space: pre-line;font-size: 16px">
+                       style="white-space: pre-wrap;font-size: 16px">
                 {{ item.answer }}
               </el-text>
             </div>

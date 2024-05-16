@@ -17,15 +17,8 @@
         <h2 style="margin-bottom: 20px;text-align: center">关于 — {{ title }}</h2>
         <div style="margin-bottom: 10px" v-if="isSystem">
           <el-button type="primary" @click="addQuestion">
-            新增
+            新增问题
           </el-button>
-          <el-button type="danger" @click="enterOrExitEditMode">
-            {{ editMode ? '不保存' : '编辑模式' }}
-          </el-button>
-          <h3 style="margin-left: 10px;display: inline-block">请逐个修改！！！</h3>
-          <!--          <el-button type="primary" @click="saveQuestion">
-                      保存
-                    </el-button>-->
         </div>
         <el-card>
           <el-skeleton class="content" v-for="(item, index) in data" :key="item.id" :loading="loading" animated
@@ -33,27 +26,17 @@
             <div class="content">
               <div style="display:flex;align-items: center;margin-bottom: 10px">
                 <h3 style="margin-top: 3px">{{ parseInt(index) + 1 }}.</h3>
-                <h3 class="editable" :contenteditable="editMode"
-                    @click="getQuestion(item)"
-                    @input="updateQuestion(item, $event)">
-                  {{
-                    item.question
-                  }}</h3> <span v-if="isSystem" style="margin-left: 5px">排序值：</span><span v-if="isSystem"
-                                                                                             :contenteditable="editMode"
-                                                                                             @click="getQuestion(item)"
-                                                                                             @input="updateSort(item, $event)"
-                                                                                             style="margin-top: 3px;margin-right: 10px">{{
-                  item.sort
-                }}</span>
-                <el-button v-if="isSystem" type="primary" text @click="saveQuestion">保存</el-button>
+                <h3 class="editable">
+                  {{ item.question }}</h3> <span v-if="isSystem" style="margin-left: 5px">排序值：</span><span
+                  v-if="isSystem"
+                  style="margin-top: 3px;margin-right: 10px">{{ item.sort }}</span>
+                <el-button v-if="isSystem" type="primary" text @click="editQuestion(item)">编辑</el-button>
                 <el-button v-if="isSystem" type="danger" :icon="Delete" text @click="deleteQuestion(item.id)"/>
               </div>
 
 
-              <el-text ref="answer" class="editable" :contenteditable="editMode"
-                       style="white-space: pre-line;font-size: 16px"
-                       @click="getQuestion(item)"
-                       @input="updateAnswer(item, $event)">
+              <el-text ref="answer" class="editable"
+                       style="white-space: pre-line;font-size: 16px">
                 {{ item.answer }}
               </el-text>
             </div>
@@ -69,7 +52,7 @@
         <el-input v-model="addForm.question" autocomplete="off"/>
       </el-form-item>
       <el-form-item label="回答">
-        <el-input v-model="addForm.answer" autocomplete="off"/>
+        <el-input type="textarea" :rows="5" v-model="addForm.answer" autocomplete="off"/>
       </el-form-item>
       <el-form-item label="排序值">
         <el-input v-model="addForm.sort" autocomplete="off"/>
@@ -79,6 +62,28 @@
       <div class="dialog-footer">
         <el-button @click="addVisible = false">取消</el-button>
         <el-button type="primary" @click="sureAdd">
+          确认
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+  <!--编辑-->
+  <el-dialog v-model="editVisible" title="修改问题" width="500" :close-on-click-modal="false">
+    <el-form :model="editForm" :label-position='"top"'>
+      <el-form-item label="问题">
+        <el-input v-model="editForm.question" autocomplete="off"/>
+      </el-form-item>
+      <el-form-item label="回答">
+        <el-input type="textarea" :rows="5" v-model="editForm.answer" autocomplete="off"/>
+      </el-form-item>
+      <el-form-item label="排序值">
+        <el-input v-model="editForm.sort" autocomplete="off"/>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="editVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveQuestion">
           确认
         </el-button>
       </div>
@@ -97,8 +102,6 @@ import useAuthControl from '@/hooks/useAuthControl.js'
 const {isSystem} = useAuthControl()
 const answer = ref()
 const qid = ref()
-let question = {}
-const editMode = ref(false)
 const length = ref(0)
 const loading = ref(true)
 const menuTree = ref()
@@ -130,6 +133,30 @@ const defaultProps = {
   children: 'children',
   label: 'name'
 }
+// 修改
+const editVisible = ref(false)
+const editForm = ref({
+  question: '',
+  answer: '',
+  sort: null
+})
+const editQuestion = (item) => {
+  qid.value = item.id
+  editForm.value.question = item.question
+  editForm.value.answer = item.answer
+  editForm.value.sort = item.sort
+  editVisible.value = true
+}
+
+const saveQuestion = async () => {
+  const res = await editQuestionApi(qid.value, editForm.value)
+  if (res.code === 201) {
+    ElMessage.success(res.msg)
+    editVisible.value = false
+    await handleNodeClick(old_data.value)
+  }
+}
+
 // 新增
 const addVisible = ref(false)
 const addForm = ref({
@@ -152,38 +179,7 @@ const sureAdd = async () => {
     await handleNodeClick(old_data.value)
   }
 }
-// 编辑
-const enterOrExitEditMode = () => {
-  if (editMode.value === true)
-    handleNodeClick(old_data.value)
-  editMode.value = !editMode.value
-}
-const getQuestion = (item) => {
-  qid.value = item.id
-  question.question = item.question
-  question.answer = item.answer
-  question.sort = item.sort
-}
-const updateQuestion = (item, event) => {
-  question.question = event.target.innerText
-}
-const updateAnswer = (item, event) => {
-  question.answer = event.target.innerText
-}
-const updateSort = (item, event) => {
-  question.sort = parseInt(event.target.innerText)
-  console.log(question.sort)
-}
 
-const saveQuestion = async () => {
-  if (qid.value && editMode.value === true) {
-    const res = await editQuestionApi(qid.value, question)
-    if (res.code === 201) {
-      ElMessage.success(res.msg)
-      enterOrExitEditMode()
-    }
-  }
-}
 
 // 删除
 const deleteQuestion = async (id) => {

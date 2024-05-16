@@ -53,7 +53,8 @@ class RefreshOverviews extends Command
             $air_quantity = $airs->count();
             $air_boot_quantity = $airs->where('power_state', '开机')->count();
 
-            $temperatures = $airs->map(function ($air) {
+            $air_boot = Air_detail::where('client_id', $client->id)->where('power_state', '开机')->get();
+            $temperatures = $air_boot->map(function ($air) {
                 $temperature = $air->set_temperature;
                 preg_match('/\d+/', $temperature, $matches);
                 return !empty($matches) ? (int)$matches[0] : null;

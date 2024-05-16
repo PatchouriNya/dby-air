@@ -2,18 +2,20 @@
   <el-row>
     <el-col :span="4">
       <div style="width: 100%">
-        <el-tree
-            :data="treeData"
-            :props="defaultProps"
-            node-key="id"
-            :expand-on-click-node="true"
-            @current-change="clickNode"
-            :current-node-key="default_checked"
-            :default-expanded-keys="defaultExpandedKeys"
-            auto-expand-parent
-            highlight-current
-            style="background-color: #f5f5f5;width: 100%"
-        />
+        <el-skeleton :loading="loading">
+          <el-tree
+              :data="treeData"
+              :props="defaultProps"
+              node-key="id"
+              :expand-on-click-node="true"
+              @current-change="clickNode"
+              :current-node-key="default_checked"
+              :default-expanded-keys="defaultExpandedKeys"
+              auto-expand-parent
+              highlight-current
+              style="background-color: #f5f5f5;width: 100%"
+          />
+        </el-skeleton>
       </div>
     </el-col>
     <el-col :span="20">
@@ -451,6 +453,7 @@ import {logCreateApi} from '@/api/log.js'
 import {airDetailApi, getAirTrueDataApi} from '@/api/air.js'
 import {Icon} from '@iconify/vue'
 
+const loading = ref(true)
 const tableClientId = ref()
 // 配置左侧层级
 const clientId = ref()
@@ -584,8 +587,10 @@ const findFirstTypeOneNode = (nodes) => {
 
 
 async function initclientList() {
+  loading.value = true
   let res = await clientList()
   treeData.value = [res.data]
+  loading.value = false
   let defaultChoose = findFirstTypeOneNode(treeData.value)
   if (defaultChoose) {
     // 找到第一个 type 为 1 的节点

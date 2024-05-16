@@ -2,15 +2,17 @@
   <el-row>
     <el-col :span="4">
       <div style="width: 100%">
-        <el-tree
-            :data="treeData"
-            :props="defaultProps"
-            :node-key="defaultProps.label"
-            :expand-on-click-node="true"
-            default-expand-all
-            style="background-color: #f5f5f5 ;width:100%"
-            @node-click="clickNode"
-        />
+        <el-skeleton :loading="loading" :rows="8">
+          <el-tree
+              :data="treeData"
+              :props="defaultProps"
+              :node-key="defaultProps.label"
+              :expand-on-click-node="true"
+              default-expand-all
+              style="background-color: #f5f5f5 ;width:100%"
+              @node-click="clickNode"
+          />
+        </el-skeleton>
       </div>
     </el-col>
     <el-col :span="20">
@@ -82,6 +84,7 @@
 import {ref, computed, onMounted} from 'vue'
 import {clientList} from '@/api/client.js'
 
+const loading = ref(true)
 const treeData = ref([])
 const selectData = ref({})
 const title = ref('欢迎回来')
@@ -92,7 +95,9 @@ const defaultProps = {
 }
 
 async function initclientList() {
+  loading.value = true
   let res = await clientList()
+  loading.value = false
   treeData.value = [res.data]
   clickNode(treeData.value[0])
 }

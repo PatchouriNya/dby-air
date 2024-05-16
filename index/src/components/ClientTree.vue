@@ -1,17 +1,20 @@
 <template>
   <div style="width: 250px">
-    <el-tree
-        :data="treeData"
-        :props="defaultProps"
-        node-key="id"
-        :expand-on-click-node="true"
-        :current-node-key="currentKey"
-        :default-expanded-keys="expandedKeys"
-        highlight-current
-        ref="tree"
-        style="background-color: #f5f5f5"
-        @node-click="clickNode"
-    />
+    <el-skeleton animated :loading="loading">
+      <el-tree
+          :data="treeData"
+          :props="defaultProps"
+          node-key="id"
+          :expand-on-click-node="true"
+          :current-node-key="currentKey"
+          :default-expanded-keys="expandedKeys"
+          highlight-current
+          ref="tree"
+          style="background-color: #f5f5f5"
+          @node-click="clickNode"
+      />
+    </el-skeleton>
+
   </div>
 </template>
 
@@ -21,6 +24,7 @@ import {clientList} from '@/api/client'
 import eventBus from "@/listen/event-bus"
 import {useClientStore} from '@/store/client.js'
 
+const loading = ref(true)
 // 树dom
 const tree = ref()
 // 树数据
@@ -65,8 +69,10 @@ const findFirstTypeOneNode = (nodes) => {
 }
 
 async function initclientList() {
+  loading.value = true
   let res = await clientList()
   treeData.value = [res.data]
+  loading.value = false
   defaultChoose.value = findFirstTypeOneNode(treeData.value)
   currentKey.value = defaultChoose.value.id
   expandedKeys.value.push(defaultChoose.value.id)

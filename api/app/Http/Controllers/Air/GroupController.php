@@ -194,6 +194,17 @@ class GroupController extends Controller
                     return api(null, 400, $client_id->errors()->first());
                 }
                 $client_id = (int)$client_id->validate()['client_id'];
+                $air_ids = Air_detail::where('client_id', $client_id)->pluck('id')->toArray();
+                unset($data['client_id']);
+                foreach ($air_ids as $air_id) {
+                    $res = Air_detail::where('id', $air_id)->update($data);
+                    if (!$res) {
+                        $error_air_id_array[] = $air_id;
+                    }
+                }
+                if (count($error_air_id_array) > 0) {
+                    return api(null, 400, '指令部分发送失败,请检查air_id是否正确。失败的id如下: ' . implode(',', $error_air_id_array));
+                }
                 return api($client_id, 201, '集体强控成功');
 
             } else {

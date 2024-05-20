@@ -1,6 +1,13 @@
 import {ref, watch} from 'vue'
 import eventBus from '@/listen/event-bus.js'
-import {addGroupApi, deleteGroupApi, editGroupApi, getGroupListByClientApi, setStrategyApi} from '@/api/group.js'
+import {
+    addGroupApi,
+    deleteGroupApi,
+    editGroupApi,
+    getGroupListByClientApi,
+    groupControlApi,
+    setStrategyApi
+} from '@/api/group.js'
 import {ElMessage} from 'element-plus'
 import {getStrategyListApi} from '@/api/strategy.js'
 
@@ -161,5 +168,24 @@ export function useSetStrategy() {
     return {setStrategyVisible, strategy_id, strategyList, showSetStrategy, sureSetStrategy, stopSetStrategy}
 }
 
+export function userGroupControl() {
+    // 组控制
+    const groupControlVisible = ref(false)
+    const group_id = ref()
+    const controlForm = ref({})
+    const showGroupControl = async (row) => {
+        controlForm.value = {}
+        group_id.value = row.id
+        groupControlVisible.value = true
+    }
+    const sureGroupControl = async () => {
+        const res = await groupControlApi(group_id.value, controlForm.value)
+        if (res.code === 201) {
+            groupControlVisible.value = false
+            ElMessage.success(res.msg)
+        }
+    }
+    return {groupControlVisible, controlForm, showGroupControl, sureGroupControl}
+}
 
 

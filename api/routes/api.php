@@ -72,7 +72,7 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Login', 'm
 // 菜单
 Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Menu', 'middleware' => ['cors']], function () {
     Route::get('menu/route', 'MenuController@getMenuRoute');
-    
+
     // 获取全部菜单
     Route::get('menu/{faq}', 'MenuController@getMenu');
 
@@ -109,6 +109,9 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Air', 'mid
 
     // 刷新真实空调数据(指定客户)
     Route::get('air/refresh/{id}', 'AirController@refreshAirByClient');
+
+    // 分组控制
+    Route::put('group/control/{id}', 'GroupController@groupControl');
 });
 // 策略
 

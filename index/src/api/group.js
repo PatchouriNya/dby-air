@@ -75,3 +75,11 @@ export const setStrategyApi = (id, strategy_id) => {
         data: {strategy_id}
     })
 }
+
+export const groupControlApi = (id, data) => {
+    return request({
+        url: '/group/control/' + id,
+        method: 'put',
+        data
+    })
+}

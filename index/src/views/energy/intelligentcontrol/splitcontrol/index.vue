@@ -45,7 +45,7 @@
             </div>
             <div class="searchOnline" style="margin-left: 10px">
               <span>开机状态</span>
-              <el-select v-model="filters.power_state" placeholder="选择状态" style="width: 240px">
+              <el-select v-model="filters.power_state" placeholder="选择状态" style="width: 160px">
                 <el-option
                     v-for="item in options"
                     :key="item.value"
@@ -59,6 +59,8 @@
               <el-button type="primary" @click="search">搜索</el-button>
               <el-button type="primary" @click="showSelectColumn">选择列</el-button>
               <el-button type="danger" @click="getAirTrueData">刷新</el-button>
+              <el-button type="warning" @click="forceControl">集体强控</el-button>
+
             </div>
           </div>
 
@@ -412,6 +414,173 @@
         </span>
     </template>
   </el-dialog>
+  <!--强控面板-->
+  <el-dialog title="空调集体控制" v-model="forceControlVisible" :close-on-click-modal="false" :width="744">
+
+    <div class="part2">
+      <el-card class="card-box">
+        <template #header>
+          <div>
+            <span style="font-size: 16px">控制面板</span>
+          </div>
+        </template>
+        <el-row>
+          <el-col :span="12">
+            <el-tag type="primary" effect="dark" size="large">集体控制</el-tag>
+
+          </el-col>
+
+          <el-col :span="12">
+            <el-button-group>
+              <el-switch v-model="controlForm.power_state" active-value="开机" inactive-value="关机"
+                         active-text="开机" inactive-text="关机"/>
+            </el-button-group>
+          </el-col>
+
+        </el-row>
+
+        <el-row>
+          <el-col :span="8">
+            <el-card shadow="never">
+              <template #header>
+                <h3>
+                  <Icon icon="material-symbols:thermometer-gain-outline-rounded"/>
+                  <span>设置温度/区间</span></h3>
+              </template>
+              <el-select v-model="controlForm.set_temperature" placeholder="选择温度">
+                <el-option label="16℃" value="16℃"/>
+                <el-option label="17℃" value="17℃"/>
+                <el-option label="18℃" value="18℃"/>
+                <el-option label="19℃" value="19℃"/>
+                <el-option label="20℃" value="20℃"/>
+                <el-option label="21℃" value="21℃"/>
+                <el-option label="22℃" value="22℃"/>
+                <el-option label="23℃" value="23℃"/>
+                <el-option label="24℃" value="24℃"/>
+                <el-option label="25℃" value="25℃"/>
+                <el-option label="26℃" value="26℃"/>
+                <el-option label="27℃" value="27℃"/>
+                <el-option label="28℃" value="28℃"/>
+                <el-option label="29℃" value="29℃"/>
+                <el-option label="30℃" value="30℃"/>
+                <el-option label="31℃" value="31℃"/>
+                <el-option label="32℃" value="32℃"/>
+              </el-select>
+
+            </el-card>
+          </el-col>
+
+          <el-col :span="13" :push="2">
+            <el-card shadow="never">
+              <template #header>
+                <h3>
+                  <Icon icon="ri:function-fill"/>
+                  <span>模式</span></h3>
+              </template>
+              <el-radio-group v-model="controlForm.operation_mode">
+                <el-radio-button label="送风" value="送风">
+                  <template #default>
+                    <Icon icon="mdi:fan" class="btnIcon"/>
+                    <span class="btnWord">送风</span>
+                  </template>
+                </el-radio-button>
+                <el-radio-button label="制冷" value="制冷">
+                  <template #default>
+                    <Icon icon="fluent:weather-snowflake-32-filled" class="btnIcon"/>
+                    <span class="btnWord">制冷</span>
+                  </template>
+                </el-radio-button>
+                <el-radio-button label="制热" value="制热">
+                  <template #default>
+                    <Icon icon="solar:sun-2-bold-duotone" class="btnIcon"/>
+                    <span class="btnWord">制热</span>
+                  </template>
+                </el-radio-button>
+                <el-radio-button label="除湿" value="除湿">
+                  <template #default>
+                    <Icon icon="fa6-solid:droplet-slash" class="btnIcon"/>
+                    <span class="btnWord">除湿</span>
+                  </template>
+                </el-radio-button>
+              </el-radio-group>
+            </el-card>
+          </el-col>
+        </el-row>
+
+        <el-row>
+
+          <el-col :span="8" class="card-item">
+            <el-card shadow="never">
+              <template #header>
+                <h3>
+                  <Icon icon="streamline:hotel-air-conditioner"/>
+                  <span>风向</span>
+                </h3>
+              </template>
+              <el-radio-group v-model="controlForm.wind_mode">
+                <el-radio-button label="走风" value="走风">
+                  <template #default>
+                    <Icon icon="mdi:wind-power" class="btnIcon"/>
+                    <span class="btnWord">走风</span>
+                  </template>
+                </el-radio-button>
+                <el-radio-button label="扫风" value="扫风">
+                  <template #default>
+                    <Icon icon="carbon:wind-stream" class="btnIcon"/>
+                    <span class="btnWord">扫风</span>
+                  </template>
+                </el-radio-button>
+              </el-radio-group>
+            </el-card>
+          </el-col>
+
+          <el-col :span="13" :push="2" class="card-item">
+            <el-card shadow="never">
+              <template #header>
+                <h3>
+                  <Icon icon="bx:wind"/>
+                  <span>风速</span>
+                </h3>
+              </template>
+              <el-radio-group v-model="controlForm.wind_speed">
+                <el-radio-button label="自动" value="自动">
+                  <template #default>
+                    <Icon icon="mdi:refresh-auto" class="btnIcon"/>
+                    <span class="btnWord">自动</span>
+                  </template>
+                </el-radio-button>
+                <el-radio-button label="低风" value="低风">
+                  <template #default>
+                    <Icon icon="mdi:fan-speed-1" class="btnIcon"/>
+                    <span class="btnWord">低风</span>
+                  </template>
+                </el-radio-button>
+                <el-radio-button label="中风" value="中风">
+                  <template #default>
+                    <Icon icon="mdi:fan-speed-2" class="btnIcon"/>
+                    <span class="btnWord">中风</span>
+                  </template>
+                </el-radio-button>
+                <el-radio-button label="高风" value="高风">
+                  <template #default>
+                    <Icon icon="mdi:fan-speed-3" class="btnIcon"/>
+                    <span class="btnWord">高风</span>
+                  </template>
+                </el-radio-button>
+              </el-radio-group>
+            </el-card>
+          </el-col>
+        </el-row>
+      </el-card>
+    </div>
+    <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="forceControlVisible = false">取 消</el-button>
+          <el-button type="primary" @click="sureForceControl">发送指令</el-button>
+
+        </span>
+    </template>
+  </el-dialog>
 
   <el-dialog title="编辑" v-model="editVisible" :close-on-click-modal="false" :width="500">
     <transition name="fade">
@@ -452,6 +621,7 @@ import {ElLoading, ElMessage, ElMessageBox} from 'element-plus'
 import {logCreateApi} from '@/api/log.js'
 import {airDetailApi, getAirTrueDataApi} from '@/api/air.js'
 import {Icon} from '@iconify/vue'
+import {groupControlApi} from '@/api/group.js'
 
 const loading = ref(true)
 const tableClientId = ref()
@@ -806,6 +976,21 @@ watch(controlForm.value, (val) => {
   if (val.power_state === false)
     controlForm.value.power_state = '关机'
 })
+
+// 强控
+const forceControlVisible = ref(false)
+const forceControl = () => {
+  controlForm.value = {client_id: clientId.value}
+  forceControlVisible.value = true
+}
+const sureForceControl = async () => {
+  const res = await groupControlApi(0, controlForm.value)
+  if (res.code === 201) {
+    forceControlVisible.value = false
+    ElMessage.success(res.msg)
+    await initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+  }
+}
 
 onMounted(() => {
   initclientList()

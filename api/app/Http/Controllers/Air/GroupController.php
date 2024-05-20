@@ -169,5 +169,52 @@ class GroupController extends Controller
         return api(null, 400, '策略设置失败');
     }
 
+    public function groupControl(Request $request, $id)
+    {
+        //        根据集控模式($id是否为0)，发送分组控制指令或集体强控
+        try {
+            $validator = \Validator::make($request->all(), [
+                    'power_state'     => 'required|string|max:20',
+                    'operation_mode'  => 'required|string|max:20',
+                    'wind_speed'      => 'required|string|max:20',
+                    'wind_mode'       => 'required|string|max:20',
+                    'set_temperature' => 'required|string|max:20',
+                ]
+            );
+            if ($validator->fails()) {
+                return api(null, 400, $validator->errors()->first());
+            }
+            $data = $validator->validate();
+            $error_air_id_array = [];
+            if ($id == 0) {
+                $client_id = \Validator::make($request->all(), [
+                    'client_id' => 'required|integer|exists:clients,id',
+                ]);
+                if ($client_id->fails()) {
+                    return api(null, 400, $client_id->errors()->first());
+                }
+                $client_id = (int)$client_id->validate()['client_id'];
+                return api($client_id, 201, '集体强控成功');
+
+            } else {
+                $air_ids = Air_group_relationship::where('group_id', $id)->pluck('air_id')->toArray();
+                unset($data['client_id']);
+                foreach ($air_ids as $air_id) {
+                    $res = Air_detail::where('id', $air_id)->update($data);
+                    if (!$res) {
+                        $error_air_id_array[] = $air_id;
+                    }
+                }
+                if (count($error_air_id_array) > 0) {
+                    return api(null, 400, '指令部分发送失败,请检查air_id是否正确。失败的id如下: ' . implode(',', $error_air_id_array));
+                }
+                return api($request->all(), 201, '发送指令成功');
+            }
+
+        } catch (\Exception $e) {
+            return api(null, 500, $e->getMessage());
+        }
+    }
+
 
 }

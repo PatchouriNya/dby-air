@@ -19,30 +19,38 @@
           <el-button type="primary" @click="addQuestion">
             新增问题
           </el-button>
+
           <!--          <span style="margin-left: 10px">空格请自取:( )</span>-->
         </div>
-        <el-card>
+        <el-card class="card">
           <el-skeleton class="content" v-for="(item, index) in data" :key="item.id" :loading="loading" animated
                        :rows="length">
             <div class="content">
-              <div style="display:flex;align-items: center;margin-bottom: 10px">
-                <h3 style="margin-top: 3px">{{ parseInt(index) + 1 }}.</h3>
-                <h3 class="editable">
-                  {{ item.question }}</h3> <span v-if="isSystem" style="margin-left: 5px">排序值：</span><span
-                  v-if="isSystem"
-                  style="margin-top: 3px;margin-right: 10px">{{ item.sort }}</span>
+              <div style="display:flex;align-items: center;margin-bottom: 10px" class="scrollbar-demo-item">
+
+
+                <h3 class="editable" style="margin-left: 15px">
+                  {{ parseInt(index) + 1 }}.{{ item.question }}</h3>
+                <span v-if="isSystem"
+                      style="margin-left: 5px">排序值：</span>
+                <span
+                    v-if="isSystem"
+                    style="margin-top: 3px;margin-right: 10px">{{ item.sort }}</span>
                 <el-button v-if="isSystem" type="primary" text @click="editQuestion(item)">编辑</el-button>
                 <el-button v-if="isSystem" type="danger" :icon="Delete" text @click="deleteQuestion(item.id)"/>
+
               </div>
 
 
               <el-text ref="answer" class="editable"
                        style="white-space: pre-wrap;font-size: 16px">
-                {{ item.answer }}
+                &nbsp; &nbsp; &nbsp;&nbsp;<span>{{ item.answer }}</span>
               </el-text>
             </div>
           </el-skeleton>
         </el-card>
+
+
       </div>
     </el-col>
   </el-row>
@@ -75,7 +83,8 @@
         <el-input v-model="editForm.question" autocomplete="off"/>
       </el-form-item>
       <el-form-item label="回答">
-        <el-input type="textarea" :rows="5" v-model="editForm.answer" autocomplete="off"/>
+        <el-input type="textarea" style="white-space: pre-wrap;" :rows="5" v-model="editForm.answer"
+                  autocomplete="off"/>
       </el-form-item>
       <el-form-item label="排序值">
         <el-input v-model="editForm.sort" autocomplete="off"/>
@@ -216,9 +225,13 @@ handleNodeClick({id: 31, name: '帮助中心'})
 }
 
 .content {
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 }
 
+.card {
+  max-height: 700px;
+  overflow-y: auto;
+}
 
 /* 设置 focus 状态下的样式 */
 .editable:focus {
@@ -231,5 +244,13 @@ span:focus {
   outline: 2px solid #409eff; /* 设置边框颜色 */
   border-radius: 4px; /* 可选，设置圆角 */
   padding: 4px; /* 确保 padding 在 focus 时仍然存在 */
+}
+
+.scrollbar-demo-item {
+  height: 50px;
+  margin: 10px;
+  border-radius: 4px;
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
 }
 </style>

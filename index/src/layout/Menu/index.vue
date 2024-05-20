@@ -5,6 +5,7 @@
            :unique-opened="true"
            class="el-menu-vertical-demo"
            text-color="#fff"
+           :default-openeds="['/main/energy','/main/energy/intelligentControl']"
            router
   >
     <router-link to="/main">
@@ -71,8 +72,6 @@ import {Edit} from '@element-plus/icons-vue'
 
 let menusList = ref([])
 const activeIndex = ref('')
-const iconList = ref(['Odometer', 'Operation', 'Sunset', 'tickets', 'pie-chart'])
-const iconList2 = ref(['EditPen', 'EditPen', 'EditPen'])
 const $menuActiveText = '#ffffff'
 const $menuBg = '#304156'
 const route = useRoute()

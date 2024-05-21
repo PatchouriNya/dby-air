@@ -26,7 +26,7 @@ class GroupController extends Controller
             $query->where('name', 'like', '%' . $name . '%');
         }
 
-        $data = $query->with(['withStrategy:id,name'])->paginate($pageSize);
+        $data = $query->paginate($pageSize);
 
         return api($data, 200, '获得该客户下空调组成功');
     }
@@ -151,23 +151,62 @@ class GroupController extends Controller
     public function setStrategy($id)
     {
         $airGroup = Air_group::find($id);
+        $client_id = $airGroup->client_id;
         $ori_id = $airGroup->strategy_id;
-        $res = $airGroup->update(['strategy_id' => \request('strategy_id')]);
-        if ($res) {
-            if (\request('strategy_id') != null)
-                Strategy::find(\request('strategy_id'))->update(['status' => 1]);
-            if ($ori_id) {
-                $res = Air_group::where('strategy_id', $ori_id)->exists();
-                if ($res) {
-                    Strategy::find($ori_id)->update(['status' => 1]);
-                } else {
-                    Strategy::find($ori_id)->update(['status' => 0]);
+        // ori_Id变为数组
+        $strategy_id = \request('strategy_id');
+        $error_strategy_id_array = [];
+        $msg = '';
+        if ($strategy_id === []) {
+            $res = $airGroup->update(['strategy_id' => null]);
+            $msg = '策略停用成功';
+        } else {
+            // 循环判断策略是否存在,存在则更新状态为1,不存在就进入error_strategy_id_array最后去掉错误的值再入库
+            foreach ($strategy_id as $strategy) {
+                if ($strategy) {
+                    $res = Strategy::find($strategy);
+                    if ($res) {
+                        $res->update(['status' => 1]);
+                    } else {
+                        $error_strategy_id_array[] = $strategy;
+                    }
                 }
             }
-            return api(null, 201, '策略设置成功');
+            $res = $airGroup->update(['strategy_id' => json_encode(array_diff($strategy_id, $error_strategy_id_array))]);
+            $msg = '策略设置成功';
         }
-        return api(null, 400, '策略设置失败');
+        if ($res) {
+            if ($ori_id) {
+                $ori_id_bak = $ori_id;
+                // 仍然在使用的策略id数组
+                $res_arr = [];
+                $arr = Air_group::whereNotNull('strategy_id')->where('client_id', $client_id)->get('strategy_id')->toArray();
+                foreach ($arr as $value) {
+                    foreach ($ori_id as $ori_strategy) {
+                        if (in_array($ori_strategy, $value['strategy_id'])) {
+                            $res_arr[] = $ori_strategy;
+                        }
+                    }
+                    $ori_id = array_diff($ori_id, $res_arr);
+                    if ($ori_id == [])
+                        break;
+                }
+                // 不在使用的id数组
+                $ori_id_arr = array_diff($ori_id_bak, $res_arr);
+                // 将不在使用的策略启用状态改为0
+                Strategy::whereIn('id', $ori_id_arr)->update(['status' => 0]);
+
+                if ($error_strategy_id_array == [])
+                    return api(null, 201, $msg);
+                else
+                    return api(null, 201, '策略设置成功,但部分策略id不存在,请检查:' . implode(',', $error_strategy_id_array));
+            }
+        } else {
+            return api(null, 400, '策略设置失败,请检查策略id是否正确');
+        }
+        return api(null, 201, '策略设置成功');
     }
+
 
     public function groupControl(Request $request, $id)
     {

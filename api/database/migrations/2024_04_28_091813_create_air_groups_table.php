@@ -18,7 +18,7 @@ class CreateAirGroupsTable extends Migration
             $table->string('name');
             $table->text('info')->nullable();
             $table->unsignedBigInteger('client_id')->comment('关联的客户ID');
-            $table->unsignedBigInteger('strategy_id')->nullable()->comment('关联的策略ID');
+            $table->string('strategy_id', 255)->nullable()->comment('关联的策略ID');
 
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->timestamps();

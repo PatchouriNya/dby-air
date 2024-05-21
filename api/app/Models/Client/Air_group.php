@@ -36,6 +36,12 @@ class Air_group extends Model
 
     public function withStrategy()
     {
-        return $this->hasOne(Strategy::class, 'id', 'strategy_id');
+        //        return $this->hasOne(Strategy::class, 'id', 'strategy_id');
+    }
+
+    // 定义 strategy_id 字段的访问器
+    public function getStrategyIdAttribute($value)
+    {
+        return json_decode($value);
     }
 }

@@ -100,13 +100,16 @@ class StrategyController extends Controller
             if (!$strategy) {
                 return api(null, 404, '策略不存在');
             }
-            $used = Air_group::where('strategy_id', $id)->first();
-            if ($used) {
-                return api(null, 400, '策略正在被使用,请停用后再尝试删除');
+            $client_id = $strategy->client_id;
+            $arrs = Air_group::where('client_id', $client_id)->get('strategy_id')->toArray();
+
+            foreach ($arrs as $arr) {
+                if (in_array($id, $arr['strategy_id'])) {
+                    return api(null, 400, '策略正在被使用,请停用后再尝试删除');
+                }
             }
             $res = $strategy->delete();
             if ($res) {
-                Air_group::where('strategy_id', $id)->update(['strategy_id' => null]);
                 return api(null, 204, '删除策略成功');
             }
             return api(null, 500, '删除策略失败');

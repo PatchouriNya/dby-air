@@ -139,11 +139,11 @@ export function useSetStrategy() {
     const setStrategyVisible = ref(false)
     const group_id = ref()
     const strategyList = ref([])
-    const strategy_id = ref()
+    const strategy_id = ref([])
     const showSetStrategy = async (row) => {
         setStrategyVisible.value = true
         group_id.value = row.id
-        strategy_id.value = row.strategy_id
+        strategy_id.value = row.strategy_id ? row.strategy_id : []
         const res = await getStrategyListApi(true, 1, 1, 1, client_id.value)
         if (res.code === 200)
             strategyList.value = res.data
@@ -157,12 +157,12 @@ export function useSetStrategy() {
         }
     }
     const stopSetStrategy = async () => {
-        strategy_id.value = null
+        strategy_id.value = []
         const res = await setStrategyApi(group_id.value, strategy_id.value)
         if (res.code === 201) {
             setStrategyVisible.value = false
             await getGroupListByClient()
-            ElMessage.success('策略已停用')
+            ElMessage.success('策略停用成功')
         }
     }
     return {setStrategyVisible, strategy_id, strategyList, showSetStrategy, sureSetStrategy, stopSetStrategy}

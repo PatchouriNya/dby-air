@@ -33,14 +33,14 @@
           <el-table-column prop="name" label="组名" width="180"/>
           <el-table-column prop="with_strategy.name" label="策略" width="180">
             <template #default="scope">
-              <span v-if="scope.row.with_strategy"><el-tag>{{ scope.row.with_strategy.name }}</el-tag></span>
+              <span v-if="scope.row.strategy_id && scope.row.strategy_id[0]"><el-tag>正在执行</el-tag></span>
               <span v-else><el-tag type="danger">暂无策略</el-tag></span>
             </template>
           </el-table-column>
           <el-table-column prop="info" label="组信息"/>
           <el-table-column fixed="right" label="操作">
             <template #default="row">
-              <el-tooltip content="设置策略" placement="top"
+              <el-tooltip content="设置/查看策略" placement="top"
                           v-if="isSystem || (client_id === localClient && mainFlag === 1)">
                 <el-button link type="primary" size="default" @click="showSetStrategy(row.row)">
                   <el-icon>
@@ -162,9 +162,9 @@
   </el-dialog>
 
   <!--设置策略-->
-  <el-dialog v-model="setStrategyVisible" title="设置策略" width="500" :close-on-click-modal="false">
+  <el-dialog v-model="setStrategyVisible" title="设置/查看策略" width="500" :close-on-click-modal="false">
     <el-form-item label="策略">
-      <el-select v-model="strategy_id" placeholder="请选择策略, 若没有可用的策略，请先添加策略">
+      <el-select v-model="strategy_id" placeholder="请选择策略, 若没有可用的策略，请先添加策略" multiple>
         <el-option
             v-for="item in strategyList"
             :key="item.id"

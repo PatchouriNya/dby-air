@@ -29,7 +29,7 @@
           <el-table-column prop="name" label="组名" width="180"/>
           <el-table-column prop="with_strategy.name" label="策略" width="180">
             <template #default="scope">
-              <span v-if="scope.row.with_strategy"><el-tag>{{ scope.row.with_strategy.name }}</el-tag></span>
+              <span v-if="scope.row.strategy_id && scope.row.strategy_id[0]"><el-tag>正在执行</el-tag></span>
               <span v-else><el-tag type="danger">暂无策略</el-tag></span>
             </template>
           </el-table-column>

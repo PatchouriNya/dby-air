@@ -90,7 +90,7 @@ export const useStrategyAdd = () => {
     const showAdd = () => {
         formVisible.value = true
         opFlag.value = 1
-        controlForm.value = {}
+        controlForm.value = {power_state: '关机'}
     }
     const sureAdd = async () => {
         controlForm.value.client_id = client_id.value

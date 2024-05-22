@@ -15,45 +15,39 @@
     <el-col :span="20">
       <div class="right-content">
         <h2 style="margin-bottom: 20px;text-align: center">关于 — {{ title }}</h2>
-        <div style="margin-bottom: 10px" v-if="isSystem">
-          <el-button type="primary" @click="addQuestion">
-            新增问题
-          </el-button>
+        <div style="display: flex">
+          <div style="margin-bottom: 10px" v-if="isSystem">
+            <el-button type="primary" @click="addQuestion">新增问题</el-button>
+          </div>
 
-          <!--          <span style="margin-left: 10px">空格请自取:( )</span>-->
+          <!-- 搜索框 -->
+          <div style="margin-bottom: 20px;margin-left: 20px">
+            <el-input v-model="searchQuery" placeholder="搜索问题" style="width: 300px;" clearable/>
+          </div>
         </div>
         <el-card class="card">
-          <el-skeleton class="content" v-for="(item, index) in data" :key="item.id" :loading="loading" animated
+          <el-skeleton class="content" v-for="(item, index) in filteredData" :key="item.id" :loading="loading" animated
                        :rows="length">
             <div class="content">
               <div style="display:flex;align-items: center;margin-bottom: 10px" class="scrollbar-demo-item">
-
-
                 <h3 class="editable" style="margin-left: 15px">
-                  {{ parseInt(index) + 1 }}.{{ item.question }}</h3>
-                <span v-if="isSystem"
-                      style="margin-left: 5px">排序值：</span>
-                <span
-                    v-if="isSystem"
-                    style="margin-top: 3px;margin-right: 10px">{{ item.sort }}</span>
+                  {{ parseInt(index) + 1 }}. <span v-html="highlight(item.question)"></span>
+                </h3>
+                <span v-if="isSystem" style="margin-left: 5px">排序值：</span>
+                <span v-if="isSystem" style="margin-top: 3px;margin-right: 10px">{{ item.sort }}</span>
                 <el-button v-if="isSystem" type="primary" text @click="editQuestion(item)">编辑</el-button>
                 <el-button v-if="isSystem" type="danger" :icon="Delete" text @click="deleteQuestion(item.id)"/>
-
               </div>
-
-
-              <el-text ref="answer" class="editable"
-                       style="white-space: pre-wrap;font-size: 16px">
-                &nbsp; &nbsp; &nbsp;&nbsp;<span>{{ item.answer }}</span>
+              <el-text ref="answer" class="editable" style="white-space: pre-wrap;font-size: 16px">
+                &nbsp; &nbsp; &nbsp;&nbsp;<span v-html="highlight(item.answer)"></span>
               </el-text>
             </div>
           </el-skeleton>
         </el-card>
-
-
       </div>
     </el-col>
   </el-row>
+
   <!--新增-->
   <el-dialog v-model="addVisible" title="新增问题" width="500" :close-on-click-modal="false">
     <el-form :model="addForm" :label-position='"top"'>
@@ -101,97 +95,93 @@
   </el-dialog>
 </template>
 <script setup>
-import {menuList} from '@/api/menu.js'
-import {ref, watch, watchEffect} from 'vue'
-import {addQuestionApi, deleteQuestionApi, editQuestionApi, getQuestionListApi} from '@/api/question.js'
-import {ElLoading, ElMessage, ElMessageBox} from 'element-plus'
-import {Delete} from '@element-plus/icons-vue'
-import {getAirTrueDataApi} from '@/api/air.js'
-import useAuthControl from '@/hooks/useAuthControl.js'
+import {ref, computed} from 'vue';
+import {menuList} from '@/api/menu.js';
+import {addQuestionApi, deleteQuestionApi, editQuestionApi, getQuestionListApi} from '@/api/question.js';
+import {ElLoading, ElMessage, ElMessageBox} from 'element-plus';
+import {Delete} from '@element-plus/icons-vue';
+import useAuthControl from '@/hooks/useAuthControl.js';
 
-const {isSystem} = useAuthControl()
-const answer = ref()
-const qid = ref()
-const length = ref(0)
-const loading = ref(true)
-const menuTree = ref()
-const title = ref('帮助中心')
+const {isSystem} = useAuthControl();
+const answer = ref();
+const qid = ref();
+const length = ref(0);
+const loading = ref(true);
+const menuTree = ref();
+const title = ref('帮助中心');
+const data = ref({});
+const old_data = ref({});
+const currentNodeKey = ref(0);
+const searchQuery = ref(''); // 搜索关键字
 
-const data = ref({})
-// 用于不保存恢复数据
-const old_data = ref({})
-const currentNodeKey = ref(0)
-
-async function initMenusList() {
-  let res = await menuList()
-  menuTree.value = res.data
-}
+const initMenusList = async () => {
+  let res = await menuList();
+  menuTree.value = res.data;
+};
 
 const handleNodeClick = async (val) => {
-  addForm.value.menu_id = val.id
-  loading.value = true
-  title.value = val.name
-  const res = await getQuestionListApi(val.id)
-  data.value = res.data
-  old_data.value = val
-  length.value = res.data.length
+  addForm.value.menu_id = val.id;
+  loading.value = true;
+  title.value = val.name;
+  const res = await getQuestionListApi(val.id);
+  data.value = res.data;
+  old_data.value = val;
+  length.value = res.data.length;
   setTimeout(() => {
-    loading.value = false
-  }, 300)
-}
+    loading.value = false;
+  }, 300);
+};
+
 const defaultProps = {
   children: 'children',
   label: 'name'
-}
-// 修改
-const editVisible = ref(false)
+};
+
+const editVisible = ref(false);
 const editForm = ref({
   question: '',
   answer: '',
   sort: null
-})
+});
 const editQuestion = (item) => {
-  qid.value = item.id
-  editForm.value.question = item.question
-  editForm.value.answer = item.answer
-  editForm.value.sort = item.sort
-  editVisible.value = true
-}
+  qid.value = item.id;
+  editForm.value.question = item.question;
+  editForm.value.answer = item.answer;
+  editForm.value.sort = item.sort;
+  editVisible.value = true;
+};
 
 const saveQuestion = async () => {
-  const res = await editQuestionApi(qid.value, editForm.value)
+  const res = await editQuestionApi(qid.value, editForm.value);
   if (res.code === 201) {
-    ElMessage.success(res.msg)
-    editVisible.value = false
-    await handleNodeClick(old_data.value)
+    ElMessage.success(res.msg);
+    editVisible.value = false;
+    await handleNodeClick(old_data.value);
   }
-}
+};
 
-// 新增
-const addVisible = ref(false)
+const addVisible = ref(false);
 const addForm = ref({
   menu_id: null,
   question: '',
   answer: '',
   sort: null
-})
+});
 const addQuestion = () => {
-  addForm.value.question = ''
-  addForm.value.answer = ''
-  addForm.value.sort = null
-  addVisible.value = true
-}
+  addForm.value.question = '';
+  addForm.value.answer = '';
+  addForm.value.sort = null;
+  addVisible.value = true;
+};
 const sureAdd = async () => {
-  const res = await addQuestionApi(addForm.value)
+  const res = await addQuestionApi(addForm.value);
   if (res.code === 201) {
-    ElMessage.success(res.msg)
-    addVisible.value = false
-    await handleNodeClick(old_data.value)
+    ElMessage.success(res.msg);
+    addVisible.value = false;
+    await handleNodeClick(old_data.value);
   }
-}
+};
 
-
-// 删除
 const deleteQuestion = async (id) => {
   ElMessageBox.confirm(
       '您确定要删除吗?',
@@ -203,21 +193,37 @@ const deleteQuestion = async (id) => {
       }
   )
       .then(async () => {
-        const res = await deleteQuestionApi(id)
+        const res = await deleteQuestionApi(id);
         if (res.code === 204) {
-          ElMessage.success(res.msg)
-          await handleNodeClick(old_data.value)
+          ElMessage.success(res.msg);
+          await handleNodeClick(old_data.value);
         }
       })
       .catch(() => {
+      });
+};
 
-      })
+// 过滤后的数据
+const filteredData = computed(() => {
+  if (!searchQuery.value) return data.value;
+  return data.value.filter(item =>
+      item.question.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      item.answer.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
 
+// 高亮显示搜索结果
+const highlight = (text) => {
+  if (!searchQuery.value) return text;
+  return text.replace(new RegExp(searchQuery.value, 'gi'), match => {
+    return `<span style="background-color: yellow;">${match}</span>`;
+  });
+};
 
-}
-initMenusList()
-handleNodeClick({id: 31, name: '帮助中心'})
+initMenusList();
+handleNodeClick({id: 31, name: '帮助中心'});
 </script>
+
 
 <style scoped lang="scss">
 .right-content {

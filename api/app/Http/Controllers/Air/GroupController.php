@@ -162,18 +162,72 @@ class GroupController extends Controller
             $msg = '策略停用成功';
         } else {
             // 循环判断策略是否存在,存在则更新状态为1,不存在就进入error_strategy_id_array最后去掉错误的值再入库
+            $start_time_arr = [];
+            $end_time_arr = [];
+            $week_days_arr = [];
+            $conflict = false;
+            /*            foreach ($strategy_id as $strategy) {
+                            if ($strategy) {
+                                $res = Strategy::find($strategy);
+                                if ($res) {
+                                    $res->update(['status' => 1]);
+                                    $week_days_arr[] = $res->week_days;
+                                    $start_time_arr[] = $res->start_time;
+                                    $end_time_arr[] = $res->end_time;
+                                } else {
+                                    $error_strategy_id_array[] = $strategy;
+                                }
+                            }
+                        }
+                        sort($start_time_arr);
+                        sort($end_time_arr);
+                        // 判断是否有时间冲突
+                        for ($i = 0; $i < count($start_time_arr) - 1; $i++) {
+                            if ($end_time_arr[$i] > $start_time_arr[$i + 1]) {
+                                $conflict = true;
+                                break;
+                            }
+                        }
+
+                        if (!$conflict) {
+                            $res = $airGroup->update(['strategy_id' => json_encode(array_diff($strategy_id, $error_strategy_id_array))]);
+                            $msg = '策略设置成功';
+                        } else {
+                            return api(null, 400, implode('', $week_days_arr));
+                        }*/
             foreach ($strategy_id as $strategy) {
                 if ($strategy) {
                     $res = Strategy::find($strategy);
                     if ($res) {
-                        $res->update(['status' => 1]);
+                        $week_days_arr[] = $res->week_days; // Assuming week_days is stored as comma-separated values
+                        $start_time_arr[] = $res->start_time;
+                        $end_time_arr[] = $res->end_time;
                     } else {
                         $error_strategy_id_array[] = $strategy;
                     }
                 }
             }
-            $res = $airGroup->update(['strategy_id' => json_encode(array_diff($strategy_id, $error_strategy_id_array))]);
-            $msg = '策略设置成功';
+
+            // Check for week day overlap and time conflicts
+            for ($i = 0; $i < count($week_days_arr) - 1; $i++) {
+                for ($j = $i + 1; $j < count($week_days_arr); $j++) {
+                    if (array_intersect($week_days_arr[$i], $week_days_arr[$j])) {
+                        // There is a week day overlap, now check for time overlap
+                        if (($start_time_arr[$i] < $end_time_arr[$j]) && ($end_time_arr[$i] > $start_time_arr[$j])) {
+                            $conflict = true;
+                            break 2; // Break out of both loops
+                        }
+                    }
+                }
+            }
+
+            if (!$conflict) {
+                $res = $airGroup->update(['strategy_id' => json_encode(array_diff($strategy_id, $error_strategy_id_array))]);
+                Strategy::whereIn('id', array_diff($strategy_id, $error_strategy_id_array))->update(['status' => 1]);
+                $msg = '策略设置成功';
+            } else {
+                return api(null, 400, '策略时间冲突，请检查星期和时间安排');
+            }
         }
         if ($res) {
             if ($ori_id) {

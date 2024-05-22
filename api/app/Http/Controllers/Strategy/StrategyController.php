@@ -100,14 +100,8 @@ class StrategyController extends Controller
             if (!$strategy) {
                 return api(null, 404, '策略不存在');
             }
-            $client_id = $strategy->client_id;
-            $arrs = Air_group::where('client_id', $client_id)->get('strategy_id')->toArray();
-
-            foreach ($arrs as $arr) {
-                if (in_array($id, $arr['strategy_id'])) {
-                    return api(null, 400, '策略正在被使用,请停用后再尝试删除');
-                }
-            }
+            if ($strategy->status === 1)
+                return api(null, 400, '策略正在被使用,请停用后再尝试删除');
             $res = $strategy->delete();
             if ($res) {
                 return api(null, 204, '删除策略成功');
@@ -129,6 +123,7 @@ class StrategyController extends Controller
     {
         // 更新策略
         try {
+
             $validator = \Validator::make($request->all(), [
                     'name'            => 'required|string|max:20',
                     'info'            => 'required|string|max:50',
@@ -155,6 +150,9 @@ class StrategyController extends Controller
             if (!$strategy) {
                 return api(null, 404, '策略不存在');
             }
+            if ($strategy->status === 1)
+                return api(null, 400, '策略正在被使用,请停用后再尝试修改');
+
             $data['week_days'] = json_encode($data['week_days']);
             $strategy->update($data);
             return api($strategy, 201, '更新策略成功');

@@ -1,7 +1,8 @@
 import {reactive, ref} from 'vue'
-import {clientEditApi, clientSelectTree, getParentApi} from '@/api/client.js'
+import {clientDetailApi, clientEditApi, clientSelectTree, getParentApi} from '@/api/client.js'
 import {ElMessage} from 'element-plus'
 import {useClientWithoutHeadStore} from '@/store/clientWithoutHead.js'
+import {logCreateApi} from '@/api/log.js'
 
 
 export default function () {
@@ -22,6 +23,12 @@ export default function () {
     // 树数据
     const treeData = ref([])
     const selectValue = ref('')
+    // 写日志
+    const logForm = reactive({
+        id: localStorage.getItem("token"),
+        type: 1,
+        content: ''
+    })
 
     const showClientEdit = async (row) => {
         id.value = row.id
@@ -46,7 +53,9 @@ export default function () {
 
     const sureClientEdit = async () => {
         const res = await clientEditApi(id.value, clientEditForm)
-        if (res.code === 200) {
+        if (res.code === 201) {
+            logForm.content = '编辑了客户' + clientEditForm.clientname
+            await logCreateApi(logForm)
             ElMessage({
                 message: res.msg,
                 type: 'success'

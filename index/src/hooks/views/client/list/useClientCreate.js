@@ -1,7 +1,8 @@
 import {onMounted, reactive, ref} from 'vue'
-import {getMainClientApi, clientCreateApi} from '@/api/client.js'
+import {getMainClientApi, clientCreateApi, clientDetailApi} from '@/api/client.js'
 import {ElMessage} from 'element-plus'
 import {useClientWithoutHeadStore} from '@/store/clientWithoutHead.js'
+import {logCreateApi} from '@/api/log.js'
 
 
 export default function () {
@@ -18,6 +19,13 @@ export default function () {
         type: null,
         info: ''
     })
+    // 写日志
+    const logForm = reactive({
+        id: localStorage.getItem("token"),
+        type: 1,
+        content: ''
+    })
+    const clientname = ref('')
 
     const resetForm = () => {
         clientCreateForm.clientname = ''
@@ -44,6 +52,17 @@ export default function () {
     const sureClientCreate = async () => {
         const res = await clientCreateApi(clientCreateForm)
         if (res.code === 201) {
+            // 如果有pid,拿pid的名字来写日志没有的话就是在自己下面加
+            if (clientCreateForm.pid) {
+                const client = await clientDetailApi(clientCreateForm.pid)
+                clientname.value = client.data.clientname
+            } else {
+                const client = await clientDetailApi(logForm.id)
+                clientname.value = client.data.clientname
+            }
+
+            logForm.content = '在' + clientname.value + '下创建了客户' + clientCreateForm.clientname
+            await logCreateApi(logForm)
             ElMessage({
                 message: res.msg,
                 type: 'success'

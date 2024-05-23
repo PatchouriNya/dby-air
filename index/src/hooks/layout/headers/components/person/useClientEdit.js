@@ -1,8 +1,9 @@
 import {reactive, ref} from 'vue'
-import {clientEditApi} from '@/api/client.js'
+import {clientDetailApi, clientEditApi} from '@/api/client.js'
 import {ElMessage} from 'element-plus'
 import {useAccountStore} from '@/store/account.js'
 import {storeToRefs} from 'pinia'
+import {logCreateApi} from '@/api/log.js'
 
 
 export default function () {
@@ -19,6 +20,14 @@ export default function () {
         district: '',
         info: ''
     })
+    // 写日志
+    const logForm = reactive({
+        id: localStorage.getItem("token"),
+        type: 1,
+        content: ''
+    })
+    const clientname = ref('')
+
 
     const showClientEdit = () => {
         clientEditForm.clientname = mainClient.value.clientname
@@ -36,7 +45,13 @@ export default function () {
 
     const sureClientEdit = async () => {
         const res = await clientEditApi(mainClient.value.id, clientEditForm)
-        if (res.code === 200) {
+        if (res.code === 201) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(logForm.id)
+            clientname.value = client.data.clientname
+            logForm.content = '修改了' + clientname.value + '下的信息'
+            await logCreateApi(logForm)
+            
             ElMessage({
                 message: res.msg,
                 type: 'success'

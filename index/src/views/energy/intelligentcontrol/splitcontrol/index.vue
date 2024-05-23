@@ -907,7 +907,10 @@ async function sureControl(id) {
   }
 }
 
-function showEdit(row) {
+async function showEdit(row) {
+  let res = await airDetailApi(row.row.id)
+  airBelongClientname.value = res.data.clientname
+  show_id.value = row.row.show_id
   editVisible.value = !editVisible.value
   colId.value = row.row.id
   editForm.value.designation = row.row.designation
@@ -922,6 +925,9 @@ function closeEdit() {
 async function sureEdit(id) {
   let res = await updateAir(id, editForm.value)
   if (res.code === 201) {
+    logForm.client_id = tableClientId.value
+    logForm.content = '修改了' + airBelongClientname.value + '的' + show_id.value + '号机 ' + '的信息'
+    await logCreateApi(logForm)
     ElMessage({
       message: '更新成功:)',
       type: 'success'
@@ -957,6 +963,9 @@ const getAirTrueData = async () => {
         })
         const res = await getAirTrueDataApi(clientId.value)
         if (res.code === 201) {
+          logForm.client_id = tableClientId.value
+          logForm.content = '读取了' + selectData.value.clientname + '的最新的空调数据'
+          await logCreateApi(logForm)
           ElMessage({
             message: res.msg,
             type: 'success'
@@ -980,12 +989,15 @@ watch(controlForm.value, (val) => {
 // 强控
 const forceControlVisible = ref(false)
 const forceControl = () => {
-  controlForm.value = {client_id: clientId.value}
+  controlForm.value = {client_id: clientId.value, power_state: '关机'}
   forceControlVisible.value = true
 }
 const sureForceControl = async () => {
   const res = await groupControlApi(0, controlForm.value)
   if (res.code === 201) {
+    logForm.client_id = tableClientId.value
+    logForm.content = '强控了' + selectData.value.clientname + '下的所有空调' + ' ' + controlForm.value.power_state + ' ' + controlForm.value.set_temperature + ' ' + controlForm.value.operation_mode + ' ' + controlForm.value.wind_speed + ' ' + controlForm.value.wind_mode
+    await logCreateApi(logForm)
     forceControlVisible.value = false
     ElMessage.success(res.msg)
     await initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)

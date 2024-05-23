@@ -1,8 +1,10 @@
-import {onMounted, ref, watch} from 'vue'
+import {onMounted, reactive, ref, watch} from 'vue'
 import {addStrategyApi, deleteStrategyApi, editStrategyApi, getStrategyListApi} from '@/api/strategy.js'
 import {ElMessage} from 'element-plus'
 import {deleteGroupApi} from '@/api/group.js'
 import eventBus from '@/listen/event-bus.js'
+import {clientDetailApi} from '@/api/client.js'
+import {logCreateApi} from '@/api/log.js'
 
 const tableData = ref()
 const client_id = ref()
@@ -45,6 +47,15 @@ const controlForm = ref({
 // 判断是新增还是编辑
 const opFlag = ref(1)
 const formVisible = ref(false)
+
+// 写日志
+const logForm = reactive({
+    id: localStorage.getItem("token"),
+    type: 1,
+    content: ''
+})
+const clientname = ref('')
+
 
 export const useStrategyList = () => {
     const handleSizeChange = async (val) => {
@@ -96,6 +107,11 @@ export const useStrategyAdd = () => {
         controlForm.value.client_id = client_id.value
         const res = await addStrategyApi(controlForm.value)
         if (res.code === 201) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(client_id.value)
+            clientname.value = client.data.clientname
+            logForm.content = '为' + clientname.value + '新增了策略' + controlForm.value.name
+            await logCreateApi(logForm)
             formVisible.value = false
             controlForm.value = {}
             await getStrategyList()
@@ -136,6 +152,11 @@ export const useStrategyEdit = () => {
     const sureEdit = async () => {
         const res = await editStrategyApi(id.value, controlForm.value)
         if (res.code === 201) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(client_id.value)
+            clientname.value = client.data.clientname
+            logForm.content = '编辑了' + clientname.value + '下的策略' + controlForm.value.name
+            await logCreateApi(logForm)
             formVisible.value = false
             await getStrategyList()
             ElMessage.success(res.msg)
@@ -157,6 +178,11 @@ export function useStrategyDelete() {
     const sureDelete = async () => {
         let res = await deleteStrategyApi(id.value)
         if (res.code === 204) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(client_id.value)
+            clientname.value = client.data.clientname
+            logForm.content = '删除了' + clientname.value + '下的策略' + controlForm.value.name
+            await logCreateApi(logForm)
             deleteVisible.value = false
             await getStrategyList()
             ElMessage.success(res.msg)

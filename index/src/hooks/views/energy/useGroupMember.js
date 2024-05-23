@@ -1,6 +1,16 @@
-import {onMounted, ref} from 'vue'
+import {reactive, ref} from 'vue'
 import {addAirToGroup, getGroupedAirByClientApi, getUnGroupedAirByClientApi, removeAirFromGroup} from '@/api/group.js'
 import {ElMessage} from 'element-plus'
+import {clientDetailApi} from '@/api/client.js'
+import {logCreateApi} from '@/api/log.js'
+// 写日志
+const logForm = reactive({
+    id: localStorage.getItem("token"),
+    type: 1,
+    content: ''
+})
+const clientname = ref('')
+const groupname = ref('')
 
 export function useGroupMemberList() {
     const listVisible = ref(false)
@@ -32,6 +42,7 @@ export function useGroupMemberList() {
         listVisible.value = true
         client_id.value = row.client_id
         group_id.value = row.id
+        groupname.value = row.name
         await generateData()
     }
 
@@ -40,12 +51,26 @@ export function useGroupMemberList() {
         if (direction === 'right') {
             // 移动成员进组
             const res = await addAirToGroup(group_id.value, moveKeys.toString())
-            if (res.code === 201)
+            if (res.code === 201) {
+                // 拿当前的客户名称,用来写日志
+                const client = await clientDetailApi(client_id.value)
+                clientname.value = client.data.clientname
+                logForm.content = '添加了' + clientname.value + '下的组' + groupname.value + '的空调'
+                await logCreateApi(logForm)
                 ElMessage.success(res.msg)
+            }
+
         } else {
             const res = await removeAirFromGroup(group_id.value, moveKeys.toString())
-            if (res.code === 204)
+            if (res.code === 204) {
+                // 拿当前的客户名称,用来写日志
+                const client = await clientDetailApi(client_id.value)
+                clientname.value = client.data.clientname
+                logForm.content = '移除了' + clientname.value + '下的组' + groupname.value + '的空调'
+                await logCreateApi(logForm)
                 ElMessage.success(res.msg)
+            }
+
         }
     }
 

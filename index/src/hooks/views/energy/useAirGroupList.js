@@ -1,4 +1,4 @@
-import {ref, watch} from 'vue'
+import {reactive, ref, watch} from 'vue'
 import eventBus from '@/listen/event-bus.js'
 import {
     addGroupApi,
@@ -10,6 +10,8 @@ import {
 } from '@/api/group.js'
 import {ElMessage} from 'element-plus'
 import {getStrategyListApi} from '@/api/strategy.js'
+import {clientDetailApi} from '@/api/client.js'
+import {logCreateApi} from '@/api/log.js'
 
 const tableData = ref()
 const client_id = ref()
@@ -24,6 +26,14 @@ const getGroupListByClient = async () => {
     tableData.value = res.data.data
     total.value = res.data.total
 }
+// 写日志
+const logForm = reactive({
+    id: localStorage.getItem("token"),
+    type: 1,
+    content: ''
+})
+const clientname = ref('')
+const groupname = ref('')
 
 export function useGroupList() {
     const handleSizeChange = async (val) => {
@@ -73,6 +83,11 @@ export function useGroupAdd() {
         addForm.value.client_id = client_id.value
         let res = await addGroupApi(addForm.value)
         if (res.code === 201) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(client_id.value)
+            clientname.value = client.data.clientname
+            logForm.content = '为' + clientname.value + '新增了组' + addForm.value.name
+            await logCreateApi(logForm)
             addVisible.value = false
             await getGroupListByClient()
             ElMessage.success(res.msg)
@@ -105,6 +120,11 @@ export function useGroupEdit() {
         editForm.value.client_id = client_id.value
         let res = await editGroupApi(id.value, editForm.value)
         if (res.code === 201) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(client_id.value)
+            clientname.value = client.data.clientname
+            logForm.content = '编辑了' + clientname.value + '下的组' + editForm.value.name
+            await logCreateApi(logForm)
             editVisible.value = false
             await getGroupListByClient()
             ElMessage.success(res.msg)
@@ -119,6 +139,7 @@ export function useGroupDelete() {
     const deleteName = ref('')
     const deleteVisible = ref(false)
     const showDeleteGroup = async (row) => {
+        groupname.value = row.name
         deleteVisible.value = true
         id.value = row.id
         deleteName.value = row.name
@@ -126,6 +147,11 @@ export function useGroupDelete() {
     const sureDeleteGroup = async () => {
         let res = await deleteGroupApi(id.value)
         if (res.code === 204) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(client_id.value)
+            clientname.value = client.data.clientname
+            logForm.content = '删除了' + clientname.value + '下的组' + groupname.value
+            await logCreateApi(logForm)
             deleteVisible.value = false
             await getGroupListByClient()
             ElMessage.success(res.msg)
@@ -143,6 +169,7 @@ export function useSetStrategy() {
     const showSetStrategy = async (row) => {
         setStrategyVisible.value = true
         group_id.value = row.id
+        groupname.value = row.name
         strategy_id.value = row.strategy_id ? row.strategy_id : []
         const res = await getStrategyListApi(true, 1, 1, 1, client_id.value)
         if (res.code === 200)
@@ -151,6 +178,11 @@ export function useSetStrategy() {
     const sureSetStrategy = async () => {
         const res = await setStrategyApi(group_id.value, strategy_id.value)
         if (res.code === 201) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(client_id.value)
+            clientname.value = client.data.clientname
+            logForm.content = '为' + clientname.value + '下的组' + groupname.value + '设置了策略'
+            await logCreateApi(logForm)
             setStrategyVisible.value = false
             await getGroupListByClient()
             ElMessage.success(res.msg)
@@ -160,6 +192,11 @@ export function useSetStrategy() {
         strategy_id.value = []
         const res = await setStrategyApi(group_id.value, strategy_id.value)
         if (res.code === 201) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(client_id.value)
+            clientname.value = client.data.clientname
+            logForm.content = '停用了' + clientname.value + '下的组' + groupname.value + '的策略'
+            await logCreateApi(logForm)
             setStrategyVisible.value = false
             await getGroupListByClient()
             ElMessage.success('策略停用成功')
@@ -174,6 +211,7 @@ export function userGroupControl() {
     const group_id = ref()
     const controlForm = ref({})
     const showGroupControl = async (row) => {
+        groupname.value = row.name
         controlForm.value = {}
         group_id.value = row.id
         groupControlVisible.value = true
@@ -181,6 +219,12 @@ export function userGroupControl() {
     const sureGroupControl = async () => {
         const res = await groupControlApi(group_id.value, controlForm.value)
         if (res.code === 201) {
+            // 拿当前的客户名称,用来写日志
+            const client = await clientDetailApi(client_id.value)
+            clientname.value = client.data.clientname
+            logForm.type = 2
+            logForm.content = '操控了' + clientname.value + '下的组' + groupname.value + ' ' + controlForm.value.power_state + ' ' + controlForm.value.set_temperature + ' ' + controlForm.value.operation_mode + ' ' + controlForm.value.wind_speed + ' ' + controlForm.value.wind_mode
+            await logCreateApi(logForm)
             groupControlVisible.value = false
             ElMessage.success(res.msg)
         }

@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Air;
 
 use App\Http\Controllers\Controller;
+use App\Imports\DataImport;
 use App\Models\Air\Air_detail;
 use App\Models\Air_true;
 use App\Models\Client\Air_group_relationship;
 use App\Models\Client\Client;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 use Validator;
 
 class AirController extends Controller
@@ -133,5 +135,24 @@ class AirController extends Controller
         } catch (\Exception $e) {
             return api([], 500, '更新失败: ' . $e->getMessage());
         }
+    }
+
+    public function testExcel()
+    {
+        $filepath = storage_path('../resources/tt.xlsx');
+        //        $import = Excel::toCollection(new DataImport, $filepath);
+        $skip = 1;
+        $import = new DataImport($skip);
+        Excel::import($import, $filepath);
+        $rows = $import->getRows();
+        $formattedData = $rows->map(function ($row) {
+            // 把第七列从16进制转化为10进制
+            $row[7] = hexdec($row[7]) / 10 . '℃';
+            // 返回剩下的
+
+            return ['id' => $row[0], 'online' => $row[7],];
+        });
+
+        return api($formattedData, 200, '导入成功');
     }
 }

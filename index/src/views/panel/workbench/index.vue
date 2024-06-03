@@ -85,7 +85,7 @@ import {ref, computed, onMounted} from 'vue'
 import {clientList} from '@/api/client.js'
 
 const loading = ref(true)
-const treeData = ref([])
+const treeData = ref()
 const selectData = ref({})
 const title = ref('欢迎回来')
 const noData = ref('请选择一个节点')
@@ -106,6 +106,7 @@ function clickNode(val) {
   selectData.value = val
   title.value = selectData.value.clientname
 }
+
 
 const showData = computed(() => {
   const data = selectData.value.with_overview

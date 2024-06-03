@@ -1,6 +1,7 @@
 {
   "files": [],
   "compilerOptions": {
+    "allowJs": true,
     // ...
     "types": [
       "element-plus/global",

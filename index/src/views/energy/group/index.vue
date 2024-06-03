@@ -173,6 +173,8 @@
         />
         <template #footer>
           <el-button @click="stopSetStrategy" size="small" type="danger">停用策略</el-button>
+          <el-button @click="sureSetStrategy" size="small" type="primary">启用策略</el-button>
+
         </template>
       </el-select>
     </el-form-item>
@@ -283,6 +285,5 @@ onMounted(async () => {
 .edit_dev >>> .el-transfer-panel {
   width: 300px;
 }
-
 
 </style>

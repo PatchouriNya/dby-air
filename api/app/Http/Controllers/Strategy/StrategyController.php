@@ -79,6 +79,14 @@ class StrategyController extends Controller
             }
             $data = $validator->validate();
             $data['week_days'] = json_encode($data['week_days']);
+            // 检查是否重名
+
+            $exist = Strategy::where('client_id', $data['client_id'])
+                ->where('name', $data['name'])
+                ->first();
+            if ($exist) {
+                return api(null, 400, '策略名称已存在');
+            }
             $strategy = Strategy::create($data);
             return api($strategy, 201, '新增策略成功');
         } catch (\Exception $e) {
@@ -147,6 +155,12 @@ class StrategyController extends Controller
             }
             $data = $validator->validate();
             $strategy = Strategy::find($id);
+            $exist = Strategy::where('client_id', $strategy->client_id)
+                ->where('name', $data['name'])
+                ->first();
+            if ($exist) {
+                return api(null, 400, '策略名称已存在');
+            }
             if (!$strategy) {
                 return api(null, 404, '策略不存在');
             }

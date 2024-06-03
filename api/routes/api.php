@@ -112,6 +112,9 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Air', 'mid
 
     // 分组控制
     Route::put('group/control/{id}', 'GroupController@groupControl');
+
+    // 空调测试从excel读取数据
+    Route::get('air/test/excel', 'AirController@testExcel');
 });
 // 策略
 

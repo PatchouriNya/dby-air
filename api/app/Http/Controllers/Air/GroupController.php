@@ -56,15 +56,18 @@ class GroupController extends Controller
         if (Air_group_relationship::where('group_id', $id)->first())
             return api(null, 400, '该组下有空调,不能删除,请清空后再尝试');
         $airGroup = Air_group::find($id);
+
         $ori_id = $airGroup->strategy_id;
         $res = $airGroup->delete();
         if ($res) {
             if ($ori_id) {
-                $res = Air_group::where('strategy_id', $ori_id)->exists();
-                if ($res) {
-                    Strategy::find($ori_id)->update(['status' => 1]);
-                } else {
-                    Strategy::find($ori_id)->update(['status' => 0]);
+                foreach ($ori_id as $strategy_id) {
+                    $res = Air_group::where('strategy_id', $strategy_id)->exists();
+                    if ($res) {
+                        Strategy::find($strategy_id)->update(['status' => 1]);
+                    } else {
+                        Strategy::find($strategy_id)->update(['status' => 0]);
+                    }
                 }
             }
             return api(null, 204, '删除组成功');

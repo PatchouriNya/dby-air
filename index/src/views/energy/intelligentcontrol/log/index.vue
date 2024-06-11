@@ -103,8 +103,8 @@
 </template>
 
 <script setup>
-import {logDeleteApi, logListApi} from '@/api/log.js'
-import {ref, watch} from 'vue'
+import {logCreateApi, logDeleteApi, logListApi} from '@/api/log.js'
+import {reactive, ref, watch} from 'vue'
 import {ElLoading, ElMessage} from 'element-plus'
 import {account} from '@/api/account.js'
 
@@ -192,7 +192,11 @@ const search = () => {
 
 // 删除
 const deleteVisible = ref(false)
-
+const log = reactive({
+  id: localStorage.getItem("token"),
+  type: 2,
+  content: '删除了空调操作记录'
+})
 const showDelete = () => {
   deleteVisible.value = !deleteVisible.value
 }
@@ -218,7 +222,9 @@ const sureDelete = async () => {
   }
   loading.close()
   ElMessage.success('删除该条件下的所有日志成功')
+  await logCreateApi(log)
   await getLogList()
+
   showDelete()
 }
 

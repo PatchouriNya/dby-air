@@ -50,6 +50,7 @@ import {CanvasRenderer} from 'echarts/renderers'
 import eventBus from '@/listen/event-bus.js'
 import {GaugeChart} from 'echarts/charts'
 import {cityMap} from '@/assets/citymap.js'
+import {mapDataApi} from '@/api/client.js'
 
 echarts.use([GaugeChart])
 
@@ -121,6 +122,65 @@ let provinces = {
 //直辖市和特别行政区-只有二级地图，没有三级地图
 let special = ["北京", "天津", "上海", "重庆", "香港", "澳门"];
 let mapdata = [];
+let highlighted = []; // 要高亮的省份
+const getMapHighlightData = async () => {
+  let {data} = await mapDataApi(localStorage.getItem('token'), true)
+  highlighted = data
+  console.log(highlighted)
+}
+const getMapData = async () => {
+  let {data} = await mapDataApi(localStorage.getItem('token'), false)
+  console.log(data)
+}
+const renderMap = (map, data) => {
+  const mapData = data.map(item => {
+    return {
+      name: item.name,
+      itemStyle: highlighted.includes(item.name) ? {areaColor: '#FDDCAB'} : {}
+    };
+  });
+  optionMap.title.subtext = map;
+  optionMap.series = [
+    {
+      name: map,
+      type: 'map',
+      map: map, // 使用 map 而不是 mapType
+      roam: false,
+      nameMap: {
+        'china': '中国'
+      },
+      label: {
+        show: true, // 确保标签显示
+        position: 'inside', // 保证标签位于区域内部
+        color: '#0F1F40',
+        fontSize: 13
+      },
+      itemStyle: {
+        areaColor: '#fff',
+        borderColor: 'dodgerblue'
+      },
+      emphasis: {
+        label: {
+          show: true,
+          // position: 'inside',
+          color: '#0F1F40',
+          fontSize: 13
+        },
+        itemStyle: {
+          areaColor: '#FEDDAC'
+        }
+      },
+      select: {
+        itemStyle: {
+          areaColor: '#FDDCAB'
+        }
+      },
+      data: mapData
+    }
+  ];
+  //渲染地图
+  mapChart.value.setOption(optionMap);
+}
 const loadChina = async () => {
   let {data} = await axios.get('/map/china.json')
   let d = [];
@@ -132,6 +192,7 @@ const loadChina = async () => {
   mapdata = d;
   //注册地图
   echarts.registerMap('china', data);
+
   //绘制地图
   renderMap('china', d);
 }
@@ -200,48 +261,10 @@ let optionMap = {
   animationEasing: 'cubicOut',
   animationDurationUpdate: 1000
 }
-const renderMap = (map, data) => {
-  optionMap.title.subtext = map;
-  optionMap.series = [
-    {
-      name: map,
-      type: 'map',
-      map: map, // 使用 map 而不是 mapType
-      roam: false,
-      nameMap: {
-        'china': '中国'
-      },
-      label: {
-        show: true, // 确保标签显示
-        position: 'inside', // 保证标签位于区域内部
-        align: 'center', // 水平居中
-        verticalAlign: 'middle', // 垂直居中
-        color: '#0F1F40',
-        fontSize: 13,
-        emphasis: {
-          show: true,
-          position: 'inside',
-          align: 'center',
-          verticalAlign: 'middle',
-          color: '#0F1F40',
-          fontSize: 13
-        }
-      },
-      itemStyle: {
-        areaColor: '#fff',
-        borderColor: 'dodgerblue',
-        emphasis: {
-          areaColor: '#FEDDAC'
-        }
-      },
-      data: data
-    }
-  ];
-  //渲染地图
-  mapChart.value.setOption(optionMap);
-}
 let parentArea = '';
-onMounted(() => {
+
+onMounted(async () => {
+  await getMapHighlightData()
   eventBus.on('defaultNode', (val) => {
     eventBus.emit('node-clicked', val)
   })
@@ -265,7 +288,6 @@ onMounted(() => {
       renderMap(params.name, d);
     } else if (params.seriesName in provinces) {
       parentArea = params.seriesName
-
       //如果是【直辖市/特别行政区】只有二级下钻
       if (special.indexOf(params.seriesName) >= 0) {
         // 可以做事情
@@ -285,11 +307,12 @@ onMounted(() => {
       }
     } else {
       //到底了可以做事了
+      await getMapData()
 
       // renderMap('china', mapdata);
     }
   })
-  loadChina()
+  await loadChina()
 
   const option = {
     tooltip: {

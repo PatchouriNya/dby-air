@@ -58,3 +58,12 @@ export const clientDetailApi = (id) => {
         url: '/client/' + id
     })
 }
+
+export const mapDataApi = (id, highlight) => {
+    return request({
+        url: '/client/map/' + id,
+        params: {
+            highlight
+        }
+    })
+}

@@ -36,6 +36,10 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Client', '
 
     Route::get('system/client', 'ClientController@getSystemClient');
 
+    // 给前端地图数据的接口 返回账号下的所有type为1的客户不要层级显示
+    Route::get('client/map/{id}', 'ClientController@getMapData');
+
+    Route::get('client/map/district/{id}', 'ClientController@searchByDistrict');
 });
 
 // 账号

@@ -53,21 +53,8 @@ class Client extends Model
 {
     use HasFactory;
     use SoftDeletes;
+
     protected $guarded = [];
-    public function withAccount()
-    {
-        return $this->hasMany(Client_account_relationship::class,'client_id','id');
-    }
-    public function withOverview()
-    {
-        return $this->hasOne(Client_overview::class,'client_id','id');
-    }
-
-
-    public function children()
-    {
-        return $this->hasMany(Client::class, 'pid', 'id');
-    }
 
     public static function getAccountClients($accountId, $clientId)
     {
@@ -77,13 +64,13 @@ class Client extends Model
         })
             ->with(['childsSelect' => function ($query) use ($clientId) {
                 $query->where('id', '!=', $clientId) // 排除指定的客户
-                    ->with(['childsSelect' => function ($query) use ($clientId) {
-                        $query->where('id', '!=', $clientId)->with(['childsSelect' => function ($query) use ($clientId) {
-                            $query->where('id', '!=', $clientId) // 排除指定的客户
-                            ->where('type', '!=', 1); // 排除 type 为 1 的客户
-                        }]) // 排除指定的客户
-                            ->where('type', '!=', 1); // 排除 type 为 1 的客户
-                    }])
+                ->with(['childsSelect' => function ($query) use ($clientId) {
+                    $query->where('id', '!=', $clientId)->with(['childsSelect' => function ($query) use ($clientId) {
+                        $query->where('id', '!=', $clientId) // 排除指定的客户
+                        ->where('type', '!=', 1); // 排除 type 为 1 的客户
+                    }]) // 排除指定的客户
+                    ->where('type', '!=', 1); // 排除 type 为 1 的客户
+                }])
                     ->where('type', '!=', 1); // 排除 type 为 1 的客户
             }])
             ->where('id', '!=', $clientId) // 排除指定的客户
@@ -93,6 +80,16 @@ class Client extends Model
         return $clients;
     }
 
+    public function withAccount()
+    {
+        return $this->hasMany(Client_account_relationship::class, 'client_id', 'id');
+    }
+
+    public function withOverview()
+    {
+        return $this->hasOne(Client_overview::class, 'client_id', 'id');
+    }
+
     public function childsSelect()
     {
         return $this->hasMany(Client::class, 'pid', 'id')
@@ -100,17 +97,21 @@ class Client extends Model
             ->where('type', '!=', 1); // 排除 type 为 1 的客户
     }
 
-
-
     public function childs()
     {
         return $this->children()->with('withOverview')->with('childs');
     }
 
+    public function children()
+    {
+        return $this->hasMany(Client::class, 'pid', 'id');
+    }
+
     public function getOverview($id)
     {
-        return $this->with('withOverview')->with('childs')->where('id',$id)->first()->toArray();
+        return $this->with('withOverview')->with('childs')->where('id', $id)->first()->toArray();
     }
+
     public function getAllChildrenWithOverview($parentId, $pageSize = 15, $keyword = null)
     {
         $query = $this->with('withOverview')->where('pid', $parentId);
@@ -133,15 +134,15 @@ class Client extends Model
         $result = [];
         foreach ($children as $child) {
             $childData = [
-                'id' => $child->id,
+                'id'         => $child->id,
                 'clientname' => $child->clientname,
-                'province' =>$child->province,
-                'city' =>$child->city,
-                'district' =>$child->district,
-                'type' => $child->type,
-                'info' =>$child->info,
-                'pid'   =>$child->pid,
-                'overview' => $child->withOverview ?? null
+                'province'   => $child->province,
+                'city'       => $child->city,
+                'district'   => $child->district,
+                'type'       => $child->type,
+                'info'       => $child->info,
+                'pid'        => $child->pid,
+                'overview'   => $child->withOverview ?? null
             ];
 
             $grandchildren = $this->getAllChildrenWithOverview($child->id, null, $keyword);
@@ -160,7 +161,31 @@ class Client extends Model
         return $result;
     }
 
+    // 获取所有子客户，包括自己，且只获取type为1的客户
+    public function getAllDescendants($clientId)
+    {
+        $client = $this->with('withOverview')->find($clientId);
+        $descendants = collect([]);
 
+        if ($client && $client->type == 1) {
+            $descendants->push($client);
+        }
+
+        $this->getDescendantsRecursively($client, $descendants);
+
+        return $descendants;
+    }
+
+    // 递归获取子客户，只添加type为1的客户
+    private function getDescendantsRecursively($client, &$descendants)
+    {
+        foreach ($client->children()->with('withOverview')->get() as $child) {
+            if ($child->type == 1) {
+                $descendants->push($child);
+            }
+            $this->getDescendantsRecursively($child, $descendants);
+        }
+    }
 
 
 }

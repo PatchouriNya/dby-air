@@ -162,5 +162,48 @@ class ClientController extends Controller
         $data = Client::where('pid', 0)->select(['id', 'city', 'province', 'district', 'clientname', 'info'])->first();
         return api($data, 200, '获取账号对应的客户成功');
     }
+
+    // 给前端地图数据的接口 返回账号下的所有type为1的客户不要层级显示
+    public function getMapData($id, Request $request)
+    {
+        $client_id = Client_account_relationship::where('account_id', $id)->first(['client_id'])->client_id;
+        $clientModel = new \App\Models\Client\Client();
+        $data = $clientModel->getAllDescendants($client_id);
+
+        if ($request->query('highlight') == 'true') {
+            // 获取所有省、市、区字段并去重
+            $locations = $data->flatMap(function ($client) {
+                return [
+                    str_replace('省', '', $client->province),
+                    $client->city,
+                    $client->district,
+                ];
+            })->unique()->filter()->values()->all();
+            return api($locations, 200, 'haha');
+        }
+
+        return api($data, 200, '获取账号对应的客户成功');
+    }
+
+    public function searchByDistrict($id, Request $request)
+    {
+        $client_id = Client_account_relationship::where('account_id', $id)->first(['client_id'])->client_id;
+        $district = $request->query('district');
+
+        if (!$client_id || !$district) {
+            return api(null, 400, '参数错误');
+        }
+
+        // 获取指定客户及其所有子客户
+        $clientModel = new Client();
+        $allDescendants = $clientModel->getAllDescendants($client_id);
+
+        // 过滤指定区名且 type 为 1 的客户
+        $filteredClients = $allDescendants->filter(function ($client) use ($district) {
+            return $client->district == $district && $client->type == 1;
+        })->values();
+
+        return api($filteredClients, 200, '获取指定区名且 type 为 1 的客户成功');
+    }
 }
 

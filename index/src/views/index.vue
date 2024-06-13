@@ -35,12 +35,30 @@
       </div>
     </el-col>
   </el-row>
+
+  <el-dialog v-model="dialogTableVisible" title="客户列表">
+    <el-table :data="tableData">
+      <el-table-column property="clientname" label="客户" width="220"/>
+      <el-table-column property="with_overview.air_quantity" label=" 空调总数"/>
+      <el-table-column property="with_overview.air_boot_quantity" label="开机数量"/>
+      <el-table-column property="with_overview.air_startup_temperature" label="平均温度"/>
+      <!--      <el-table-column label="操作">
+              <template #default>
+                <el-button link type="primary" size="default">
+                  <el-icon>
+                    <Compass/>
+                  </el-icon>
+                </el-button>
+              </template>
+            </el-table-column>-->
+    </el-table>
+  </el-dialog>
 </template>
 
 <script setup>
 import axios from 'axios'
 import ClientTree from '@/components/ClientTree.vue'
-import {ref, onMounted, watch} from 'vue'
+import {ref, onMounted, watch, onBeforeMount} from 'vue'
 import * as echarts from 'echarts'
 import {MapChart} from 'echarts/charts.js'
 import {TooltipComponent, LegendComponent} from 'echarts/components'
@@ -50,10 +68,11 @@ import {CanvasRenderer} from 'echarts/renderers'
 import eventBus from '@/listen/event-bus.js'
 import {GaugeChart} from 'echarts/charts'
 import {cityMap} from '@/assets/citymap.js'
-import {mapDataApi} from '@/api/client.js'
+import {mapDataApi, mapDistrictApi} from '@/api/client.js'
 
 echarts.use([GaugeChart])
-
+const dialogTableVisible = ref(false)
+const tableData = ref([])
 const selectData = ref()
 const airBootQuantity = ref(0)
 const airQuantity = ref(0)
@@ -126,19 +145,20 @@ let highlighted = []; // 要高亮的省份
 const getMapHighlightData = async () => {
   let {data} = await mapDataApi(localStorage.getItem('token'), true)
   highlighted = data
-  console.log(highlighted)
 }
-const getMapData = async () => {
-  let {data} = await mapDataApi(localStorage.getItem('token'), false)
-  console.log(data)
+
+const getMapDataByDistrict = async (district) => {
+  let {data} = await mapDistrictApi(localStorage.getItem('token'), district)
+  tableData.value = data
+
 }
 const renderMap = (map, data) => {
   const mapData = data.map(item => {
     return {
       name: item.name,
       itemStyle: highlighted.includes(item.name) ? {areaColor: '#FDDCAB'} : {}
-    };
-  });
+    }
+  })
   optionMap.title.subtext = map;
   optionMap.series = [
     {
@@ -249,9 +269,12 @@ let optionMap = {
           }
         }
       },
-      dataView: {readOnly: false},
-      restore: {},
-      saveAsImage: {}
+      // dataView: {readOnly: false},
+      restore: {
+        show: true,
+        title: '重置'
+      }
+      // saveAsImage: {}
     },
     iconStyle: {
       color: '#fff'
@@ -264,6 +287,7 @@ let optionMap = {
 let parentArea = '';
 
 onMounted(async () => {
+
   await getMapHighlightData()
   eventBus.on('defaultNode', (val) => {
     eventBus.emit('node-clicked', val)
@@ -291,7 +315,9 @@ onMounted(async () => {
       //如果是【直辖市/特别行政区】只有二级下钻
       if (special.indexOf(params.seriesName) >= 0) {
         // 可以做事情
-        renderMap('china', mapdata);
+        dialogTableVisible.value = true
+        //到底了可以做事了
+        await getMapDataByDistrict(params.name)
       } else {
         parentArea = params.seriesName
         //显示县级地图
@@ -306,8 +332,9 @@ onMounted(async () => {
         renderMap(params.name, d);
       }
     } else {
+      dialogTableVisible.value = true
       //到底了可以做事了
-      await getMapData()
+      await getMapDataByDistrict(params.name)
 
       // renderMap('china', mapdata);
     }

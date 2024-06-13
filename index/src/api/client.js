@@ -59,11 +59,21 @@ export const clientDetailApi = (id) => {
     })
 }
 
+// @ts-ignore
 export const mapDataApi = (id, highlight) => {
     return request({
         url: '/client/map/' + id,
         params: {
             highlight
+        }
+    })
+}
+
+export const mapDistrictApi = (id, district) => {
+    return request({
+        url: '/client/map/district/' + id,
+        params: {
+            district
         }
     })
 }

@@ -8,14 +8,12 @@
            :default-openeds="['/main/energy','/main/energy/intelligentControl']"
            router
   >
-    <router-link to="/main">
-      <div class="menu-title">
-        <el-icon :size="19" color="skyblue">
-          <Cpu/>
-        </el-icon>
-        <h2 style="font-size: 18px;margin-left: 10px;color: skyblue">空调集控系统</h2>
-      </div>
-    </router-link>
+    <div class="menu-title">
+      <el-icon :size="19" color="skyblue">
+        <Cpu/>
+      </el-icon>
+      <h2 style="font-size: 18px;margin-left: 10px;color: skyblue;cursor:pointer " @click="goMain">空调集控系统</h2>
+    </div>
     <div v-for="level1 in menusList">
       <!--      一级菜单-->
       <el-sub-menu :index="level1.url" :key="level1.id" v-if="level1.show === 1">
@@ -67,9 +65,10 @@
 <script setup>
 import {menuList} from "@/api/menu.js"
 import {onMounted, ref} from "vue"
-import {useRoute} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import {Edit} from '@element-plus/icons-vue'
 
+const router = useRouter()
 let menusList = ref([])
 const activeIndex = ref('')
 const $menuActiveText = '#ffffff'
@@ -77,7 +76,10 @@ const $menuBg = '#304156'
 const route = useRoute()
 
 const icon = ref('menu')
-
+const goMain = async () => {
+  await router.push({path: '/main'})
+  router.go(0)  // 解决了登出后再进来需要手动刷新的问题
+}
 
 async function initMenusList() {
   let res = await menuList(0)

@@ -622,7 +622,10 @@ import {logCreateApi} from '@/api/log.js'
 import {airDetailApi, getAirTrueDataApi} from '@/api/air.js'
 import {Icon} from '@iconify/vue'
 import {groupControlApi} from '@/api/group.js'
+import {useRoute} from 'vue-router'
 
+const route = useRoute()
+let data = route.query.data
 const loading = ref(true)
 const tableClientId = ref()
 // 配置左侧层级
@@ -762,6 +765,11 @@ async function initclientList() {
   treeData.value = [res.data]
   loading.value = false
   let defaultChoose = findFirstTypeOneNode(treeData.value)
+  if (data) {
+    data = JSON.parse(route.query.data)
+    defaultChoose = data
+  }
+
   if (defaultChoose) {
     // 找到第一个 type 为 1 的节点
     default_checked.value = defaultChoose.id

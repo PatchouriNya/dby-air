@@ -17,6 +17,7 @@
     <div v-for="level1 in menusList">
       <!--      一级菜单-->
       <el-sub-menu :index="level1.url" :key="level1.id" v-if="level1.show === 1">
+        /
         <template #title>
           <el-icon>
             <component :is="level1.icon"/>

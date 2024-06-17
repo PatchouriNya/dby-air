@@ -42,15 +42,15 @@
       <el-table-column property="with_overview.air_quantity" label=" 空调总数"/>
       <el-table-column property="with_overview.air_boot_quantity" label="开机数量"/>
       <el-table-column property="with_overview.air_startup_temperature" label="平均温度"/>
-      <!--      <el-table-column label="操作">
-              <template #default>
-                <el-button link type="primary" size="default">
-                  <el-icon>
-                    <Compass/>
-                  </el-icon>
-                </el-button>
-              </template>
-            </el-table-column>-->
+      <el-table-column label="操作">
+        <template #default="row">
+          <el-button link type="primary" size="default" @click="jumpToClient(row.row)">
+            <el-icon>
+              <Compass/>
+            </el-icon>
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
   </el-dialog>
 </template>
@@ -69,8 +69,10 @@ import eventBus from '@/listen/event-bus.js'
 import {GaugeChart} from 'echarts/charts'
 import {cityMap} from '@/assets/citymap.js'
 import {mapDataApi, mapDistrictApi} from '@/api/client.js'
+import {useRouter} from 'vue-router'
 
 echarts.use([GaugeChart])
+const router = useRouter()
 const dialogTableVisible = ref(false)
 const tableData = ref([])
 const selectData = ref()
@@ -285,7 +287,9 @@ let optionMap = {
   animationDurationUpdate: 1000
 }
 let parentArea = '';
-
+const jumpToClient = (row) => {
+  router.push({name: 'splitcontrol', query: {data: JSON.stringify(row)}})
+}
 onMounted(async () => {
 
   await getMapHighlightData()

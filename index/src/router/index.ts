@@ -36,7 +36,8 @@ const router = createRouter({
                 {
                     path: '/main/energy/intelligentcontrol/splitcontrol',
                     name: 'splitcontrol',
-                    component: () => import('@/views/energy/intelligentcontrol/splitcontrol/index.vue')
+                    component: () => import('@/views/energy/intelligentcontrol/splitcontrol/index.vue'),
+                    props: route => ({data: route.query.data})
                 },
                 {
                     path: '/main/energy/intelligentcontrol/log',
@@ -84,6 +85,16 @@ const router = createRouter({
                     path: '/main/about/faq',
                     name: 'about-faq',
                     component: () => import ('@/views/about/faq/index.vue')
+                },
+                {
+                    path: '/main/charts/one',
+                    name: 'chart-one',
+                    component: () => import ('@/views/charts/one/index.vue')
+                },
+                {
+                    path: '/main/charts/two',
+                    name: 'chart-two',
+                    component: () => import ('@/views/charts/two/index.vue')
                 }
 
             ]

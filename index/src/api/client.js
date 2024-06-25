@@ -77,3 +77,8 @@ export const mapDistrictApi = (id, district) => {
         }
     })
 }
+export const chart2DataApi = (id) => {
+    return request({
+        url: '/client/children/' + id
+    })
+}

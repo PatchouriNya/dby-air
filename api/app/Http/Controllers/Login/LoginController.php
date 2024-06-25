@@ -41,7 +41,7 @@ class LoginController extends Controller
                 $system_id = (integer)Redis::connection()->get('system_id');
                 // 存过期时间
                 $key = 'user_id_' . $id->id . '_' . $request->ip();
-                Redis::connection()->setex($key, 3600, json_encode(['id' => $id->id, 'ip' => $request->ip()]));
+                Redis::connection()->setex($key, 7200, json_encode(['id' => $id->id, 'ip' => $request->ip()]));
                 if ($id->id === $system_id)
                     return api($id, 999, '登录成功');
                 else {

@@ -53,8 +53,26 @@ class AirController extends Controller
 
     public function show($id)
     {
-        $client_id = Air_detail::where('id', $id)->first()->client_id;
-        $data = Client::where('id', $client_id)->first(['clientname']);
+        // 查询空调的详细信息
+        $airDetail = Air_detail::find($id);
+
+        // 如果空调信息不存在，返回错误信息
+        if (!$airDetail) {
+            return api([], 404, '空调信息不存在');
+        }
+
+        // 查询关联的客户信息
+        $client = Client::find($airDetail->client_id, ['clientname']);
+
+        // 如果客户信息不存在，返回错误信息
+        if (!$client) {
+            return api([], 404, '客户信息不存在');
+        }
+
+        // 将空调信息和客户信息合并为一个对象
+        $data = array_merge($airDetail->toArray(), $client->toArray());
+
+        // 返回合并后的数据
         return api($data, 200, '获取空调信息成功');
     }
 

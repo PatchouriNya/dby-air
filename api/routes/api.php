@@ -144,4 +144,9 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Question',
 
 });
 
+Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\SerialPort', 'middleware' => ['cors']], function () {
+    // 资源路由
+    Route::get('serial-communicate', 'SerialPortController@communicate');
+
+});
 

@@ -723,21 +723,21 @@ const cellStyle = ({row, column, rowIndex, columnIndex}) => {
   // row 行
   // column 列
   if (row.electrify_state == '通电' && columnIndex === 3)
-    return {color: "#189EFF", textAlign: "center"}
+    return {color: '#189EFF', textAlign: 'center'}
   if (row.electrify_state == '断电' && columnIndex === 3) {
-    return {color: "#FB6E6E", textAlign: "center"}
+    return {color: '#FB6E6E', textAlign: 'center'}
   }
   if (row.power_state == '开机' && columnIndex === 4)
-    return {color: "#189EFF", textAlign: "center"}
+    return {color: '#189EFF', textAlign: 'center'}
   if (row.power_state == '关机' && columnIndex === 4) {
-    return {color: "#FB6E6E", textAlign: "center"}
+    return {color: '#FB6E6E', textAlign: 'center'}
   }
   if (row.operation_mode == '制冷' && columnIndex === 5)
-    return {color: "#189EFF", textAlign: "center"}
+    return {color: '#189EFF', textAlign: 'center'}
   if (row.operation_mode == '制热' && columnIndex === 5) {
-    return {color: "#FB6E6E", textAlign: "center"}
+    return {color: '#FB6E6E', textAlign: 'center'}
   }
-  return {textAlign: "center"}
+  return {textAlign: 'center'}
 
 }
 const findFirstTypeOneNode = (nodes) => {
@@ -886,7 +886,7 @@ function closeControl() {
 
 
 const logForm = reactive({
-  id: localStorage.getItem("token"),
+  id: localStorage.getItem('token'),
   type: 2,
   client_id: '',
   content: ''
@@ -966,19 +966,25 @@ const getAirTrueData = async () => {
       .then(async () => {
         const loading = ElLoading.service({
           lock: true,
-          text: '加载中……',
+          text: '正在读取真实数据,时间较长,请耐心等待...',
           background: 'rgba(0, 0, 0, 0.7)'
         })
         const res = await getAirTrueDataApi(clientId.value)
-        if (res.code === 201) {
+        if (res.data.code === 200) {
           logForm.client_id = tableClientId.value
           logForm.content = '读取了' + selectData.value.clientname + '的最新的空调数据'
           await logCreateApi(logForm)
           ElMessage({
-            message: res.msg,
+            message: res.data.msg,
             type: 'success'
           })
           await initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+          loading.close()
+        } else {
+          ElMessage({
+            message: res.data.msg,
+            type: 'error'
+          })
           loading.close()
         }
       })

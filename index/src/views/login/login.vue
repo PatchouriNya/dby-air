@@ -1,7 +1,7 @@
 <template>
   <div class="loginPage">
     <div class="title" style="color: black">
-      江苏东佰源空调集控系统
+      江苏兆润空调集控系统
     </div>
     <el-card class="loginPanel">
       <div class="loginPanelInner">
@@ -65,14 +65,14 @@ const loginLog = ref({
 
 // 检查本地存储中是否有记住的用户名和密码，并设置初始值
 onMounted(() => {
-  const rememberName = localStorage.getItem("remember_username");
-  const rememberPassword = localStorage.getItem("remember_password");
+  const rememberName = localStorage.getItem('remember_username')
+  const rememberPassword = localStorage.getItem('remember_password')
   if (rememberName && rememberPassword) {
-    loginForm.value.username = rememberName;
-    loginForm.value.password = rememberPassword;
-    loginForm.value.remember = true;
+    loginForm.value.username = rememberName
+    loginForm.value.password = rememberPassword
+    loginForm.value.remember = true
   }
-});
+})
 
 async function login() {
   try {
@@ -84,19 +84,19 @@ async function login() {
 
       // 如果勾选了记住密码，则将用户名和密码保存到本地存储
       if (loginForm.value.remember) {
-        localStorage.setItem("remember_username", loginForm.value.username);
-        localStorage.setItem("remember_password", loginForm.value.password);
+        localStorage.setItem('remember_username', loginForm.value.username)
+        localStorage.setItem('remember_password', loginForm.value.password)
       } else {
-        localStorage.removeItem("remember_username");
-        localStorage.removeItem("remember_password");
+        localStorage.removeItem('remember_username')
+        localStorage.removeItem('remember_password')
       }
       // 如果是系统账号,设置个特殊token
       if (response.data.code === 999) {
-        localStorage.setItem("token_", 'ははは、ここは大きな図書館の大きなオレンジです！')
+        localStorage.setItem('token_', 'ははは、ここは大きな図書館の大きなオレンジです！')
       }
 
 
-      localStorage.setItem("token", response.data.data.id)
+      localStorage.setItem('token', response.data.data.id)
       loginstateStore.id = response.data.data.id
       loginLog.value.id = response.data.data.id
       await logCreateApi(loginLog.value)

@@ -1,6 +1,6 @@
 <template>
   <div style="font-size: 25px">
-    东佰源空调集控系统 <span style="font-size: 20px;margin-left: 10px;margin-right: 10px">欢迎，{{
+    兆润空调集控系统 <span style="font-size: 20px;margin-left: 10px;margin-right: 10px">欢迎，{{
       accountData && accountData.nickname
     }}</span>
     <span style="font-size: 20px">({{ path }})</span>

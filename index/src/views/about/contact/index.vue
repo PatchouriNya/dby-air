@@ -1,7 +1,7 @@
 <template>
   <el-main style="margin-top: -20px">
     <el-card class="full-card" shadow="hover">
-      <h1 style="text-align: center;font-size: 70px;">东佰源空调集控系统</h1>
+      <h1 style="text-align: center;font-size: 70px;">兆润空调集控系统</h1>
     </el-card>
     <el-card class="company-card" shadow="hover">
       <el-text class="company-info" style="white-space: pre-line;">

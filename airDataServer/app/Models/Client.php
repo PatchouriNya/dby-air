@@ -41,6 +41,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Client whereTotalAir($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Client whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Client whereUpdatedAt($value)
+ * @property string|null $host_address 主机地址
+ * @method static \Illuminate\Database\Eloquent\Builder|Client whereHostAddress($value)
  * @mixin \Eloquent
  */
 class Client extends Model

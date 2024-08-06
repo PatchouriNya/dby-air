@@ -57,6 +57,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Air_detail whereVoltage($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Air_detail whereWindMode($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Air_detail whereWindSpeed($value)
+ * @property string|null $read_base_address 读取时寄存器起始地址
+ * @property string|null $write_base_address 写入时寄存器起始地址
+ * @method static \Illuminate\Database\Eloquent\Builder|Air_detail whereReadBaseAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Air_detail whereWriteBaseAddress($value)
  * @mixin \Eloquent
  */
 class Air_detail extends Model

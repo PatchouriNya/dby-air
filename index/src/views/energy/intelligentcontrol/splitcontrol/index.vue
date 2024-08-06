@@ -264,8 +264,10 @@
 
                   <el-switch v-if="controlForm.electrify_state === false"
                              v-model="controlForm.power_state"
-                             active-text="开机" inactive-text="关机" disabled/>
-                  <el-switch v-else v-model="controlForm.power_state" active-text="开机" inactive-text="关机"/>
+                             active-text="开机" inactive-text="关机" active-value="开机" inactive-value="关机"
+                             disabled/>
+                  <el-switch v-else v-model="controlForm.power_state" active-text="开机" inactive-text="关机"
+                             active-value="开机" inactive-value="关机"/>
                 </el-button-group>
               </el-col>
 
@@ -623,9 +625,11 @@ import {logCreateApi} from '@/api/log.js'
 import {airDetailApi, getAirTrueDataApi} from '@/api/air.js'
 import {Icon} from '@iconify/vue'
 import {groupControlApi} from '@/api/group.js'
-import {useRoute} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 
 const route = useRoute()
+const router = useRouter()
+
 let data = route.query.data
 const loading = ref(true)
 const tableClientId = ref()
@@ -725,7 +729,7 @@ const cellStyle = ({row, column, rowIndex, columnIndex}) => {
   // column 列
   if (row.online_state == '在线' && column.property === 'online_state')
     return {color: '#189EFF', textAlign: 'center'}
-  if (row.online_state == '故障' && column.property === 'online_state') {
+  if (row.online_state == '离线' && column.property === 'online_state') {
     return {color: '#FB6E6E', textAlign: 'center'}
   }
   if (row.power_state == '开机' && column.property === 'power_state')
@@ -769,6 +773,7 @@ async function initclientList() {
   if (data) {
     data = JSON.parse(route.query.data)
     defaultChoose = data
+    await router.replace({name: 'splitcontrol'})
   }
 
   if (defaultChoose) {
@@ -843,7 +848,7 @@ function showSelectColumn() {
 }
 
 // 是否显示断电开关
-const showEleState = ref(true)
+const showEleState = ref(false)
 const show_id = ref()
 
 const airBelongClientname = ref()
@@ -856,15 +861,14 @@ async function showControl(row) {
   colId.value = row.row.id
   editForm.value.designation = row.row.designation
   controlForm.value.wind_speed = row.row.wind_speed
-  controlForm.value.online_state = row.row.online_state == '在线'
-  controlForm.value.power_state = row.row.power_state == '开机'
-  if (row.row.electrify_state == null || row.row.electrify_state == '') {
-    showEleState.value = false
-    controlForm.value.electrify_state = null
-  } else {
-    controlForm.value.electrify_state = row.row.electrify_state == '通电'
-    showEleState.value = true
-  }
+  controlForm.value.power_state = row.row.power_state
+  /*  if (row.row.electrify_state == null || row.row.electrify_state == '') {
+      showEleState.value = false
+      controlForm.value.electrify_state = null
+    } else {
+      controlForm.value.electrify_state = row.row.electrify_state == '通电'
+      showEleState.value = true
+    }*/
   controlForm.value.operation_mode = row.row.operation_mode
   controlForm.value.set_temperature = row.row.set_temperature
   controlForm.value.room_temperature = row.row.room_temperature
@@ -895,13 +899,11 @@ const logForm = reactive({
 
 
 async function sureControl(id) {
-
-  controlForm.value.power_state = controlForm.value.power_state === true ? '开机' : '关机'
-  controlForm.value.online_state = controlForm.value.online_state === true ? '在线' : '离线'
-  if (controlForm.value.electrify_state != null)
-    controlForm.value.electrify_state = controlForm.value.electrify_state === true ? '通电' : '断电'
-  else
-    controlForm.value.electrify_state = ''
+  const loading = ElLoading.service({
+    lock: true,
+    text: '正在发送指令...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   logForm.client_id = tableClientId.value
   logForm.content = '操控了' + airBelongClientname.value + '的' + show_id.value + '号机 ' + controlForm.value.electrify_state + ' ' + controlForm.value.power_state + ' ' + controlForm.value.set_temperature + ' ' + controlForm.value.operation_mode + ' ' + controlForm.value.wind_speed + ' ' + controlForm.value.wind_mode
   await logCreateApi(logForm)
@@ -912,7 +914,7 @@ async function sureControl(id) {
       message: '发送指令成功:)',
       type: 'success'
     })
-
+    loading.close()
     await initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
   } else {
     controlVisible.value = !controlVisible.value

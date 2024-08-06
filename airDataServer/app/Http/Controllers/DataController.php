@@ -7,21 +7,25 @@ use App\Models\Client;
 use Illuminate\Http\Request;
 class DataController extends Controller
 {
-    private array $windSpeed = ['50' =>'高风','40' => 'h','30' => '中风','20' => 'l','10' => '低风','a0' => '自动','00' => '未知2','01' => '未知1'];
+    private array $windSpeed = ['50' =>'高风','40' => 'h','30' => '中风','20' => 'l','10' => '低风','a0' => '自动'];
+    private array $windSpeed_write = ['高风' =>'5000','中风' => '3000','低风' => '1000','自动' => 'a000'];
 
-    private array $mode = ['4200' => '送风','4201' => '制热','4202' => '制冷','4207' => '除湿','0200' => '未知2','0000' => '未知1'];
 
-    private array $kaiguan = ['00' => '关机','01' => '开机','42' => '未知'];
+    private array $mode = ['4200' => '送风','4201' => '制热','4202' => '制冷','4207' => '除湿'];
+    private array $mode_write = ['送风' =>'0000','制热' => '0001','制冷' => '0002','除湿' => '0007','自动' => '0003'];
 
-    private array $guzhangma = ['0000' => '正常','0001' => '异常'];
+    private array $power = ['00' => '关机','01' => '开机','42' => '未知'];
+    private array $power_write = ['关机' =>'0060','开机' => '0061'];
+
+    private array $guzhangma = ['0000' => '在线','0001' => '异常'];
 
     private array $chuanganqi = ['0000' => '正常'];
-    public function sendCommand($str,$com)
+    private function sendCommand($str,$com,$mode): \Illuminate\Http\JsonResponse
     {
+        // $mode为读写模式 1为读 2为写
         $s = pack('H*',$str);
         $t = $this->crc16($s);
         $command = strtoupper(unpack("H*", $s.$t)[1]);
-
         // 定义com口 baud 波特率 data 数据位 stop 停止位 由供应商提供
         $baud = '9600';
         $data = '8';
@@ -62,15 +66,21 @@ class DataController extends Controller
 
         $shuju = bin2hex($shuju);
 
-        // 去掉前6位和最后4位
-        $shuju = substr($shuju, 6, -4);
+        if ($mode === 1){
+            // 去掉前6位和最后4位
+            $shuju = substr($shuju, 6, -4);
 
-        // 使用 str_split 按每24个字符进行分割
-        $shujuArray = str_split($shuju, 24);
+            // 使用 str_split 按每24个字符进行分割
+            $shujuArray = str_split($shuju, 24);
 
-        $translatedArray = $this->translateData($shujuArray);
+            $translatedArray = $this->translateData($shujuArray);
+            return response()->json(['received' =>$translatedArray]);
+
+        }else{
+            return response()->json(['received' => $shuju]);
+        }
+
         // 返回接收到的数据
-        return response()->json(['received' =>$translatedArray]);
     }
 
     public function getLatestAirData($id)
@@ -86,12 +96,16 @@ class DataController extends Controller
         $index = 1; // 初始化编号
 
         for ($i = 0; $i < ceil($numAircons / $maxPerRequest); $i++) {
+            // 计算读取时的起始地址
             $startRegister = $baseRegister + ($i * $maxPerRequest * $registersPerAircon);
+            // 计算写入时的起始地址
+            $writeStartRegister = $baseRegister + ($i * $maxPerRequest * 4);
+
             $count = min($maxPerRequest, $numAircons - ($i * $maxPerRequest));
 
             // 构造命令
             $command = sprintf($client['host_address'].'04%04X%04X', $startRegister, $count * $registersPerAircon);
-            $receivedData = $this->sendCommand($command, $client['com_port']);
+            $receivedData = $this->sendCommand($command, $client['com_port'],1);
 
             // 将 JSON 响应转换为数组
             $receivedDataArray = $receivedData->getData(true);
@@ -100,9 +114,16 @@ class DataController extends Controller
             if (isset($receivedDataArray['received'])) {
                 foreach ($receivedDataArray['received'] as &$data) {
                     $data['id'] = $index++; // 为每台空调添加编号
+                    // 读取数据时的起始地址
                     $data['startAddress'] = dechex($startRegister + (($data['id'] - 1) % $maxPerRequest) * $registersPerAircon);
+                    // 将十六进制数转换为固定长度的字符串（四位），如果不够四位则在前面填充零
+                    $data['startAddress'] = str_pad($data['startAddress'], 4, '0', STR_PAD_LEFT);
+
+                    // 写入数据时的起始地址
+                    $data['writeAddress'] = dechex($writeStartRegister + (($data['id'] - 1) % $maxPerRequest) * 4);
+                    $data['writeAddress'] = str_pad($data['writeAddress'], 4, '0', STR_PAD_LEFT);
                     // 将 id 和 startAddress 放在数组的第一个位置
-                    $data = ['id' => $data['id'], 'startAddress' => $data['startAddress']] + $data;
+                    $data = ['id' => $data['id'], 'startAddress' => $data['startAddress'], 'writeAddress' => $data['writeAddress']] + $data;
                 }
                 $results = array_merge($results, $receivedDataArray['received']);
             } else {
@@ -110,26 +131,61 @@ class DataController extends Controller
             }
         }
         foreach ($results as $item) {
-            if($item['error_code'] === '正常' && ((int)$item['set_temperature'] >=16 && (int)$item['set_temperature'] <= 32)){
+            if($item['error_code'] === '在线' && ((int)$item['set_temperature'] >=16 && (int)$item['set_temperature'] <= 32)){
                Air_detail::where('client_id',$id)->where('show_id' ,$item['id'])->update([
+                   'read_base_address' => $item['startAddress'],
+                   'write_base_address' => $item['writeAddress'],
                    'wind_speed' => $item['wind_speed'],
                    'power_state' => $item['power_state'],
                    'operation_mode' => $item['operation_mode'],
                    'set_temperature' => $item['set_temperature'],
                    'room_temperature' => $item['room_temperature'],
-                   'online_state' => '正常'
+                   'online_state' => '在线'
                ]);
             }else{
                 Air_detail::where('client_id',$id)->where('show_id' ,$item['id'])->update([
-                    'online_state' => '故障'
+                    'online_state' => '离线',
+                    'read_base_address' => $item['startAddress'],
+                    'write_base_address' => $item['writeAddress'],
+                    // 测试用
+                    'wind_speed' => $item['wind_speed'],
+                    'power_state' => $item['power_state'],
+                    'operation_mode' => $item['operation_mode'],
+                    'set_temperature' => '0℃',
+                    'room_temperature' => '0℃',
+
                 ]);
             }
         }
         return api($results,200,'获取最新数据成功');
     }
 
+    public function controlOneAir($id,Request $request){
+        $client = Client::where('id',$id)->first(['host_address','com_port','start_address'])->toArray();
+        if ($client['host_address'] === null || $client['com_port'] === null || $client['start_address'] === null)
+            return api(null,400,'该客户还没有接通真实数据哟~');
+        $air_id = $request->input('air_id');
+        $air = Air_detail::where('client_id',$id)->where('show_id',$air_id)->first('write_base_address');
+        $wind_speed = $request->input('wind_speed');
+        $power_state = $request->input('power_state');
+        $operation_mode = $request->input('operation_mode');
+        // 字符串转成数字之后扩大十倍再转成16进制之后再前面补0够4位
+        $set_temperature = str_pad(dechex((int)$request->input('set_temperature') *10), 4, '0', STR_PAD_LEFT);
+        $command = $client['host_address'].'10'.$air->write_base_address.'0004'.'08'.$this->windSpeed_write[$wind_speed].$this->power_write[$power_state].$this->mode_write[$operation_mode].$set_temperature;
+        $res = $this->sendCommand($command,$client['com_port'],2);
+        $receivedDataArray = $res->getData(true);
+        Air_detail::where('client_id',$id)->where('show_id',$air_id)->update([
+            'wind_speed' => $wind_speed,
+            'power_state' => $power_state,
+            'operation_mode' => $operation_mode,
+           'set_temperature' => $request->input('set_temperature').'℃',
+        ]);
+        return api($receivedDataArray['received'],201,'控制空调成功');
+        // 数据校验没写
+    }
 
-    private function crc16($string, $length = 0)
+
+    private function crc16($string, $length = 0): string
     {
         $auchCRCHi = array(
             0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
@@ -183,13 +239,13 @@ class DataController extends Controller
         return (chr($uchCRCLo) . chr($uchCRCHi));
     }
 
-    private function translateData($dataArray)
+    private function translateData($dataArray): array
     {
         $translatedArray = [];
 
         foreach ($dataArray as $data) {
             $fengsu = substr($data, 0, 2);
-            $kaiguan = substr($data, 2, 2);
+            $power = substr($data, 2, 2);
             $moshi = substr($data, 4, 4);
             $wendu = substr($data, 8, 4);
             $wendu = hexdec($wendu);
@@ -199,11 +255,11 @@ class DataController extends Controller
             $wenduchuanganqi = substr($data, 20, 4);
 
             $translated = [
-                'wind_speed' => $this->windSpeed[$fengsu],
-                'power_state' => $this->kaiguan[$kaiguan],
-                'operation_mode' => $this->mode[$moshi],
+                'wind_speed' => $this->windSpeed[$fengsu] ?? '未知风速',
+                'power_state' => $this->power[$power] ?? '未知开关状态',
+                'operation_mode' => $this->mode[$moshi] ?? '未知模式',
                 'set_temperature' => $wendu . '℃',
-                'error_code' => $this->guzhangma[$guzhangma],
+                'error_code' => $this->guzhangma[$guzhangma] ?? '未知故障码',
                 'room_temperature' => $shiwen . '℃',
                 '温度传感器' => $wenduchuanganqi
             ];

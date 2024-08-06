@@ -21,7 +21,9 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers','middleware' => ['cors']], function () {
     Route::get('/command-liuhe/{str}', 'DataController@sendCommand');
 
-    // 传客户id
+    // 传客户id 读取空调
     Route::get('/air-latest/{id}', 'DataController@getLatestAirData');
 
+    // 传客户id 控制一台空调
+    Route::post('/air-control/{id}', 'DataController@controlOneAir');
 });

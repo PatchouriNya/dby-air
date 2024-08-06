@@ -71,21 +71,22 @@
                   :empty-text="noDataMeg">
           <el-table-column prop="show_id" label="序号" width="100px"/>
           <el-table-column v-if="showColumn.designation" prop="designation" label="空调位置"/>
-          <el-table-column v-if="showColumn.air_brand" prop="air_brand" label="品牌" width="120px"/>
-          <el-table-column v-if="showColumn.electrify_state" prop="electrify_state" label="通电状态" width="120px"/>
-          <el-table-column v-if="showColumn.power_state" prop="power_state" label="开机状态" width="120px"/>
-          <el-table-column v-if="showColumn.operation_mode" prop="operation_mode" label="运行模式" width="120px"/>
-          <el-table-column v-if="showColumn.wind_speed" prop="wind_speed" label="风速" width="120px"/>
-          <el-table-column v-if="showColumn.wind_mode" prop="wind_mode" label="风向" width="120px"/>
-          <el-table-column v-if="showColumn.set_temperature" prop="set_temperature" label="设置温度℃" width="120px"/>
-          <el-table-column v-if="showColumn.room_temperature" prop="room_temperature" label="室温℃" width="120px"/>
-          <el-table-column v-if="showColumn.online_state" prop="online_state" label="接入状态" width="120px"/>
-          <el-table-column v-if="showColumn.voltage" prop="voltage" label="电压" width="120px"/>
-          <el-table-column v-if="showColumn.electric_current" prop="electric_current" label="电流" width="120px"/>
-          <el-table-column v-if="showColumn.power" prop="power" label="功率" width="120px"/>
-          <el-table-column v-if="showColumn.electric_quantity" prop="electric_quantity" label="电量读取" width="120px"/>
-          <el-table-column v-if="showColumn.responsible_person" prop="responsible_person" label="责任人" width="120px"/>
-          <el-table-column v-if="showColumn.standby_mode" prop="standby_mode" label="待机状态" width="120px"/>
+          <el-table-column v-if="showColumn.online_state" prop="online_state" label="接入状态" width="130px"/>
+          <!--          <el-table-column v-if="showColumn.electrify_state" prop="electrify_state" label="通电状态" width="130px"/>-->
+          <el-table-column v-if="showColumn.power_state" prop="power_state" label="开机状态" width="130px"/>
+          <el-table-column v-if="showColumn.operation_mode" prop="operation_mode" label="运行模式" width="130px"/>
+          <el-table-column v-if="showColumn.wind_speed" prop="wind_speed" label="风速" width="130px"/>
+          <el-table-column v-if="showColumn.wind_mode" prop="wind_mode" label="风向" width="130px"/>
+          <el-table-column v-if="showColumn.set_temperature" prop="set_temperature" label="设置温度℃" width="130px"/>
+          <el-table-column v-if="showColumn.room_temperature" prop="room_temperature" label="室温℃" width="130px"/>
+          <el-table-column v-if="showColumn.voltage" prop="voltage" label="电压" width="130px"/>
+          <el-table-column v-if="showColumn.electric_current" prop="electric_current" label="电流" width="130px"/>
+          <el-table-column v-if="showColumn.power" prop="power" label="功率" width="130px"/>
+          <el-table-column v-if="showColumn.electric_quantity" prop="electric_quantity" label="电量读取" width="130px"/>
+          <el-table-column v-if="showColumn.responsible_person" prop="responsible_person" label="责任人" width="130px"/>
+          <el-table-column v-if="showColumn.standby_mode" prop="standby_mode" label="待机状态" width="130px"/>
+          <el-table-column v-if="showColumn.air_brand" prop="air_brand" width="140px" label="品牌"/>
+
           <el-table-column fixed="right" label="操作" width="100">
             <template #default="row">
               <el-tooltip content="控制" placement="top">
@@ -129,15 +130,15 @@
         <div>选择显示字段</div>
         <div>
           <el-checkbox v-model="showColumn.designation">空调位置</el-checkbox>
-          <el-checkbox v-model="showColumn.air_brand">品牌</el-checkbox>
-          <el-checkbox v-model="showColumn.electrify_state">通电状态</el-checkbox>
+          <el-checkbox v-model="showColumn.online_state">接入状态</el-checkbox>
           <el-checkbox v-model="showColumn.power_state">开机状态</el-checkbox>
           <el-checkbox v-model="showColumn.operation_mode">运行模式</el-checkbox>
           <el-checkbox v-model="showColumn.wind_speed">风速</el-checkbox>
-          <el-checkbox v-model="showColumn.wind_mode">风向</el-checkbox>
           <el-checkbox v-model="showColumn.set_temperature">设置温度℃</el-checkbox>
           <el-checkbox v-model="showColumn.room_temperature">室温℃</el-checkbox>
-          <el-checkbox v-model="showColumn.online_state">在线状态</el-checkbox>
+          <el-checkbox v-model="showColumn.air_brand">品牌</el-checkbox>
+          <el-checkbox v-model="showColumn.electrify_state">通电状态</el-checkbox>
+          <el-checkbox v-model="showColumn.wind_mode">风向</el-checkbox>
           <el-checkbox v-model="showColumn.voltage">电压</el-checkbox>
           <el-checkbox v-model="showColumn.electric_current">电流</el-checkbox>
           <el-checkbox v-model="showColumn.power">功率</el-checkbox>
@@ -667,8 +668,8 @@ const columnVisible = ref(false)
 const showColumn = ref({
   designation: true,
   air_brand: true,
-  online_state: false,
-  electrify_state: true,
+  online_state: true,
+  electrify_state: false,
   power_state: true,
   operation_mode: true,
   wind_speed: true,
@@ -722,19 +723,19 @@ const cellStyle = ({row, column, rowIndex, columnIndex}) => {
   // rowIndex 行下标
   // row 行
   // column 列
-  if (row.electrify_state == '通电' && columnIndex === 3)
+  if (row.online_state == '在线' && column.property === 'online_state')
     return {color: '#189EFF', textAlign: 'center'}
-  if (row.electrify_state == '断电' && columnIndex === 3) {
+  if (row.online_state == '故障' && column.property === 'online_state') {
     return {color: '#FB6E6E', textAlign: 'center'}
   }
-  if (row.power_state == '开机' && columnIndex === 4)
+  if (row.power_state == '开机' && column.property === 'power_state')
     return {color: '#189EFF', textAlign: 'center'}
-  if (row.power_state == '关机' && columnIndex === 4) {
+  if (row.power_state == '关机' && column.property === 'power_state') {
     return {color: '#FB6E6E', textAlign: 'center'}
   }
-  if (row.operation_mode == '制冷' && columnIndex === 5)
+  if (row.operation_mode == '制冷' && column.property === 'operation_mode')
     return {color: '#189EFF', textAlign: 'center'}
-  if (row.operation_mode == '制热' && columnIndex === 5) {
+  if (row.operation_mode == '制热' && column.property === 'operation_mode') {
     return {color: '#FB6E6E', textAlign: 'center'}
   }
   return {textAlign: 'center'}
@@ -904,14 +905,21 @@ async function sureControl(id) {
   logForm.client_id = tableClientId.value
   logForm.content = '操控了' + airBelongClientname.value + '的' + show_id.value + '号机 ' + controlForm.value.electrify_state + ' ' + controlForm.value.power_state + ' ' + controlForm.value.set_temperature + ' ' + controlForm.value.operation_mode + ' ' + controlForm.value.wind_speed + ' ' + controlForm.value.wind_mode
   await logCreateApi(logForm)
-  let res = await controlAir(id, controlForm.value)
-  if (res.code === 201) {
+  controlVisible.value = !controlVisible.value
+  let res = await controlAir(clientId.value, controlForm.value, show_id.value)
+  if (res.data.code === 201) {
     ElMessage({
       message: '发送指令成功:)',
       type: 'success'
     })
+
+    await initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+  } else {
     controlVisible.value = !controlVisible.value
-    initAirList(clientId.value, filters.value, pageSize.value, currentPage.value)
+    ElMessage({
+      message: res.data.msg,
+      type: 'error'
+    })
   }
 }
 

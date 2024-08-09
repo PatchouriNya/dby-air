@@ -31,9 +31,12 @@
         <el-table :data="tableData" border style="width: 100%">
           <el-table-column type="index" label="序号" width="180"/>
           <el-table-column prop="name" label="组名" width="180"/>
-          <el-table-column prop="with_strategy.name" label="策略" width="180">
+          <el-table-column prop="with_strategy.name" label="策略">
             <template #default="scope">
-              <span v-if="scope.row.strategy_id && scope.row.strategy_id[0]"><el-tag>正在执行</el-tag></span>
+              <span v-if="scope.row.strategy_id && scope.row.strategy_id[0]"><el-tag
+                  v-for="(name, index) in scope.row.strategy_name" :key="index" style="margin-right: 5px">{{
+                  name
+                }}</el-tag></span>
               <span v-else><el-tag type="danger">暂无策略</el-tag></span>
             </template>
           </el-table-column>
@@ -180,6 +183,7 @@
     </el-form-item>
     <template #footer>
       <div class="dialog-footer">
+        <el-button @click="stopSetStrategy" type="danger">停用</el-button>
         <el-button @click="setStrategyVisible = false">取消</el-button>
         <el-button type="primary" @click=sureSetStrategy>
           启用

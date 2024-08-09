@@ -18,7 +18,6 @@ class GroupController extends Controller
         $pageSize = $request->query('pageSize') ?? 5;
         $client_id = $request->input('client_id');
         $name = $request->input('name');
-
         $query = Air_group::where('client_id', $client_id);
 
         // 如果提供了名称，添加名称检索条件
@@ -27,7 +26,17 @@ class GroupController extends Controller
         }
 
         $data = $query->paginate($pageSize);
-
+        // 对其中一个字段单独处理
+        $data->getCollection()->transform(function ($item) {
+            $strategy_name = [];
+            // 将 name 字段转换为大写
+            if ($item->strategy_id != null)
+                foreach ($item->strategy_id as $strategy) {
+                    $strategy_name[] = Strategy::find($strategy)->name;
+                }
+            $item->strategy_name = $strategy_name;
+            return $item;
+        });
         return api($data, 200, '获得该客户下空调组成功');
     }
 

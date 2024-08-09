@@ -158,7 +158,7 @@ class StrategyController extends Controller
             $exist = Strategy::where('client_id', $strategy->client_id)
                 ->where('name', $data['name'])
                 ->first();
-            if ($exist) {
+            if ($exist && $exist->id != $strategy->id) {
                 return api(null, 400, '策略名称已存在');
             }
             if (!$strategy) {

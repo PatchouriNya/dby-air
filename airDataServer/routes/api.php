@@ -26,4 +26,13 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers','middlewa
 
     // 传客户id 控制一台空调
     Route::post('/air-control/{id}', 'DataController@controlOneAir');
+
+    // 传组id 控制组内空调
+    Route::post('/air-control-group/{id}', 'DataController@controlAirGroup');
+
+    // 读一台空调
+    Route::get('/air-read/{client_id}/{air_id}', 'DataController@readOneAir');
+
+    Route::get('/air-test', 'DataController@test11');
+
 });

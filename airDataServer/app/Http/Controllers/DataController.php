@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helper\PhpSerial;
 use App\Models\Air_detail;
+use App\Models\Air_group_relationship;
 use App\Models\Client;
 use Illuminate\Http\Request;
 class DataController extends Controller
@@ -17,9 +19,81 @@ class DataController extends Controller
     private array $power = ['00' => '关机','01' => '开机','42' => '未知'];
     private array $power_write = ['关机' =>'0060','开机' => '0061'];
 
-    private array $guzhangma = ['0000' => '在线','0001' => '异常'];
+    private array $guzhangma = ['0000' => '在线','0001' => '离线'];
 
     private array $chuanganqi = ['0000' => '正常'];
+    function completeAndRepairData($data) {
+        if (strlen($data) === 24)
+            return $data;
+        // 定义规则
+        $validStart = ['50', '40', '30', '20', '10', 'A0'];
+        $validSecondPart = ['00', '01'];
+        $thirdPart = '42';
+        $validFourthPart = ['00', '01', '02', '07'];
+        $validFifthPartRange = ['0010', '0020'];
+        $validSixthPart = ['0000'];
+        $validSeventhPartRange = ['00A0', '0190'];
+        $endPart = '0000';
+
+        // 补全数据
+        $data = str_pad($data, 24, '0'); // 补全到24位，先用 '0' 填充
+
+        // 提取数据段
+        $start = substr($data, 0, 2);
+        $secondPart = substr($data, 2, 2);
+        $thirdPartExtracted = substr($data, 4, 2);
+        $fourthPart = substr($data, 6, 2);
+        $fifthPart = substr($data, 8, 4);
+        $sixthPart = substr($data, 12, 4);
+        $seventhPart = substr($data, 16, 4);
+        $end = substr($data, 20, 4);
+
+        // 1. 修复开始2位
+        if (!in_array(strtoupper($start), $validStart)) {
+            $start = $validStart[0]; // 默认使用第一个有效值 '50'
+        }
+
+        // 2. 修复接下来的2位
+        if (!in_array($secondPart, $validSecondPart)) {
+            $secondPart = $validSecondPart[0]; // 默认使用 '00'
+        }
+
+        // 3. 修复接下来的2位 (一定是 '42')
+        if ($thirdPartExtracted !== $thirdPart) {
+            $thirdPartExtracted = $thirdPart;
+        }
+
+        // 4. 修复接下来的2位
+        if (!in_array($fourthPart, $validFourthPart)) {
+            $fourthPart = $validFourthPart[2]; // 默认使用 '00'
+        }
+
+        // 5. 修复接下来的4位 (范围 '0010' - '0020')
+        if (hexdec($fifthPart) < hexdec($validFifthPartRange[0]) || hexdec($fifthPart) > hexdec($validFifthPartRange[1])) {
+            $fifthPart = '001A'; // 默认使用最小值 '0010'
+        }
+
+        // 6. 修复接下来的4位 ('0000' 或 '0001')
+        if (!in_array($sixthPart, $validSixthPart)) {
+            $sixthPart = $validSixthPart[0]; // 默认使用 '0000'
+        }
+
+        // 7. 修复接下来的4位 (范围 '00A0' - '0190')
+        if (hexdec($seventhPart) < hexdec($validSeventhPartRange[0]) || hexdec($seventhPart) > hexdec($validSeventhPartRange[1])) {
+            $seventhPart = '0154'; // 默认使用最小值 '00A0'
+        }
+
+        // 8. 修复最后的4位 (一定是 '0000')
+        if ($end !== $endPart) {
+            $end = $endPart;
+        }
+
+        // 拼接修复和补全后的数据
+        return $start . $secondPart . $thirdPartExtracted . $fourthPart . $fifthPart . $sixthPart . $seventhPart . $end;
+    }
+    public function test11()
+    {
+    }
     private function sendCommand($str,$com,$mode): \Illuminate\Http\JsonResponse
     {
         // $mode为读写模式 1为读 2为写
@@ -44,6 +118,7 @@ class DataController extends Controller
 
         // 发送命令
         $command = hex2bin($command);
+
         dio_write($ck, $command);
 
         // 读取串口数据
@@ -60,24 +135,33 @@ class DataController extends Controller
                 $shuju .= $data;
             }
         } while ($data == null);
-
         // 关闭串口
         dio_close($ck);
 
         $shuju = bin2hex($shuju);
-
         if ($mode === 1){
             // 去掉前6位和最后4位
             $shuju = substr($shuju, 6, -4);
 
             // 使用 str_split 按每24个字符进行分割
             $shujuArray = str_split($shuju, 24);
-
             $translatedArray = $this->translateData($shujuArray);
             return response()->json(['received' =>$translatedArray]);
 
-        }else{
+        }else if ($mode === 2){
             return response()->json(['received' => $shuju]);
+        }else if ($mode === 3){
+
+            // 去掉前6位和结尾4位
+            $trimmed = substr($shuju, 6, -4);
+
+            $trimmed = $this->completeAndRepairData($trimmed);
+            if (strlen($trimmed) !== 24){
+                $trimmed = substr_replace($trimmed, 11, 10, 0);
+            }
+            $arr[] = $trimmed;
+            $translatedArray = $this->translateData($arr);
+            return response()->json(['received' =>$translatedArray]);
         }
 
         // 返回接收到的数据
@@ -106,7 +190,6 @@ class DataController extends Controller
             // 构造命令
             $command = sprintf($client['host_address'].'04%04X%04X', $startRegister, $count * $registersPerAircon);
             $receivedData = $this->sendCommand($command, $client['com_port'],1);
-
             // 将 JSON 响应转换为数组
             $receivedDataArray = $receivedData->getData(true);
 
@@ -143,24 +226,14 @@ class DataController extends Controller
                    'online_state' => '在线'
                ]);
             }else{
-                Air_detail::where('client_id',$id)->where('show_id' ,$item['id'])->update([
-                    'online_state' => '离线',
-                    'read_base_address' => $item['startAddress'],
-                    'write_base_address' => $item['writeAddress'],
-                    // 测试用
-                    'wind_speed' => $item['wind_speed'],
-                    'power_state' => $item['power_state'],
-                    'operation_mode' => $item['operation_mode'],
-                    'set_temperature' => '0℃',
-                    'room_temperature' => '0℃',
-
-                ]);
+                $this->readOneAir($id,$item['id']);
             }
         }
         return api($results,200,'获取最新数据成功');
     }
 
     public function controlOneAir($id,Request $request){
+        // 传客户id
         $client = Client::where('id',$id)->first(['host_address','com_port','start_address'])->toArray();
         if ($client['host_address'] === null || $client['com_port'] === null || $client['start_address'] === null)
             return api(null,400,'该客户还没有接通真实数据哟~');
@@ -184,7 +257,33 @@ class DataController extends Controller
         // 数据校验没写
     }
 
+    public function controlAirGroup($id,Request $request){
+        $wind_speed = $request->input('wind_speed');
+        $power_state = $request->input('power_state');
+        $operation_mode = $request->input('operation_mode');
+        $set_temperature = $request->input('set_temperature');
+        // 传group_id
+        $air_ids = Air_group_relationship::where('group_id', $id)->pluck('air_id')->toArray();
+        foreach ($air_ids as $air_id) {
+            $res = json_decode($this->controlAnAir($air_id,$wind_speed,$power_state,$operation_mode,$set_temperature)->content());
+            if ($res->code !== 201) {
+                return api(null,400,$res->msg);
+            }
+        }
+        return api(null,201,'控制组内空调成功');
+    }
 
+    public function controlAnAirGroup($id,$wind_speed,$power_state,$operation_mode,$set_temperature){
+        // 传group_id
+        $air_ids = Air_group_relationship::where('group_id', $id)->pluck('air_id')->toArray();
+        foreach ($air_ids as $air_id) {
+            $res = json_decode($this->controlAnAir($air_id,$wind_speed,$power_state,$operation_mode,$set_temperature)->content());
+            if ($res->code !== 201) {
+                return api(null,400,$res->msg);
+            }
+        }
+        return api(null,201,'控制组内空调成功');
+    }
     private function crc16($string, $length = 0): string
     {
         $auchCRCHi = array(
@@ -268,6 +367,53 @@ class DataController extends Controller
         }
 
         return $translatedArray;
+    }
+
+    public function controlAnAir($id,$wind_speed,$power_state,$operation_mode,$set_temperature){
+        // 先找空调的写地址和客户id
+        $air = Air_detail::where('id',$id)->first(['write_base_address','client_id']);
+        // 再用客户id找客户
+        $client = Client::where('id',$air->client_id)->first(['host_address','com_port','start_address'])->toArray();
+        if ($client['host_address'] === null || $client['com_port'] === null || $client['start_address'] === null)
+            return api(null,400,'该客户还没有接通真实数据哟~');
+
+        // 字符串转成数字之后扩大十倍再转成16进制之后再前面补0够4位
+        $set_temperature_new = str_pad(dechex((int)$set_temperature *10), 4, '0', STR_PAD_LEFT);
+        $command = $client['host_address'].'10'.$air->write_base_address.'0004'.'08'.$this->windSpeed_write[$wind_speed].$this->power_write[$power_state].$this->mode_write[$operation_mode].$set_temperature_new;
+        $res = $this->sendCommand($command,$client['com_port'],2);
+        $receivedDataArray = $res->getData(true);
+        if (strpos($set_temperature, '℃') === false) {
+            // 如果不包含，则添加 '℃'
+            $set_temperature .= '℃';
+        }
+        Air_detail::where('id',$id)->update([
+            'wind_speed' => $wind_speed,
+            'power_state' => $power_state,
+            'operation_mode' => $operation_mode,
+            'set_temperature' => $set_temperature,
+        ]);
+        return api($receivedDataArray['received'],201,'控制空调成功');
+        // 数据校验没写
+    }
+
+    public function readOneAir($clitent_id,$air_id)
+    {
+        $client = Client::where('id',$clitent_id)->first(['host_address','com_port','start_address','total_air'])->toArray();
+        if ($client['host_address'] === null || $client['com_port'] === null || $client['start_address'] === null || $client['total_air'] === null)
+            return api(null,400,'该客户还没有接通真实数据哟~');
+        $read_address = Air_detail::where('client_id',$clitent_id)->where('show_id',$air_id)->first(['read_base_address'])->read_base_address;
+        // 构造命令
+        $command = $client['host_address'].'04'.$read_address.'0006';
+        $receivedData = $this->sendCommand($command, $client['com_port'],3)->getData(true);
+        $receivedData = $receivedData['received'][0];
+        Air_detail::where('client_id',$clitent_id)->where('show_id',$air_id)->update([
+            'wind_speed' => $receivedData['wind_speed'],
+            'power_state' => $receivedData['power_state'],
+            'operation_mode' => $receivedData['operation_mode'],
+            'set_temperature' => $receivedData['set_temperature'],
+            'room_temperature' => $receivedData['room_temperature'],
+            'online_state' => $receivedData['error_code']
+        ]);
     }
 
 }

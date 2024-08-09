@@ -12,6 +12,7 @@
           ref="tree"
           style="background-color: #f5f5f5"
           @node-click="clickNode"
+          default-expand-all
       />
     </el-skeleton>
 
@@ -21,7 +22,7 @@
 <script setup>
 import {ref, onMounted} from 'vue'
 import {clientList} from '@/api/client'
-import eventBus from "@/listen/event-bus"
+import eventBus from '@/listen/event-bus'
 import {useClientStore} from '@/store/client.js'
 
 const loading = ref(true)

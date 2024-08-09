@@ -14,6 +14,7 @@
               auto-expand-parent
               highlight-current
               style="background-color: #f5f5f5;width: 100%"
+              default-expand-all
           />
         </el-skeleton>
       </div>

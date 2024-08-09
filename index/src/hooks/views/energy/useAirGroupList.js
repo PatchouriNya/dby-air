@@ -8,7 +8,7 @@ import {
     groupControlApi,
     setStrategyApi
 } from '@/api/group.js'
-import {ElMessage} from 'element-plus'
+import {ElLoading, ElMessage} from 'element-plus'
 import {getStrategyListApi} from '@/api/strategy.js'
 import {clientDetailApi} from '@/api/client.js'
 import {logCreateApi} from '@/api/log.js'
@@ -28,7 +28,7 @@ const getGroupListByClient = async () => {
 }
 // 写日志
 const logForm = reactive({
-    id: localStorage.getItem("token"),
+    id: localStorage.getItem('token'),
     type: 1,
     content: ''
 })
@@ -217,8 +217,13 @@ export function userGroupControl() {
         groupControlVisible.value = true
     }
     const sureGroupControl = async () => {
+        const loading = ElLoading.service({
+            lock: true,
+            text: '正在发送指令...',
+            background: 'rgba(0, 0, 0, 0.7)'
+        })
         const res = await groupControlApi(group_id.value, controlForm.value)
-        if (res.code === 201) {
+        if (res.data.code === 201) {
             // 拿当前的客户名称,用来写日志
             const client = await clientDetailApi(client_id.value)
             clientname.value = client.data.clientname
@@ -226,7 +231,11 @@ export function userGroupControl() {
             logForm.content = '操控了' + clientname.value + '下的组' + groupname.value + ' ' + controlForm.value.power_state + ' ' + controlForm.value.set_temperature + ' ' + controlForm.value.operation_mode + ' ' + controlForm.value.wind_speed + ' ' + controlForm.value.wind_mode
             await logCreateApi(logForm)
             groupControlVisible.value = false
-            ElMessage.success(res.msg)
+            ElMessage.success(res.data.msg)
+            loading.close()
+        } else {
+            ElMessage.error(res.data.msg)
+            loading.close()
         }
     }
     return {groupControlVisible, controlForm, showGroupControl, sureGroupControl}

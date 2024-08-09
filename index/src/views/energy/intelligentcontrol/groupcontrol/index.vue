@@ -242,7 +242,6 @@ import {Icon} from '@iconify/vue'
 eventBus.off('defaultNode')
 eventBus.off('node-clicked')
 const tree = ref()
-const client_id = ref()
 
 // 权限控制
 const {isSystem, mainFlag} = useAuthControl()
@@ -256,6 +255,7 @@ const {
   pageSize,
   title,
   name,
+  client_id,
   handleSizeChange,
   handleCurrentChange,
   reset,

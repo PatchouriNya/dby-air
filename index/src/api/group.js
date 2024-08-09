@@ -1,6 +1,7 @@
 import request from './request.js'
+import axios from 'axios'
 // 获取单跳账号信息
-const token = localStorage.getItem("token")
+const token = localStorage.getItem('token')
 
 
 export const getGroupListByClientApi = (id, pageSize, currentPage, name) => {
@@ -76,10 +77,19 @@ export const setStrategyApi = (id, strategy_id) => {
     })
 }
 
-export const groupControlApi = (id, data) => {
+/*export const groupControlApi = (id, data) => {
     return request({
         url: '/group/control/' + id,
         method: 'put',
         data
+    })
+}*/
+
+export const groupControlApi = (id, data) => {
+    return axios.post('http://47.103.60.199:1110/api/dby/air-control-group/' + id, {
+        wind_speed: data.wind_speed,
+        power_state: data.power_state,
+        operation_mode: data.operation_mode,
+        set_temperature: parseInt(data.set_temperature)
     })
 }

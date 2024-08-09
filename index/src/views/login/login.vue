@@ -30,7 +30,7 @@
 
 <script setup>
 import {getCurrentInstance, ref, onMounted} from 'vue'
-import {ElForm, ElFormItem, ElInput, ElButton, ElCheckbox, ElMessage} from 'element-plus'
+import {ElForm, ElFormItem, ElInput, ElButton, ElCheckbox, ElMessage, ElLoading} from 'element-plus'
 import {useRouter} from 'vue-router'
 import axios from 'axios'
 import {useLoginstateStore} from '@/stores/loginstate.js'
@@ -76,6 +76,11 @@ onMounted(() => {
 
 async function login() {
   try {
+    const loading = ElLoading.service({
+      lock: true,
+      text: '正在刷新真实数据,登陆中,请稍后...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
     const response = await axios.post(url, {
       username: loginForm.value.username,
       password: loginForm.value.password
@@ -100,12 +105,14 @@ async function login() {
       loginstateStore.id = response.data.data.id
       loginLog.value.id = response.data.data.id
       await logCreateApi(loginLog.value)
+      loading.close()
       ElMessage.success('登录成功')
       // 跳转到 index 路由
       await router.push({path: '/'})
       router.go(0)  // 解决了登出后再进来需要手动刷新的问题
     } else {
       ElMessage.error(response.data.msg || '登录失败，请检查用户名和密码')
+      loading.close()
     }
   } catch (error) {
     ElMessage.error('登录失败，请稍后重试')

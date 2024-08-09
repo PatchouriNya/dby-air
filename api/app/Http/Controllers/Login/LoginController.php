@@ -9,6 +9,7 @@ use App\Models\Client\Client;
 use App\Models\Client\Client_account_relationship;
 use App\Models\User\Create_record;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
 
 class LoginController extends Controller
@@ -48,8 +49,7 @@ class LoginController extends Controller
                     $client_id = Client_account_relationship::where('account_id', $id->id)->first('client_id')->client_id;
                     $type = Client::where('id', $client_id)->first('type')->type;
                     if ($type === 1) {
-                        $airController = new AirController();
-                        $airController->refreshAirByClient($client_id);
+                        Http::get('http://47.103.60.199:1110/api/dby/air-latest/' . $client_id);
                     }
                     return api($id, 200, '登录成功');
                 }

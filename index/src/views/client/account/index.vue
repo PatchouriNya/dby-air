@@ -19,16 +19,17 @@
           <el-table-column fixed="right" label="操作">
             <template #default="row">
               <el-tooltip content="修改密码" placement="top"
-                          v-if="isSystem || (row.row.client_id === mainClientId && mainFlag === 1 || accountStore.accountData.id === row.row.id)"
-                          @click="showCpd(row)">
-                <el-button link type="primary" size="default">
+                          v-if="isSystem || (client_id === localClient && mainFlag === 1) || accountId === row.row.account_id"
+              >
+                <el-button link type="primary" size="default" @click="showCpd(row)">
                   <el-icon>
                     <Compass/>
                   </el-icon>
                 </el-button>
               </el-tooltip>
               <el-tooltip content="编辑" placement="top"
-                          v-if="isSystem || (row.row.client_id === mainClientId && mainFlag === 1 || accountStore.accountData.id === row.row.id)">
+                          v-if="isSystem || (client_id === localClient && mainFlag === 1) || accountId === row.row.account_id"
+              >
                 <el-button link type="primary" size="default"
                            @click="showInnerEdit(row)">
                   <el-icon>
@@ -37,7 +38,8 @@
                 </el-button>
               </el-tooltip>
               <el-tooltip content="删除" placement="top"
-                          v-if="accountStore.accountData.id !== row.row.id && (isSystem || (row.row.client_id === mainClientId && mainFlag === 1))">
+                          v-if="(isSystem && accountId !== row.row.account_id) || (client_id === localClient && mainFlag === 1 && accountId !== row.row.account_id)"
+              >
                 <el-button
                     link
                     type="primary" size="default"
@@ -48,7 +50,8 @@
                 </el-button>
               </el-tooltip>
               <el-tooltip content="设置为主管账号" placement="top"
-                          v-if="(mainFlag === 1 || isSystem) &&row.row.account.main !== 1 && (row.row.client_id === mainClientId || isSystem)">
+                          v-if="(isSystem && accountId !== row.row.account_id) || (client_id === localClient && mainFlag === 1 && accountId !== row.row.account_id)"
+              >
                 <el-button
                     link
                     type="primary"
@@ -167,18 +170,21 @@
 </template>
 
 <script setup>
-import ClientTree from "@/components/ClientTree.vue"
+import ClientTree from '@/components/ClientTree.vue'
 import useChangePwd from '@/hooks/views/client/account/useChangePwd.js'
 import useInnerEdit from '@/hooks/views/client/account/useInnerEdit.js'
 import eventBus from '@/listen/event-bus.js'
 import {onMounted, ref} from 'vue'
 import useAccountCreate from '@/hooks/views/client/account/useAccountCreate.js'
-import useAccountDelete from "@/hooks/views/client/account/useAccountDelete.js";
-import {useClientStore} from "@/store/client.js";
+import useAccountDelete from '@/hooks/views/client/account/useAccountDelete.js'
+import {useClientStore} from '@/store/client.js'
 import {storeToRefs} from 'pinia'
 import {useAccountStore} from '@/store/account.js'
 import useSetMain from '@/hooks/views/client/account/useSetMain.js'
-
+import useAuthControl from '@/hooks/useAuthControl.js'
+// 权限控制
+const {isSystem, mainFlag} = useAuthControl()
+const localClient = parseInt(localStorage.getItem('client_id'))
 eventBus.off('defaultNode')
 eventBus.off('node-clicked')
 const tree = ref()
@@ -187,9 +193,7 @@ const client_id = ref()
 // 从pinia读数据
 const clientStore = useClientStore()
 const {tableManageData} = storeToRefs(clientStore)
-const accountStore = useAccountStore()
-let mainClientId = 0
-let isSystem = localStorage.getItem('token_')
+let accountId = parseInt(localStorage.getItem('token'))
 const currentAccountClientId = parseInt(localStorage.getItem('client_id'))
 // 账号管理下的修改密码
 const {showCpdVisible, cancelCpd, cpwForm, showCpd, sureChange} = useChangePwd()
@@ -204,7 +208,7 @@ const {accountCreateForm, accountCreateVisible, showAccountCreate, sureAccountCr
 const {accountDeleteVisible, showAccountDelete, sureAccountDelete, accountDelName} = useAccountDelete()
 
 // 设置主账号
-const {accountSetMainVisible, accountSetMainName, showAccountSetMain, sureAccountSetMain, mainFlag} = useSetMain()
+const {accountSetMainVisible, accountSetMainName, showAccountSetMain, sureAccountSetMain} = useSetMain()
 
 // 改颜色
 function tableRow({row}) {

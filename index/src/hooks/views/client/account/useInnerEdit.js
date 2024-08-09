@@ -1,7 +1,7 @@
 import {reactive, ref} from 'vue'
 import {accountEdit} from '@/api/accountEdit.js'
 import {ElMessage} from 'element-plus'
-import {useClientStore} from "@/store/client.js";
+import {useClientStore} from '@/store/client.js'
 import {logCreateApi} from '@/api/log.js'
 import {clientDetailApi} from '@/api/client.js'
 
@@ -18,12 +18,13 @@ export default function () {
     const account = ref()
     const client = ref()
     const logForm = reactive({
-        id: localStorage.getItem("token"),
+        id: localStorage.getItem('token'),
         type: 1,
         content: ''
     })
 
     async function showInnerEdit(row) {
+        console.log(row)
         // 拿当前账号对应的客户名称,用来写日志
         const res = await clientDetailApi(row.row.client_id)
         client.value = res.data.clientname

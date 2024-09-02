@@ -35,4 +35,8 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers','middlewa
 
     Route::get('/air-test', 'DataController@test11');
 
+    Route::get('/open/{com}', 'DataController@openSerialPort');
+
+    Route::get('/close', 'DataController@closeSerialPort');
+
 });

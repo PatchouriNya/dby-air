@@ -923,6 +923,7 @@ async function sureControl(id) {
       message: res.data.msg,
       type: 'error'
     })
+    loading.close()
   }
 }
 

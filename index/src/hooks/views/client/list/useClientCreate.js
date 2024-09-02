@@ -17,11 +17,12 @@ export default function () {
         district: '',
         pid: null,
         type: null,
-        info: ''
+        info: '',
+        total_air: null
     })
     // 写日志
     const logForm = reactive({
-        id: localStorage.getItem("token"),
+        id: localStorage.getItem('token'),
         type: 1,
         content: ''
     })
@@ -34,6 +35,7 @@ export default function () {
         clientCreateForm.district = ''
         clientCreateForm.type = 0
         clientCreateForm.info = ''
+        clientCreateForm.total_air = null
     }
 
     const showClientCreate = (row) => {

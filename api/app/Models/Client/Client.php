@@ -142,6 +142,7 @@ class Client extends Model
                 'type'       => $child->type,
                 'info'       => $child->info,
                 'pid'        => $child->pid,
+                'total_air'  => $child->total_air,
                 'overview'   => $child->withOverview ?? null
             ];
 

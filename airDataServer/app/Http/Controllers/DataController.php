@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helper\PhpSerial;
+use App\Jobs\ControlAnAirJob;
 use App\Models\Air_detail;
 use App\Models\Air_group_relationship;
 use App\Models\Client;
@@ -22,6 +23,8 @@ class DataController extends Controller
     private array $guzhangma = ['0000' => '在线','0001' => '离线'];
 
     private array $chuanganqi = ['0000' => '正常'];
+
+    private $ck;
     function completeAndRepairData($data) {
         if (strlen($data) === 24)
             return $data;
@@ -91,8 +94,45 @@ class DataController extends Controller
         // 拼接修复和补全后的数据
         return $start . $secondPart . $thirdPartExtracted . $fourthPart . $fifthPart . $sixthPart . $seventhPart . $end;
     }
-    public function test11()
+    public function test11($cid,$air_id)
     {
+//        return $this->calculateAirconAddresses(99,hexdec('0015'),6,20);
+        $this->readOneAir($cid,$air_id);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function openSerialPort($com)
+    {
+        // 定义com口 baud 波特率 data 数据位 stop 停止位 由供应商提供
+        $baud = '9600';
+        $data = '8';
+        $stop = '1';
+
+        set_time_limit(0);
+
+        exec('mode ' . $com . ': baud=' . $baud . ' data=' . $data . ' stop=' . $stop . ' parity=n xon=on', $output);
+        // 打开串口
+        $this->ck = dio_open($com . ':', O_RDWR);
+        // 如果打开串口失败，停止脚本，并输出错误信息
+        if (!$this->ck) {
+            throw new \Exception("打开串口" . $com . "失败");
+        }
+        dump($this->ck);
+
+    }
+
+    public function closeSerialPort()
+    {
+        dump($this->ck);
+
+        if ($this->ck) {
+            dio_close($this->ck);
+            $this->ck = null;
+        }
+        dump($this->ck);
+
     }
     private function sendCommand($str,$com,$mode): \Illuminate\Http\JsonResponse
     {
@@ -215,7 +255,7 @@ class DataController extends Controller
         }
         foreach ($results as $item) {
             if($item['error_code'] === '在线' && ((int)$item['set_temperature'] >=16 && (int)$item['set_temperature'] <= 32)){
-               Air_detail::where('client_id',$id)->where('show_id' ,$item['id'])->update([
+               $res = Air_detail::where('client_id',$id)->where('show_id' ,$item['id'])->update([
                    'read_base_address' => $item['startAddress'],
                    'write_base_address' => $item['writeAddress'],
                    'wind_speed' => $item['wind_speed'],
@@ -225,36 +265,64 @@ class DataController extends Controller
                    'room_temperature' => $item['room_temperature'],
                    'online_state' => '在线'
                ]);
+               if (!$res){
+                   Air_detail::create([
+                       'client_id' => $id,
+                      'show_id' => $item['id'],
+                      'read_base_address' => $item['startAddress'],
+                       'write_base_address' => $item['writeAddress'],
+                       'wind_speed' => $item['wind_speed'],
+                       'power_state' => $item['power_state'],
+                       'operation_mode' => $item['operation_mode'],
+                      'set_temperature' => $item['set_temperature'],
+                       'room_temperature' => $item['room_temperature'],
+                       'online_state' => '在线'
+                   ]);
+               }
             }else{
-                $this->readOneAir($id,$item['id']);
+//                $this->readOneAir($id,$item['id']);
+                Air_detail::where('client_id',$id)->where('show_id' ,$item['id'])->update([
+                    'read_base_address' => $item['startAddress'],
+                    'write_base_address' => $item['writeAddress'],
+                    'wind_speed' => $item['wind_speed'],
+                    'power_state' => $item['power_state'],
+                    'operation_mode' => $item['operation_mode'],
+                    'set_temperature' => $item['set_temperature'],
+                    'room_temperature' => $item['room_temperature'],
+                    'online_state' => '离线'
+                ]);
             }
         }
         return api($results,200,'获取最新数据成功');
     }
 
     public function controlOneAir($id,Request $request){
-        // 传客户id
-        $client = Client::where('id',$id)->first(['host_address','com_port','start_address'])->toArray();
-        if ($client['host_address'] === null || $client['com_port'] === null || $client['start_address'] === null)
-            return api(null,400,'该客户还没有接通真实数据哟~');
-        $air_id = $request->input('air_id');
-        $air = Air_detail::where('client_id',$id)->where('show_id',$air_id)->first('write_base_address');
-        $wind_speed = $request->input('wind_speed');
-        $power_state = $request->input('power_state');
-        $operation_mode = $request->input('operation_mode');
-        // 字符串转成数字之后扩大十倍再转成16进制之后再前面补0够4位
-        $set_temperature = str_pad(dechex((int)$request->input('set_temperature') *10), 4, '0', STR_PAD_LEFT);
-        $command = $client['host_address'].'10'.$air->write_base_address.'0004'.'08'.$this->windSpeed_write[$wind_speed].$this->power_write[$power_state].$this->mode_write[$operation_mode].$set_temperature;
-        $res = $this->sendCommand($command,$client['com_port'],2);
-        $receivedDataArray = $res->getData(true);
-        Air_detail::where('client_id',$id)->where('show_id',$air_id)->update([
-            'wind_speed' => $wind_speed,
-            'power_state' => $power_state,
-            'operation_mode' => $operation_mode,
-           'set_temperature' => $request->input('set_temperature').'℃',
-        ]);
-        return api($receivedDataArray['received'],201,'控制空调成功');
-        // 数据校验没写
+        try {
+            // 传客户id
+            $client = Client::where('id',$id)->first(['host_address','com_port','start_address'])->toArray();
+            if ($client['host_address'] === null || $client['com_port'] === null || $client['start_address'] === null)
+                return api(null,400,'该客户还没有接通真实数据哟~');
+            $air_id = $request->input('air_id');
+            $air = Air_detail::where('client_id',$id)->where('show_id',$air_id)->first('write_base_address');
+            $wind_speed = $request->input('wind_speed');
+            $power_state = $request->input('power_state');
+            $operation_mode = $request->input('operation_mode');
+            // 字符串转成数字之后扩大十倍再转成16进制之后再前面补0够4位
+            $set_temperature = str_pad(dechex((int)$request->input('set_temperature') *10), 4, '0', STR_PAD_LEFT);
+            $command = $client['host_address'].'10'.$air->write_base_address.'0004'.'08'.$this->windSpeed_write[$wind_speed].$this->power_write[$power_state].$this->mode_write[$operation_mode].$set_temperature;
+            $res = $this->sendCommand($command,$client['com_port'],2);
+            $receivedDataArray = $res->getData(true);
+            Air_detail::where('client_id',$id)->where('show_id',$air_id)->update([
+                'wind_speed' => $wind_speed,
+                'power_state' => $power_state,
+                'operation_mode' => $operation_mode,
+                'set_temperature' => $request->input('set_temperature').'℃',
+            ]);
+            return api($receivedDataArray['received'],201,'控制空调成功');
+            // 数据校验没写
+        }catch (\Exception $e) {
+            return api($e->getMessage(),500,'服务器忙请数秒后再试~');
+        }
     }
 
     public function controlAirGroup($id,Request $request){
@@ -370,30 +438,42 @@ class DataController extends Controller
     }
 
     public function controlAnAir($id,$wind_speed,$power_state,$operation_mode,$set_temperature){
-        // 先找空调的写地址和客户id
-        $air = Air_detail::where('id',$id)->first(['write_base_address','client_id']);
-        // 再用客户id找客户
-        $client = Client::where('id',$air->client_id)->first(['host_address','com_port','start_address'])->toArray();
-        if ($client['host_address'] === null || $client['com_port'] === null || $client['start_address'] === null)
-            return api(null,400,'该客户还没有接通真实数据哟~');
+        try {
+            // 先找空调的写地址和客户id
+            $air = Air_detail::where('id',$id)->first(['write_base_address','client_id']);
+            // 再用客户id找客户
+            $client = Client::where('id',$air->client_id)->first(['host_address','com_port','start_address'])->toArray();
+            if ($client['host_address'] === null || $client['com_port'] === null || $client['start_address'] === null)
+                return api(null,400,'该客户还没有接通真实数据哟~');
 
-        // 字符串转成数字之后扩大十倍再转成16进制之后再前面补0够4位
-        $set_temperature_new = str_pad(dechex((int)$set_temperature *10), 4, '0', STR_PAD_LEFT);
-        $command = $client['host_address'].'10'.$air->write_base_address.'0004'.'08'.$this->windSpeed_write[$wind_speed].$this->power_write[$power_state].$this->mode_write[$operation_mode].$set_temperature_new;
-        $res = $this->sendCommand($command,$client['com_port'],2);
-        $receivedDataArray = $res->getData(true);
-        if (strpos($set_temperature, '℃') === false) {
-            // 如果不包含，则添加 '℃'
-            $set_temperature .= '℃';
+            // 字符串转成数字之后扩大十倍再转成16进制之后再前面补0够4位
+            $set_temperature_new = str_pad(dechex((int)$set_temperature *10), 4, '0', STR_PAD_LEFT);
+            $command = $client['host_address'].'10'.$air->write_base_address.'0004'.'08'.$this->windSpeed_write[$wind_speed].$this->power_write[$power_state].$this->mode_write[$operation_mode].$set_temperature_new;
+            $res = $this->sendCommand($command,$client['com_port'],2);
+            $receivedDataArray = $res->getData(true);
+            if (strpos($set_temperature, '℃') === false) {
+                // 如果不包含，则添加 '℃'
+                $set_temperature .= '℃';
+            }
+            Air_detail::where('id',$id)->update([
+                'wind_speed' => $wind_speed,
+                'power_state' => $power_state,
+                'operation_mode' => $operation_mode,
+                'set_temperature' => $set_temperature,
+            ]);
+            /*        // 将数据库更新操作放到队列中处理
+                    ControlAnAirJob::dispatch('air_details', ['id' => $id], [
+                        'wind_speed' => $wind_speed,
+                        'power_state' => $power_state,
+                        'operation_mode' => $operation_mode,
+                        'set_temperature' => $set_temperature,
+                    ]);*/
+            return api($receivedDataArray['received'],201,'控制空调成功');
+            // 数据校验没写
+        } catch (\Exception $e) {
+            return api(null,500,'服务器忙请数秒后再试~');
         }
-        Air_detail::where('id',$id)->update([
-            'wind_speed' => $wind_speed,
-            'power_state' => $power_state,
-            'operation_mode' => $operation_mode,
-            'set_temperature' => $set_temperature,
-        ]);
-        return api($receivedDataArray['received'],201,'控制空调成功');
-        // 数据校验没写
+
     }
 
     public function readOneAir($clitent_id,$air_id)
@@ -401,12 +481,15 @@ class DataController extends Controller
         $client = Client::where('id',$clitent_id)->first(['host_address','com_port','start_address','total_air'])->toArray();
         if ($client['host_address'] === null || $client['com_port'] === null || $client['start_address'] === null || $client['total_air'] === null)
             return api(null,400,'该客户还没有接通真实数据哟~');
-        $read_address = Air_detail::where('client_id',$clitent_id)->where('show_id',$air_id)->first(['read_base_address'])->read_base_address;
+        $arr = $this->calculateAirconAddresses($air_id,hexdec('0015'),6,20);
+//        $read_address = Air_detail::where('client_id',$clitent_id)->where('show_id',$air_id)->first(['read_base_address'])->read_base_address;
+        $read_address = $arr['startAddress'];
+        $write_address = $arr['writeAddress'];
         // 构造命令
         $command = $client['host_address'].'04'.$read_address.'0006';
         $receivedData = $this->sendCommand($command, $client['com_port'],3)->getData(true);
         $receivedData = $receivedData['received'][0];
-        Air_detail::where('client_id',$clitent_id)->where('show_id',$air_id)->update([
+        $res = Air_detail::where('client_id',$clitent_id)->where('show_id',$air_id)->update([
             'wind_speed' => $receivedData['wind_speed'],
             'power_state' => $receivedData['power_state'],
             'operation_mode' => $receivedData['operation_mode'],
@@ -414,6 +497,47 @@ class DataController extends Controller
             'room_temperature' => $receivedData['room_temperature'],
             'online_state' => $receivedData['error_code']
         ]);
+        if (!$res){
+            Air_detail::create([
+                'client_id' => $clitent_id,
+                'show_id' => $air_id,
+                'wind_speed' => $receivedData['wind_speed'],
+                'power_state' => $receivedData['power_state'],
+                'operation_mode' => $receivedData['operation_mode'],
+                'set_temperature' => $receivedData['set_temperature'],
+                'room_temperature' => $receivedData['room_temperature'],
+                'online_state' => $receivedData['error_code'],
+                'read_base_address' => $read_address,
+                'write_base_address' => $write_address
+            ]);
+        }
     }
 
+
+    /**
+     * 计算空调的编号、读取起始地址和写入起始地址
+     *
+     * @param int $index 当前空调的编号
+     * @param int $baseRegister 基础寄存器地址
+     * @param int $registersPerAircon 每台空调占用的寄存器数量
+     * @param int $maxPerRequest 每次请求的最大数量
+     * @return array 包含编号、读取地址、写入地址的数组
+     */
+    public function calculateAirconAddresses($index, $baseRegister, $registersPerAircon, $maxPerRequest)
+    {
+        $startRegister = $baseRegister + (floor(($index - 1) / $maxPerRequest) * $maxPerRequest * $registersPerAircon);
+        $writeStartRegister = $baseRegister + (floor(($index - 1) / $maxPerRequest) * $maxPerRequest * 4);
+
+        $startAddress = dechex($startRegister + (($index - 1) % $maxPerRequest) * $registersPerAircon);
+        $startAddress = str_pad($startAddress, 4, '0', STR_PAD_LEFT);
+
+        $writeAddress = dechex($writeStartRegister + (($index - 1) % $maxPerRequest) * 4);
+        $writeAddress = str_pad($writeAddress, 4, '0', STR_PAD_LEFT);
+
+        return [
+            'id' => $index,
+            'startAddress' => $startAddress,
+            'writeAddress' => $writeAddress
+        ];
+    }
 }

@@ -80,7 +80,8 @@ class ClientController extends Controller
                 'province'   => 'required|string',
                 'city'       => 'required|string',
                 'district'   => 'required|string',
-                'info'       => 'nullable|string'
+                'info'       => 'nullable|string',
+                'total_air'  => 'nullable|integer',
             ]);
 
             if ($validator->fails()) {
@@ -90,6 +91,9 @@ class ClientController extends Controller
             }
 
             $data = $validator->validate();
+            if ($data['type'] === 0) {
+                unset($data['total_air']);
+            }
             $data['info'] = $data['info'] ?? '这家客户很懒~没有写任何简介~';
             $res = Client::create($data);
             Client_overview::create(['client_id' => $res->id]);
@@ -109,7 +113,8 @@ class ClientController extends Controller
                 'city'       => 'nullable|string',
                 'district'   => 'nullable|string',
                 'info'       => 'nullable|string',
-                'pid'        => 'required|integer'
+                'pid'        => 'required|integer',
+                'total_air'  => 'nullable|integer'
             ]);
 
             if ($validator->fails()) {

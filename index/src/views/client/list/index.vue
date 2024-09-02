@@ -58,6 +58,9 @@
       <el-form-item label="客户名称">
         <el-input v-model="clientCreateForm.clientname" autocomplete="off"/>
       </el-form-item>
+      <el-form-item v-if="clientCreateForm.type === 1" label="空调数量">
+        <el-input v-model="clientCreateForm.total_air"/>
+      </el-form-item>
       <el-form-item label="省份">
         <el-input v-model="clientCreateForm.province" autocomplete="off"/>
       </el-form-item>
@@ -108,6 +111,9 @@
       </el-form-item>
       <el-form-item label="客户名称">
         <el-input v-model="clientEditForm.clientname" autocomplete="off"/>
+      </el-form-item>
+      <el-form-item v-if="clientEditForm.type === 1" label="空调数量">
+        <el-input v-model="clientEditForm.total_air"/>
       </el-form-item>
       <el-form-item label="省份">
         <el-input v-model="clientEditForm.province" autocomplete="off"/>

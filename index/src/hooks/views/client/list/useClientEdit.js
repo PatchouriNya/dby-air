@@ -18,14 +18,15 @@ export default function () {
         district: '',
         type: null,
         info: '',
-        pid: ''
+        pid: '',
+        total_air: null
     })
     // 树数据
     const treeData = ref([])
     const selectValue = ref('')
     // 写日志
     const logForm = reactive({
-        id: localStorage.getItem("token"),
+        id: localStorage.getItem('token'),
         type: 1,
         content: ''
     })
@@ -39,6 +40,7 @@ export default function () {
         clientEditForm.type = row.type
         clientEditForm.info = row.info
         clientEditForm.pid = row.pid
+        clientEditForm.total_air = row.total_air
         let parent = await getParentApi(row.id)
         selectValue.value = parent.data.clientname
         let res = await clientSelectTree(row.id)

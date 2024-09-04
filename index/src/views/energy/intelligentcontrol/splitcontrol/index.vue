@@ -910,7 +910,7 @@ async function sureControl(id) {
   await logCreateApi(logForm)
   controlVisible.value = !controlVisible.value
   let res = await controlAir(clientId.value, controlForm.value, show_id.value)
-  if (res.data.code === 201) {
+  if (res.data.code === 200) {
     ElMessage({
       message: '发送指令成功:)',
       type: 'success'
@@ -967,7 +967,7 @@ const handleSizeChange = () => {
 
 const getAirTrueData = async () => {
   ElMessageBox.confirm(
-      '读取真实数据时间较长,要继续吗?',
+      '读取数据时间较长,要继续吗?',
       '警告',
       {
         confirmButtonText: '确定',
@@ -978,7 +978,7 @@ const getAirTrueData = async () => {
       .then(async () => {
         const loading = ElLoading.service({
           lock: true,
-          text: '正在读取真实数据,时间较长,请耐心等待...',
+          text: '正在读取数据,时间较长,请耐心等待...',
           background: 'rgba(0, 0, 0, 0.7)'
         })
         const res = await getAirTrueDataApi(clientId.value)

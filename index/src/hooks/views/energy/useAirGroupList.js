@@ -223,7 +223,7 @@ export function userGroupControl() {
             background: 'rgba(0, 0, 0, 0.7)'
         })
         const res = await groupControlApi(group_id.value, controlForm.value)
-        if (res.data.code === 201) {
+        if (res.data.code === 200) {
             // 拿当前的客户名称,用来写日志
             const client = await clientDetailApi(client_id.value)
             clientname.value = client.data.clientname

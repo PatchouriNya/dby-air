@@ -8,5 +8,5 @@ export const airDetailApi = (id) => {
 }
 
 export const getAirTrueDataApi = (id) => {
-    return axios.get('http://47.103.60.199:1110/api/dby/air-latest/' + id, {})
+    return axios.post('http://106.14.160.207/api/dby/serial', {client_id: id})
 }

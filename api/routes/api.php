@@ -145,8 +145,14 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Question',
 });
 
 Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\SerialPort', 'middleware' => ['cors']], function () {
-    // 资源路由
-    Route::get('serial-communicate', 'SerialPortController@communicate');
+    // 获取客户数据
+    Route::post('serial', 'SerialPortController@getLatestData');
+
+    // 控制一台空调
+    Route::post('serial/control-air', 'SerialPortController@controlAir');
+
+    // 控制一组空调
+    Route::post('serial/control-air-group', 'SerialPortController@controlAirGroup');
 
 });
 

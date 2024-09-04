@@ -86,7 +86,8 @@ export const setStrategyApi = (id, strategy_id) => {
 }*/
 
 export const groupControlApi = (id, data) => {
-    return axios.post('http://47.103.60.199:1110/api/dby/air-control-group/' + id, {
+    return axios.post('http://106.14.160.207/api/dby/serial/control-air-group', {
+        group_id: id,
         wind_speed: data.wind_speed,
         power_state: data.power_state,
         operation_mode: data.operation_mode,

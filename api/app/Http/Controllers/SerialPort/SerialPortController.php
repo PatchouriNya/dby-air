@@ -28,18 +28,19 @@ class SerialPortController extends Controller
 
         $url = 'http://47.103.60.199:9000/serial/send?host_address=' . $res['host_address'] . '&com_port=' . $res['com_port'];
 
-        $maxRetries = 5;
+        $maxRetries = 10;
         $retryCount = 0;
 
         try {
             $redis->setex($key, 30, 1);
             // 设置超时时间为30秒
-
+            $msg = '';
             while ($retryCount < $maxRetries) {
                 $response = Http::timeout(30)->get($url);
 
                 // 获取返回的数据
                 $responseData = $response->json();
+                $msg = $responseData['msg'];
                 if ($responseData['code'] === 200) {
                     $airs = $responseData['data']['airs'];
                     if ($airs !== null) {
@@ -83,13 +84,12 @@ class SerialPortController extends Controller
 
             // 达到最大重试次数仍未成功
             $redis->del($key);
-            return api(null, 500, '读取数据超时,请再试几次或联系管理员');
+            return api(null, 500, $msg);
         } catch (\Illuminate\Http\Client\RequestException $e) {
             $redis->del($key);
             return api(null, 500, '请求超时，无法获取最新数据');
         }
     }
-
 
     private function getHostInfo($client_id)
     {

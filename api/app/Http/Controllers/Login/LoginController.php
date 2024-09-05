@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Login;
 
 use App\Http\Controllers\Air\AirController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SerialPort\SerialPortController;
 use App\Models\Account\Account;
 use App\Models\Client\Client;
 use App\Models\Client\Client_account_relationship;
@@ -49,7 +50,14 @@ class LoginController extends Controller
                     $client_id = Client_account_relationship::where('account_id', $id->id)->first('client_id')->client_id;
                     $type = Client::where('id', $client_id)->first('type')->type;
                     if ($type === 1) {
-                        Http::get('http://47.103.60.199:1110/api/dby/air-latest/' . $client_id);
+                        $serialPortController = resolve(SerialPortController::class);
+                        // 使用 Request::create() 创建请求实例
+                        $request = Request::create('/serial', 'GET', [
+                            'client_id' => $client_id,
+                        ]);
+                        // 调用 controlAirGroup 方法
+                        $serialPortController->getLatestData($request);
+                        return api($id, 200, '登录成功,空调状态已更新为最新数据');
                     }
                     return api($id, 200, '登录成功');
                 }

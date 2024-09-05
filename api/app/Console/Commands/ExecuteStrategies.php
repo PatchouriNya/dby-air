@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\SerialPort\SerialPortController;
 use App\Models\Air\Air_detail;
 use App\Models\Client\Air_group;
 use App\Models\Client\Air_group_relationship;
 use App\Models\Client\Client;
 use App\Models\Strategy\Strategy;
 use Illuminate\Console\Command;
+use Illuminate\Http\Request;
 
 class ExecuteStrategies extends Command
 {
@@ -64,32 +66,40 @@ class ExecuteStrategies extends Command
                         && in_array($week_day, $strategy->week_days)) {
                         $delta = $strategy->delta;
                         $airIds = Air_group_relationship::where('group_id', $group->id)->pluck('air_id');
+                        $client_id = $group->client_id;
                         if ($delta === 0) {
-                            Air_detail::where('power_state', '开机')->whereIn('id', $airIds)
-                                ->update([
-                                    'power_state'     => $strategy->power_state,
-                                    'operation_mode'  => $strategy->operation_mode,
-                                    'wind_speed'      => $strategy->wind_speed,
-                                    'wind_mode'       => $strategy->wind_mode,
-                                    'set_temperature' => $strategy->set_temperature,
-                                ]);
-
+                            // 调用控制器方法
+                            $serialPortController = resolve(SerialPortController::class);
+                            // 使用 Request::create() 创建请求实例
+                            $request = Request::create('/control-air-group', 'POST', [
+                                'group_id'        => $group->id,
+                                'wind_speed'      => $strategy->wind_speed,
+                                'power_state'     => $strategy->power_state,
+                                'operation_mode'  => $strategy->operation_mode,
+                                'set_temperature' => strval(intval($strategy->set_temperature)),
+                            ]);
+                            // 调用 controlAirGroup 方法
+                            $serialPortController->controlAirGroup($request);
                         } else {
                             foreach ($airIds as $airId) {
                                 $air = Air_detail::find($airId);
                                 if ($air->power_state === '开机') {
-
                                     $temperature = (int)$air->set_temperature;
                                     if (!(($temperature <= (int)$strategy->set_temperature + $delta) && ($temperature >= (int)$strategy->set_temperature - $delta))) {
                                         $temperature = (int)$strategy->set_temperature;
                                     }
-                                    $air->update([
+                                    $serialPortController = resolve(SerialPortController::class);
+                                    // 使用 Request::create() 创建请求实例
+                                    $request = Request::create('/control-air', 'POST', [
+                                        'air_id'          => $airId,
+                                        'client_id'       => $client_id,
+                                        'wind_speed'      => $strategy->wind_speed,
                                         'power_state'     => $strategy->power_state,
                                         'operation_mode'  => $strategy->operation_mode,
-                                        'wind_speed'      => $strategy->wind_speed,
-                                        'wind_mode'       => $strategy->wind_mode,
-                                        'set_temperature' => $temperature . '℃'
+                                        'set_temperature' => strval($temperature),
                                     ]);
+                                    // 调用 controlAirGroup 方法
+                                    $serialPortController->controlAir($request);
                                 }
                             }
                         }

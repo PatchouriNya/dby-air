@@ -134,16 +134,18 @@ class Client extends Model
         $result = [];
         foreach ($children as $child) {
             $childData = [
-                'id'         => $child->id,
-                'clientname' => $child->clientname,
-                'province'   => $child->province,
-                'city'       => $child->city,
-                'district'   => $child->district,
-                'type'       => $child->type,
-                'info'       => $child->info,
-                'pid'        => $child->pid,
-                'total_air'  => $child->total_air,
-                'overview'   => $child->withOverview ?? null
+                'id'          => $child->id,
+                'clientname'  => $child->clientname,
+                'province'    => $child->province,
+                'city'        => $child->city,
+                'district'    => $child->district,
+                'type'        => $child->type,
+                'info'        => $child->info,
+                'pid'         => $child->pid,
+                'total_air'   => $child->total_air,
+                'expire_time' => $child->expire_time,
+                'grace_time'  => $child->grace_time,
+                'overview'    => $child->withOverview ?? null
             ];
 
             $grandchildren = $this->getAllChildrenWithOverview($child->id, null, $keyword);

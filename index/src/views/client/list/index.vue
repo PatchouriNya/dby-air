@@ -16,6 +16,8 @@
     <el-table-column prop="province" label="省份" sortable/>
     <el-table-column prop="city" label="城市" sortable/>
     <el-table-column prop="district" label="市区" sortable/>
+    <el-table-column prop="expire_time" label="到期时间" :width="100"/>
+    <el-table-column prop="grace_time" label="宽限时间" :width="100"/>
     <el-table-column fixed="right" label="操作">
       <template #default="row">
         <el-tooltip v-if="row.row.type !== 1 && mainFlag === 1" content="添加子客户" placement="top">
@@ -42,6 +44,13 @@
           <el-button link type="primary" size="default" @click="showClientDelete(row.row)">
             <el-icon>
               <Delete/>
+            </el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip v-if="isSystem && row.row.type === 1" content="设置租期" placement="top">
+          <el-button link type="primary" size="default" @click="showSetExpire(row.row)">
+            <el-icon>
+              <Timer/>
             </el-icon>
           </el-button>
         </el-tooltip>
@@ -153,6 +162,10 @@
       </div>
     </template>
   </el-dialog>
+
+  <el-dialog v-model="setExpireVisible" title="设置租期" width="500" :close-on-click-modal="false">
+
+  </el-dialog>
 </template>
 
 
@@ -165,6 +178,8 @@ import useClientDelete from '@/hooks/views/client/list/useClientDelete.js'
 import useClientEdit from '@/hooks/views/client/list/useClientEdit.js'
 import {ref} from 'vue'
 import {account} from '@/api/account.js'
+import useAuthControl from '@/hooks/useAuthControl.js'
+import useSetExpire from '@/hooks/views/client/list/useSetExpire.js'
 
 const clientWithoutHeadStore = useClientWithoutHeadStore()
 const {tableData, flag} = storeToRefs(clientWithoutHeadStore)
@@ -173,6 +188,8 @@ function tableRowClass({row}) {
   if (row.type === 0)
     return 'row-color-blue'
 }
+
+const {isSystem} = useAuthControl()
 
 // 是否为主管
 const mainFlag = ref()
@@ -205,6 +222,10 @@ const {
   sureClientEdit,
   cancelClientEdit, treeData, selectValue
 } = useClientEdit()
+
+// 设置租期
+const {setExpireVisible, showSetExpire} = useSetExpire()
+
 // 表格显示
 useTable()
 

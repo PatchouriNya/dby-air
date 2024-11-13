@@ -40,6 +40,8 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\Client', '
     Route::get('client/map/{id}', 'ClientController@getMapData');
 
     Route::get('client/map/district/{id}', 'ClientController@searchByDistrict');
+
+    Route::post('client/expire/time/{id}', 'ClientController@expireTime');
 });
 
 // 账号
@@ -153,6 +155,9 @@ Route::group(['prefix' => 'dby', 'namespace' => 'App\Http\Controllers\SerialPort
 
     // 控制一组空调
     Route::post('serial/control-air-group', 'SerialPortController@controlAirGroup');
+
+    // 控制范围空调
+    Route::post('serial/control-air-range', 'SerialPortController@controlAirRange');
 
 });
 

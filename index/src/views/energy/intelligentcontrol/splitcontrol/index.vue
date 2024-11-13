@@ -69,7 +69,8 @@
         <el-table :data="tableData" style="width: 100%"
                   :header-cell-style="{'text-align':'center'}"
                   :cell-style="cellStyle"
-                  :empty-text="noDataMeg">
+                  :empty-text="noDataMeg"
+                  @row-dblclick="showControl">
           <el-table-column prop="show_id" label="序号" width="100px"/>
           <el-table-column v-if="showColumn.designation" prop="designation" label="空调位置"/>
           <el-table-column v-if="showColumn.online_state" prop="online_state" label="接入状态" width="130px"/>
@@ -91,7 +92,7 @@
           <el-table-column fixed="right" label="操作" width="100">
             <template #default="row">
               <el-tooltip content="控制" placement="top">
-                <el-button link type="primary" size="default" @click="showControl(row)">
+                <el-button link type="primary" size="default" @click="showControl(row.row)">
                   <el-icon>
                     <Compass/>
                   </el-icon>
@@ -855,31 +856,31 @@ const show_id = ref()
 const airBelongClientname = ref()
 
 async function showControl(row) {
-  let res = await airDetailApi(row.row.id)
+  let res = await airDetailApi(row.id)
   airBelongClientname.value = res.data.clientname
-  show_id.value = row.row.show_id
+  show_id.value = row.show_id
   controlVisible.value = !controlVisible.value
-  colId.value = row.row.id
-  editForm.value.designation = row.row.designation
-  controlForm.value.wind_speed = row.row.wind_speed
-  controlForm.value.power_state = row.row.power_state
-  /*  if (row.row.electrify_state == null || row.row.electrify_state == '') {
+  colId.value = row.id
+  editForm.value.designation = row.designation
+  controlForm.value.wind_speed = row.wind_speed
+  controlForm.value.power_state = row.power_state
+  /*  if (row.electrify_state == null || row.electrify_state == '') {
       showEleState.value = false
       controlForm.value.electrify_state = null
     } else {
-      controlForm.value.electrify_state = row.row.electrify_state == '通电'
+      controlForm.value.electrify_state = row.electrify_state == '通电'
       showEleState.value = true
     }*/
-  controlForm.value.operation_mode = row.row.operation_mode
-  controlForm.value.set_temperature = row.row.set_temperature
-  controlForm.value.room_temperature = row.row.room_temperature
-  controlForm.value.voltage = row.row.voltage
-  controlForm.value.electric_current = row.row.electric_current
-  controlForm.value.power = row.row.power
-  controlForm.value.electric_quantity = row.row.electric_quantity
-  controlForm.value.responsible_person = row.row.responsible_person
-  controlForm.value.wind_mode = row.row.wind_mode
-  controlForm.value.standby_mode = row.row.standby_mode
+  controlForm.value.operation_mode = row.operation_mode
+  controlForm.value.set_temperature = row.set_temperature
+  controlForm.value.room_temperature = row.room_temperature
+  controlForm.value.voltage = row.voltage
+  controlForm.value.electric_current = row.electric_current
+  controlForm.value.power = row.power
+  controlForm.value.electric_quantity = row.electric_quantity
+  controlForm.value.responsible_person = row.responsible_person
+  controlForm.value.wind_mode = row.wind_mode
+  controlForm.value.standby_mode = row.standby_mode
 }
 
 function electrifyChange() {

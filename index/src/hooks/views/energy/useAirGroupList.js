@@ -4,7 +4,7 @@ import {
     addGroupApi,
     deleteGroupApi,
     editGroupApi,
-    getGroupListByClientApi,
+    getGroupListByClientApi, getGroupMemberApi,
     groupControlApi,
     setStrategyApi
 } from '@/api/group.js'
@@ -239,6 +239,48 @@ export function userGroupControl() {
         }
     }
     return {groupControlVisible, controlForm, showGroupControl, sureGroupControl}
+}
+
+export function useGroupMember() {
+    const group_id = ref()
+    const groupMemberVisible = ref(false)
+    const groupMemberData = ref([])
+    const memberCurrentPage = ref(1)
+    const memberPageSize = ref(10)
+    const memberTotal = ref(0)
+    const showGroupMember = async (row) => {
+        group_id.value = row.id
+        groupMemberVisible.value = true
+        memberCurrentPage.value = 1
+        const res = await getGroupMemberApi(group_id.value, memberCurrentPage.value, memberPageSize.value)
+        if (res.code === 200) {
+            groupMemberData.value = res.data.data
+            memberTotal.value = res.data.total
+        }
+    }
+    const handleMemberSizeChange = async (val) => {
+        const res = await getGroupMemberApi(group_id.value, memberCurrentPage.value, val)
+        groupMemberData.value = res.data.data
+        memberTotal.value = res.data.total
+    }
+
+    const handleMemberCurrentChange = async (val) => {
+        const res = await getGroupMemberApi(group_id.value, val, memberPageSize.value)
+        groupMemberData.value = res.data.data
+        memberTotal.value = res.data.total
+    }
+
+
+    return {
+        groupMemberVisible,
+        groupMemberData,
+        memberCurrentPage,
+        memberPageSize,
+        memberTotal,
+        showGroupMember,
+        handleMemberSizeChange,
+        handleMemberCurrentChange
+    }
 }
 
 

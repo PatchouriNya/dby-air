@@ -43,6 +43,13 @@
                   </el-icon>
                 </el-button>
               </el-tooltip>
+              <el-tooltip content="查看组内空调" placement="top">
+                <el-button link type="primary" size="default" @click="showGroupMember(row.row)">
+                  <el-icon>
+                    <Icon icon="solar:condicioner-line-duotone"/>
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
             </template>
           </el-table-column>
           <el-table-column prop="info" label="组信息"/>
@@ -229,6 +236,33 @@
         </span>
     </template>
   </el-dialog>
+
+  <!--  空调成员面板表格-->
+  <el-dialog title="空调分组成员" v-model="groupMemberVisible" :close-on-click-modal="false">
+    <el-table :data="groupMemberData" style="width: 100%"
+              :header-cell-style="{'text-align':'center'}"
+              :cell-style="cellStyle"
+              :empty-text="'请添加空调成员'">
+      <el-table-column prop="air_detail.show_id" label="序号"/>
+      <el-table-column prop="air_detail.designation" label="空调位置" width="180"/>
+      <el-table-column prop="air_detail.online_state" label="接入状态"/>
+      <el-table-column prop="air_detail.power_state" label="开机状态"/>
+      <el-table-column prop="air_detail.operation_mode" label="运行模式"/>
+      <el-table-column prop="air_detail.wind_speed" label="风速"/>
+      <el-table-column prop="air_detail.set_temperature" label="设置温度℃"/>
+      <el-table-column prop="air_detail.room_temperature" label="室温℃"/>
+    </el-table>
+    <el-pagination class="fenye"
+                   v-model:current-page="memberCurrentPage"
+                   v-model:page-size="memberPageSize"
+                   :page-sizes="[10,15, 20, 25, 30]"
+                   background
+                   layout="total, sizes, prev, pager, next, jumper"
+                   :total="memberTotal"
+                   @size-change="handleMemberSizeChange"
+                   @current-change="handleMemberCurrentChange"
+    />
+  </el-dialog>
 </template>
 
 <script setup>
@@ -236,7 +270,7 @@ import ClientTree from '@/components/ClientTree.vue'
 import {onMounted, ref} from 'vue'
 import eventBus from '@/listen/event-bus.js'
 import useAuthControl from '@/hooks/useAuthControl.js'
-import {useGroupList, userGroupControl} from '@/hooks/views/energy/useAirGroupList.js'
+import {useGroupList, useGroupMember, userGroupControl} from '@/hooks/views/energy/useAirGroupList.js'
 import {Icon} from '@iconify/vue'
 
 eventBus.off('defaultNode')
@@ -264,11 +298,47 @@ const {
 
 const {groupControlVisible, controlForm, showGroupControl, sureGroupControl} = userGroupControl()
 
+const {
+  groupMemberVisible,
+  groupMemberData,
+  memberCurrentPage,
+  memberPageSize,
+  memberTotal,
+  showGroupMember,
+  handleMemberSizeChange,
+  handleMemberCurrentChange
+} = useGroupMember()
+
 onMounted(async () => {
   eventBus.on('defaultNode', (val) => {
     eventBus.emit('node-clicked', val)
   })
 })
+
+const cellStyle = ({row, column, rowIndex, columnIndex}) => {
+  // 状态列字体颜色
+  // columnIndex 列下标
+  // rowIndex 行下标
+  // row 行
+  // column 列
+  if (row.air_detail.online_state === '在线' && column.property === 'air_detail.online_state')
+    return {color: '#189EFF', textAlign: 'center'}
+  if (row.air_detail.online_state === '离线' && column.property === 'air_detail.online_state') {
+    return {color: '#FB6E6E', textAlign: 'center'}
+  }
+  if (row.air_detail.power_state === '开机' && column.property === 'air_detail.power_state')
+    return {color: '#189EFF', textAlign: 'center'}
+  if (row.air_detail.power_state === '关机' && column.property === 'air_detail.power_state') {
+    return {color: '#FB6E6E', textAlign: 'center'}
+  }
+  if (row.air_detail.operation_mode === '制冷' && column.property === 'air_detail.operation_mode')
+    return {color: '#189EFF', textAlign: 'center'}
+  if (row.air_detail.operation_mode === '制热' && column.property === 'air_detail.operation_mode') {
+    return {color: '#FB6E6E', textAlign: 'center'}
+  }
+  return {textAlign: 'center'}
+
+}
 </script>
 
 <style scoped>

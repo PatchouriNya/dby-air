@@ -77,13 +77,16 @@ export const setStrategyApi = (id, strategy_id) => {
     })
 }
 
-/*export const groupControlApi = (id, data) => {
+export const getGroupMemberApi = (id, page, pageSize) => {
     return request({
-        url: '/group/control/' + id,
-        method: 'put',
-        data
+        url: '/group/air/' + id,
+        method: 'get',
+        params: {
+            page,
+            pageSize
+        }
     })
-}*/
+}
 
 export const groupControlApi = (id, data) => {
     return axios.post('http://106.14.160.207/api/dby/serial/control-air-group', {

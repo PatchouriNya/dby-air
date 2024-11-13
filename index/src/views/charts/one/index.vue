@@ -11,13 +11,13 @@
           <div :style="{ width: '100%', height: '300px' }" ref="chart1Ref"></div>
         </el-col>
         <el-col :span="12">
-          <h1 :style="{ width: '100%', textAlign: 'center', marginBottom: '10px' }">下属单位空调总数</h1>
+          <h1 :style="{ width: '100%', textAlign: 'center', marginBottom: '10px' }">单位空调总数</h1>
           <div :style="{ width: '100%', height: '300px' }" ref="chart2Ref"></div>
         </el-col>
       </el-row>
       <el-row :gutter="20" style="margin-top: 20px;">
         <el-col :span="12">
-          <h1 :style="{ width: '100%', textAlign: 'center', marginBottom: '10px' }">下属单位实时设置温度</h1>
+          <h1 :style="{ width: '100%', textAlign: 'center', marginBottom: '10px' }">单位实时设置温度</h1>
           <div :style="{ width: '100%', height: '300px' }" ref="chart3Ref"></div>
         </el-col>
         <el-col :span="12">
@@ -184,15 +184,15 @@ let option4 = {
         rotate: 'tangential',
         formatter: function (value) {
           if (value === 0.875) {
-            return 'Grade A';
+            return 'Grade A'
           } else if (value === 0.625) {
-            return 'Grade B';
+            return 'Grade B'
           } else if (value === 0.375) {
-            return 'Grade C';
+            return 'Grade C'
           } else if (value === 0.125) {
-            return 'Grade D';
+            return 'Grade D'
           }
-          return '';
+          return ''
         }
       },
       title: {
@@ -204,7 +204,7 @@ let option4 = {
         offsetCenter: [0, '-35%'],
         valueAnimation: true,
         formatter: function (value) {
-          return Math.round(value * 100) + '';
+          return Math.round(value * 100) + ''
         },
         color: 'inherit'
       },

@@ -155,7 +155,7 @@ class GroupController extends Controller
     public function getAirByGroup($id)
     {
         $pageSize = \request()->query('pageSize') ?? 10;
-        $data = Air_group_relationship::where('group_id', $id)->with(['airDetail:id,client_id,show_id,designation,responsible_person'])->paginate($pageSize);
+        $data = Air_group_relationship::where('group_id', $id)->with(['airDetail:id,client_id,show_id,designation,online_state,power_state,operation_mode,wind_speed,set_temperature,room_temperature'])->paginate($pageSize);
         // 返回空调详情数组
         return api($data, 200, '成功获取指定组的所有空调');
     }
